@@ -28,10 +28,12 @@ class TestPlanMacro(WikiMacroBase):
         `args` are the arguments passed when HelloWorld is called using a
         `#!HelloWorld` code block.
         """
-        for arg in args:
-            print arg + ":" + args[arg]
+        self.parse_args(text)
         return 'TestPlan, text = %s, args = %s' % \
             (Markup.escape(text), Markup.escape(repr(args)))
 
     def parse_args(self,text):
+        lines = text.splitlines()
+        for line in lines:
+            print line
         pass
