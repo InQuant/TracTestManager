@@ -34,7 +34,4 @@ class TestPlanMacro(WikiMacroBase):
             (Markup.escape(text), Markup.escape(repr(args)))
 
     def parse_args(self,text):
-        lines = text.splitlines()
-        for line in lines:
-            if "Id" in line:
         pass

@@ -21,5 +21,5 @@ TestManager Plugin for TRAC""",
       install_requires=[
           # -*- Extra requirements: -*-
       ],
-      entry_points={'trac.plugins': '%s = TestManager' % PACKAGE},
+      entry_points={'trac.plugins': '%s = tractestmanager' % PACKAGE},
       )
