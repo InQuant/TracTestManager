@@ -29,63 +29,64 @@ import StringIO
 
 class TestPlanMacro(WikiMacroBase):
     """Testplan macro.
+       Formats a Wiki Testplan.
+       Usage::
 
-    Note that the name of the class is meaningful:
-     - it must end with "Macro"
-     - what comes before "Macro" ends up being the macro name
+           {{{
+           #!TestPlan
+           Id: TA14
+           Testart: UsecaseTest 
+           Build: DC-3.1.1
+           Konfiguration: IE7-Win, FF-LUX
+           Usecases: BaugruppenVerwalten, ObjekteSuchen
 
-    The documentation of the class (i.e. what you're reading)
-    will become the documentation of the macro, as shown by
-    the !MacroList macro (usually used in the WikiMacros page).
+           Testcases/SaveAsEinerBaugruppe lmende
+           Testcases/ErzeugenEinerBaugruppe lmende
+           Testcases/Suchen/* mmuster
+           }}}
     """
 
     revision = "$Rev$"
     url = "$URL$"
 
     def expand_macro(self, formatter, name, text, args):
-        """Execute the testplan-macro::
-            
-            {{{
-            #!TestPlan
-            Id: TA14
-            Testart: UsecaseTest 
-            Build: DC-3.1.1
-            Konfiguration: IE7-Win, FF-LUX
-            Usecases: BaugruppenVerwalten, ObjekteSuchen
-
-            Testcases/SaveAsEinerBaugruppe lmende
-            Testcases/ErzeugenEinerBaugruppe lmende
-            Testcases/Suchen/* mmuster
-            }}}
-
+        """Execute the macro
         """
         conf = self.parse_config(text)
-        markupreturn = 'TestPlan, text = %s, args = %s' % \
-            (Markup.escape(text), Markup.escape(repr(args)))
-        wikisite = '== Executing wiki macros =='
+        #markupreturn = 'TestPlan, text = %s, args = %s' % \
+            #(Markup.escape(text), Markup.escape(repr(args)))
+        #wikisite = '== Executing wiki macros =='
+        text = self._build_configs_wiki(conf)
         out = StringIO.StringIO()
-        Formatter(self.env, formatter.context).format(wikisite,out)
+        Formatter(self.env, formatter.context).format(text,out)
         return Markup(out.getvalue())
 
     def parse_config(self,text):
+        """Parses the macro configuration parameters
+           returns a dictionary of attributes
+        """
+        attributes = dict()
         lines = text.splitlines()
-        config = []
         for line in lines:
             if ':' in line:
-                config.append(line)
-        return self._parse_attributes(config)
+                line.replace(' ','')
+                x,y = line.split(':')
+                attributes[x] = y
+
+        return attributes
 
     def get_wiki_page(self,path):
         # put some information about a wiki page that has been selected
         print "getting wiki page for \"" + path + "\"..."
         pass
 
-    def _parse_attributes(self,attribute_lines):
-        attributes = dict()
-        for line in attribute_lines:
-            line.replace(' ','')
-            x,y = line.split(':')
-            attributes[x] = y
-        return attributes
+    def _build_configs_wiki(self,config):
+        """ builds wiki formatting for the configuration table
+        """
+        text = "== Konfigurierte Parameter ==\n||Attribut||Wert||\n"
+        table = ''
+        for key in config.keys():
+            table += '||%s||%s||\n' % (key, config[key])
+        return text + table
 
 # vim: set ft=python ts=4 sw=4 expandtab :
