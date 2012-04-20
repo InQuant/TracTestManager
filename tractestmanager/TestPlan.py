@@ -83,11 +83,6 @@ class TestPlanMacro(WikiMacroBase):
                 testcases.append({testcasepath:user})
         return attributes, testcases
 
-    def _get_wiki_pages(self,prefix):
-        # wrap the wiki api
-        for page in WikiSystem(self.env).get_pages(prefix):
-            yield page
-
     def _build_configs_wiki(self,config):
         """ builds wiki formatting for the configuration table
         """
@@ -109,5 +104,11 @@ class TestPlanMacro(WikiMacroBase):
                 for title in self._get_wiki_pages(path):
                     text += '||%s||%s||\n' % (title, testcase[key])
         return text
+
+    def _get_wiki_pages(self,prefix):
+        """ wrap the wiki api
+        """
+        for page in WikiSystem(self.env).get_pages(prefix):
+            yield page
 
 # vim: set ft=python ts=4 sw=4 expandtab :
