@@ -1,0 +1,12 @@
+{{{
+#!TestPlan
+Id: TA14
+Testart: UsecaseTest
+Build: DC-3.1.1
+Konfiguration: IE7-Win, FF-LUX
+Usecases: BaugruppenVerwalten, ObjekteSuchen
+
+Testcases/SaveAsEinerBaugruppe lmende
+Testcases/ErzeugenEinerBaugruppe lmende
+Testcases/Suchen/* mmuster
+}}}
