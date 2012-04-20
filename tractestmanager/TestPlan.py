@@ -61,6 +61,7 @@ class TestPlanMacro(WikiMacroBase):
         testcases = self._build_testcases_wiki(testcases)
         text += testcases
         out = StringIO.StringIO()
+        # TODO: Escape wiki markup for text
         Formatter(self.env, formatter.context).format(text,out)
         return Markup(out.getvalue())
 
@@ -80,7 +81,6 @@ class TestPlanMacro(WikiMacroBase):
             if '/' in line:
                 testcasepath, user = line.split()
                 testcases.append({testcasepath:user})
-        print testcases
         return attributes, testcases
 
     def _get_wiki_pages(self,prefix):
@@ -104,12 +104,10 @@ class TestPlanMacro(WikiMacroBase):
         text = "\n== Testcases ==\n||'''Testcase'''||'''User'''||\n"
         for testcase in testcases:
             for key in testcase:
-                #text += '||%s||%s||\n' % (key, testcase[key])
-                prefix = key.split('/')[0]
-                #titles = self._get_wiki_pages(prefix)
-                for title in self._get_wiki_pages(prefix):
+                path = key.split('*')[0]
+                path = path.rstrip('/')
+                for title in self._get_wiki_pages(path):
                     text += '||%s||%s||\n' % (title, testcase[key])
-
         return text
 
 # vim: set ft=python ts=4 sw=4 expandtab :
