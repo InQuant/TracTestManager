@@ -52,28 +52,34 @@ class TestPlanMacro(WikiMacroBase):
     def expand_macro(self, formatter, name, text, args):
         """Execute the macro
         """
-        conf = self.parse_config(text)
+        conf, testcases = self.parse_config(text)
         #markupreturn = 'TestPlan, text = %s, args = %s' % \
             #(Markup.escape(text), Markup.escape(repr(args)))
         #wikisite = '== Executing wiki macros =='
         text = self._build_configs_wiki(conf)
+        text += self._build_testcases_wiki(testcases)
         out = StringIO.StringIO()
         Formatter(self.env, formatter.context).format(text,out)
         return Markup(out.getvalue())
 
-    def parse_config(self,text):
+    def parse_config(self, text):
         """Parses the macro configuration parameters
            returns a dictionary of attributes
         """
         attributes = dict()
+        testcases = list()
         lines = text.splitlines()
+        # parse attributes
         for line in lines:
             if ':' in line:
                 line.replace(' ','')
                 x,y = line.split(':')
                 attributes[x] = y
-
-        return attributes
+            if '/' in line:
+                testcasepath, user = line.split()
+                testcases.append({testcasepath:user})
+        print testcases
+        return attributes, testcases
 
     def get_wiki_page(self,path):
         # put some information about a wiki page that has been selected
@@ -83,10 +89,17 @@ class TestPlanMacro(WikiMacroBase):
     def _build_configs_wiki(self,config):
         """ builds wiki formatting for the configuration table
         """
-        text = "== Konfigurierte Parameter ==\n||Attribut||Wert||\n"
+        text = "== Konfigurierte Parameter ==\n||'''Attribut'''||'''Wert'''||\n"
         table = ''
         for key in config.keys():
             table += '||%s||%s||\n' % (key, config[key])
         return text + table
+
+    def _build_testcases_wiki(self, testcases):
+        text = "\n== Testcases ==\n||'''Testcase'''||'''User'''||\n"
+        for testcase in testcases:
+            for key in testcase:
+                text += '||%s||%s||\n' % (key, testcase[key])
+        return text
 
 # vim: set ft=python ts=4 sw=4 expandtab :
