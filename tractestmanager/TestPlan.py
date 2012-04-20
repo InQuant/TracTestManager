@@ -25,6 +25,7 @@ from genshi.core import Markup
 
 from trac.wiki.macros import WikiMacroBase
 from trac.wiki import Formatter
+from trac.wiki import WikiSystem
 import StringIO
 
 class TestPlanMacro(WikiMacroBase):
@@ -52,12 +53,13 @@ class TestPlanMacro(WikiMacroBase):
     def expand_macro(self, formatter, name, text, args):
         """Execute the macro
         """
+        # Parse config and testcases
         conf, testcases = self.parse_config(text)
-        #markupreturn = 'TestPlan, text = %s, args = %s' % \
-            #(Markup.escape(text), Markup.escape(repr(args)))
-        #wikisite = '== Executing wiki macros =='
+        # Build config params in wiki syntax
         text = self._build_configs_wiki(conf)
-        text += self._build_testcases_wiki(testcases)
+        # Build testcases in wiki syntax
+        testcases = self._build_testcases_wiki(testcases)
+        text += testcases
         out = StringIO.StringIO()
         Formatter(self.env, formatter.context).format(text,out)
         return Markup(out.getvalue())
@@ -81,10 +83,10 @@ class TestPlanMacro(WikiMacroBase):
         print testcases
         return attributes, testcases
 
-    def get_wiki_page(self,path):
-        # put some information about a wiki page that has been selected
-        print "getting wiki page for \"" + path + "\"..."
-        pass
+    def _get_wiki_pages(self,prefix):
+        # wrap the wiki api
+        for page in WikiSystem(self.env).get_pages(prefix):
+            yield page
 
     def _build_configs_wiki(self,config):
         """ builds wiki formatting for the configuration table
@@ -96,10 +98,18 @@ class TestPlanMacro(WikiMacroBase):
         return text + table
 
     def _build_testcases_wiki(self, testcases):
+        """ builds the testcases in wiki syntax
+            returns wikitext
+        """
         text = "\n== Testcases ==\n||'''Testcase'''||'''User'''||\n"
         for testcase in testcases:
             for key in testcase:
-                text += '||%s||%s||\n' % (key, testcase[key])
+                #text += '||%s||%s||\n' % (key, testcase[key])
+                prefix = key.split('/')[0]
+                #titles = self._get_wiki_pages(prefix)
+                for title in self._get_wiki_pages(prefix):
+                    text += '||%s||%s||\n' % (title, testcase[key])
+
         return text
 
 # vim: set ft=python ts=4 sw=4 expandtab :
