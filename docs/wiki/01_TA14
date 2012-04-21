@@ -8,5 +8,5 @@ Usecases: BaugruppenVerwalten, ObjekteSuchen
 
 Testcases/SaveAsEinerBaugruppe lmende
 Testcases/ErzeugenEinerBaugruppe lmende
-Testcases/Suchen/* mmuster
+Testcases/* mmuster
 }}}
