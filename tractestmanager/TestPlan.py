@@ -86,7 +86,7 @@ class TestPlanMacro(WikiMacroBase):
     def _build_configs_wiki(self,config):
         """ builds wiki formatting for the configuration table
         """
-        text = "== Konfigurierte Parameter ==\n||'''Attribut'''||'''Wert'''||\n"
+        text = "== Testparameter ==\n||'''Attribut'''||'''Wert'''||\n"
         table = ''
         for key in config.keys():
             table += '||%s||%s||\n' % (key, config[key])
@@ -96,7 +96,7 @@ class TestPlanMacro(WikiMacroBase):
         """ builds the testcases in wiki syntax
             returns wikitext
         """
-        text = "\n== Testcases ==\n||'''Testcase'''||'''User'''||\n"
+        text = "\n== Zu testende Testcases ==\n||'''Testcase'''||'''User'''||\n"
         for testcase in testcases:
             for key in testcase:
                 path = key.split('*')[0]
