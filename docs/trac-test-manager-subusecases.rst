@@ -1,5 +1,5 @@
-UC020 Tests zum Testplan hinzufügen
-===================================
+UcTestPlanCreate Tests zum Testplan hinzufügen
+==============================================
 
 Story
   Der Testmanager möchte Tests zu einem Testplan hinzufügen und diese
@@ -66,8 +66,8 @@ Mögliches Trac-Macro zur Einbettung eines Testplans
   Testcases/Suchen/* mmuster
   }}}
 
-UC030 Testcase erstellen
-========================
+UcTestCaseCreate Testcase erstellen
+===================================
 
 Story
   Der Testmanager erstellt Testcases.
@@ -102,8 +102,8 @@ Fehler / Erweiterungen
 3.1 Die Syntax ist fehlerhaft und der Testmanager bekommt den Testcase nicht in
     der gewünschten Form angezeigt
 
-UC040 Testmanager startet den Testplan
-======================================
+UcTestplanStart Testmanager startet den Testplan
+================================================
 
 Story
   Der Testmanager startet den Testplan und ermöglicht den Testern, noch nicht
@@ -144,8 +144,8 @@ Primäres Erfolgszenario
 4 Das System stellt eine Zusammenfassung 
   der auszuführenden Tests ähnlich wie bei der Auswertung dar. 
 
-UC050 Tester wählt Tests und führt Testaktionen durch
-=====================================================
+UcTestcaseExecute Tester wählt Tests und führt Testaktionen durch
+=================================================================
 
 Story
   Tester wählt Tests und führt die Aktionen nach der Beschreibung durch, für
