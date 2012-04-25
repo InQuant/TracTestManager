@@ -1,0 +1,14 @@
+= 1.4 WS Revise menu removed =
+
+Check if the WS Revise is removed   
+
+Switch to WS
+  Switch to WS view of WS test_cadactions
+
+  WS list view is displayed
+
+Check menu and toolbar
+  the Revise action should not be present in the workspace (AB icon in workspace
+  toolbar, File->New->Revison menu)
+
+  no menu and not toolbar icon

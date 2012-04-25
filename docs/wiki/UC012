@@ -1,0 +1,36 @@
+= 1.2 Multi Related CADDoc =
+
+Report shows the related CAD Doc report for multiple EPMDocs.  Select two parts
+in the CS and WS list view and display there related CADDoc reports in one
+report form." 
+
+Browse CS
+  Navigate to CS Folder: `/ P1271_ru-300 / s_vehicle_linkage_devices /
+  sf_gangways_facilities / 11_uebergang-druckertuechtigt`
+  
+  Folder contents displayed
+
+Select two parts
+  "Select: `00000701625_b_befestigung_skel.prt 20070628H30_-_PRT0154.PRT`
+  
+  two objects marked in list
+
+Exec where used report
+  Menu: File -> Related CAD Documents 
+  
+  a new tab will be openened and six  tables (three per part) is shown
+
+Switch to WS
+  Close the report form and switch to WS view from 1.1
+  
+  The two parts will be listed in the WS
+
+Select
+  Select the two parts in the WS list view
+  
+  two objects marked in list
+
+Exec where used report
+  Menu: File -> Related CAD Documents 
+  
+  a new tab will be openened and six  tables (three per part) is shown
