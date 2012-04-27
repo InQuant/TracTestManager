@@ -42,6 +42,5 @@ class TestcaseParser:
     def parseTestcase(self,pagename):
         wikipage = self._get_page(pagename)
         xml = publish_parts(wikipage.text,writer_name='xml')
-        from ipdb import set_trace; set_trace()
         return None
 
