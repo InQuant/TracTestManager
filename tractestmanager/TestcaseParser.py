@@ -29,7 +29,10 @@ class TestcaseParser:
     """Model class for Testcases
     """
     def __init__(self,env):
-        self.env = env
+        self.env   = env
+        self.title = ''
+        self.desc  = ''
+        self.steps = list()
 
     def _get_page(self,pagename):
         try:
@@ -39,16 +42,34 @@ class TestcaseParser:
             wikipage = None
         return wikipage
 
+    def _parse_xml(self,document):
+        tree = Tree.fromstring(document['whole'])
+        # initial iteration
+        # we now have paragraph, paragraph and definition list
+        # which represent "title", "description" and "steps"
+        for node in tree:
+            # set title and description
+            if node.tag == 'paragraph':
+                if '=' in node.text:
+                    self.title = node.text
+                else:
+                    self.desc = node.text
+            # now we have steps as definition list items
+            else:
+                for child in node.getchildren():
+                    # every child has two children "term" and "definition"
+                    # they are called action
+                    print child.getchildren()
+                    for action in child.getchildren():
+                        # append steptitle to steps
+                        if action.tag == 'term':
+                            pass
+
+        return tree
+
     def parseTestcase(self,pagename):
         wikipage = self._get_page(pagename)
         document = publish_parts(wikipage.text,writer_name = 'xml')
         testcase = self._parse_xml(document)
 
         return None
-
-    def _parse_xml(self,document):
-        tree = Tree.fromstring(document['whole'])
-        for node in tree:
-            print node
-        return tree
-
