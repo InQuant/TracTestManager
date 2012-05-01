@@ -53,6 +53,9 @@ class TestPlanMacro(WikiMacroBase):
     def expand_macro(self, formatter, name, text, args):
         """Execute the macro
         """
+        from TestcaseParser import TestcaseParser
+        case = TestcaseParser(self.env)
+        wikipage = case.parseTestcase("Testcases/UC011")
         # Parse config and testcases
         conf, testcases = self.parse_config(text)
         # Build config params in wiki syntax

@@ -23,6 +23,7 @@ __docformat__ = 'plaintext'
 
 from trac.wiki import WikiPage
 from docutils.core import publish_parts
+import xml.etree.ElementTree as Tree
 
 class TestcaseParser:
     """Model class for Testcases
@@ -34,13 +35,20 @@ class TestcaseParser:
         try:
             wikipage = WikiPage(self.env, pagename)
         except Exception, e:
-            print "Page %s not found." % (pagename)
+            print 'Page %s not found.' % (pagename)
             wikipage = None
         return wikipage
 
-
     def parseTestcase(self,pagename):
         wikipage = self._get_page(pagename)
-        xml = publish_parts(wikipage.text,writer_name='xml')
+        document = publish_parts(wikipage.text,writer_name = 'xml')
+        testcase = self._parse_xml(document)
+
         return None
+
+    def _parse_xml(self,document):
+        tree = Tree.fromstring(document['whole'])
+        for node in tree:
+            print node
+        return tree
 
