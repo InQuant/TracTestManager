@@ -59,12 +59,15 @@ class TestcaseParser:
                 for child in node.getchildren():
                     # every child has two children "term" and "definition"
                     # they are called action
-                    print child.getchildren()
                     for action in child.getchildren():
-                        # append steptitle to steps
-                        if action.tag == 'term':
-                            pass
-
+                        if action.tag == 'definition':
+                            # we have two paragraphs - step description and expected result
+                            stepdesc, stepresult = action.getchildren()
+                            print "action desc  : " + stepdesc.text
+                            print "action result: " + stepresult.text
+                        else:
+                            # append steptitle to steps
+                            print "action title : " + action.text
         return tree
 
     def parseTestcase(self,pagename):
