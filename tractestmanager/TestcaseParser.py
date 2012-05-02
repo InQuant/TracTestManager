@@ -24,12 +24,15 @@ __docformat__ = 'plaintext'
 from trac.wiki import WikiPage
 from docutils.core import publish_parts
 import xml.etree.ElementTree as Tree
+#from models import *
 
 class TestcaseParser:
     """Model class for Testcases
     """
     def __init__(self,env):
         self.env   = env
+        ##setup_all(True)
+        ##create_all()
         self.title = ''
         self.desc  = ''
         self.steps = list()
@@ -37,6 +40,7 @@ class TestcaseParser:
     def _get_page(self,pagename):
         try:
             wikipage = WikiPage(self.env, pagename)
+            self.wikipage = wikipage
         except Exception, e:
             print 'Page %s not found.' % (pagename)
             wikipage = None
@@ -45,29 +49,40 @@ class TestcaseParser:
     def _parse_xml(self,document):
         tree = Tree.fromstring(document['whole'])
         # initial iteration
+        # it is a Testcase
+        ##case = Testcase()
+        ##case.wiki = self.wikipage
         # we now have paragraph, paragraph and definition list
-        # which represent "title", "description" and "steps"
+        # which represent "title", "description" and "actions"
         for node in tree:
             # set title and description
             if node.tag == 'paragraph':
                 if '=' in node.text:
                     self.title = node.text
+                    ##case.title = node.text
                 else:
                     self.desc = node.text
-            # now we have steps as definition list items
+                    ##case.desc = node.text
+            # now we have actions as definition list items
             else:
                 for child in node.getchildren():
                     # every child has two children "term" and "definition"
                     # they are called action
+                    ##ac = Action()
                     for action in child.getchildren():
                         if action.tag == 'definition':
-                            # we have two paragraphs - step description and expected result
-                            stepdesc, stepresult = action.getchildren()
-                            print "action desc  : " + stepdesc.text
-                            print "action result: " + stepresult.text
+                            # we have two paragraphs - action description and expected result
+                            actiondesc, actionresult = action.getchildren()
+                            ##ac.desc   = actiondesc.text
+                            ##ac.result = actionresult.text
+                            print "action desc  : " + actiondesc.text
+                            print "action result: " + actionresult.text
                         else:
                             # append steptitle to steps
+                            ##ac.title  = action.text
                             print "action title : " + action.text
+                    ##case.actions.append(ac)
+        ##session.commit()
         return tree
 
     def parseTestcase(self,pagename):
