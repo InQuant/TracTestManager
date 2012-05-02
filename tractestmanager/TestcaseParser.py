@@ -24,21 +24,23 @@ __docformat__ = 'plaintext'
 from trac.wiki import WikiPage
 from docutils.core import publish_parts
 import xml.etree.ElementTree as Tree
-#from models import *
+from models import *
 
 class TestcaseParser:
     """Model class for Testcases
     """
     def __init__(self,env):
         self.env   = env
-        ##setup_all(True)
-        ##create_all()
+        self.pagename = ''
+        setup_all(True)
+        create_all()
         self.title = ''
         self.desc  = ''
         self.steps = list()
 
     def _get_page(self,pagename):
         try:
+            self.pagename = pagename
             wikipage = WikiPage(self.env, pagename)
             self.wikipage = wikipage
         except Exception, e:
@@ -50,8 +52,8 @@ class TestcaseParser:
         tree = Tree.fromstring(document['whole'])
         # initial iteration
         # it is a Testcase
-        ##case = Testcase()
-        ##case.wiki = self.wikipage
+        case = Testcase()
+        case.wiki = self.pagename
         # we now have paragraph, paragraph and definition list
         # which represent "title", "description" and "actions"
         for node in tree:
@@ -59,30 +61,38 @@ class TestcaseParser:
             if node.tag == 'paragraph':
                 if '=' in node.text:
                     self.title = node.text
-                    ##case.title = node.text
+                    case.title = node.text
                 else:
                     self.desc = node.text
-                    ##case.desc = node.text
+                    case.desc = node.text
             # now we have actions as definition list items
             else:
                 for child in node.getchildren():
                     # every child has two children "term" and "definition"
                     # they are called action
-                    ##ac = Action()
+                    ac = Action()
                     for action in child.getchildren():
                         if action.tag == 'definition':
                             # we have two paragraphs - action description and expected result
-                            actiondesc, actionresult = action.getchildren()
-                            ##ac.desc   = actiondesc.text
-                            ##ac.result = actionresult.text
+                            # XXX: Failure Handling
+                            try:
+                                actiondesc, actionresult = action.getchildren()
+                                ac.desc   = actiondesc.text
+                                ac.result = actionresult.text
+                            except:
+                                print ("description or result not specified")
+                                if actiondesc.text is None:
+                                    ac.desc = 'not available'
+                                if actionresult.text is None:
+                                    ac.result = 'not available'
                             print "action desc  : " + self._build_markup(actiondesc)
                             print "action result: " + self._build_markup(actionresult)
                         else:
                             # append steptitle to steps
-                            ##ac.title  = action.text
+                            ac.title  = action.text
                             print "action title : " + action.text
-                    ##case.actions.append(ac)
-        ##session.commit()
+                    case.actions.append(ac)
+        session.commit()
         return tree
 
     def _build_markup(self,node):
