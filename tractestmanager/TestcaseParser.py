@@ -75,8 +75,8 @@ class TestcaseParser:
                             actiondesc, actionresult = action.getchildren()
                             ##ac.desc   = actiondesc.text
                             ##ac.result = actionresult.text
-                            print "action desc  : " + actiondesc.text
-                            print "action result: " + actionresult.text
+                            print "action desc  : " + self._build_markup(actiondesc)
+                            print "action result: " + self._build_markup(actionresult)
                         else:
                             # append steptitle to steps
                             ##ac.title  = action.text
@@ -84,6 +84,15 @@ class TestcaseParser:
                     ##case.actions.append(ac)
         ##session.commit()
         return tree
+
+    def _build_markup(self,node):
+        # helperfunction to append additional markup tags
+        # TODO: validate that text is built right
+        nodemarkup = node.text
+        for child in node.getchildren():
+            if child.tag == 'title_reference':
+                nodemarkup += child.text
+        return nodemarkup
 
     def parseTestcase(self,pagename):
         wikipage = self._get_page(pagename)
