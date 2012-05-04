@@ -26,30 +26,17 @@ from docutils.core import publish_parts
 import xml.etree.ElementTree as Tree
 from models import *
 
-class TestcaseParser:
+class TestcaseParser(object):
     """Model class for Testcases
     """
-    def __init__(self,env):
+    def __init__(self, env):
         self.env   = env
-        self.pagename = ''
         setup_all(True)
         create_all()
-        self.title = ''
-        self.desc  = ''
         self.steps = list()
 
-    def _get_page(self,pagename):
-        try:
-            self.pagename = pagename
-            wikipage = WikiPage(self.env, pagename)
-            self.wikipage = wikipage
-        except Exception, e:
-            print 'Page %s not found.' % (pagename)
-            wikipage = None
-        return wikipage
-
-    def _parse_xml(self,document):
-        tree = Tree.fromstring(document['whole'])
+    def _parse_xml(self):
+        tree = Tree.fromstring(self.xml)
         # initial iteration
         # it is a Testcase
         case = Testcase()
@@ -60,10 +47,8 @@ class TestcaseParser:
             # set title and description
             if node.tag == 'paragraph':
                 if '=' in node.text:
-                    self.title = node.text
                     case.title = node.text
                 else:
-                    self.desc = node.text
                     case.desc = node.text
             # now we have actions as definition list items
             else:
@@ -77,25 +62,22 @@ class TestcaseParser:
                             # XXX: Failure Handling
                             try:
                                 actiondesc, actionresult = action.getchildren()
-                                ac.desc   = actiondesc.text
-                                ac.result = actionresult.text
+                                ac.desc   = self._build_markup(actiondesc)
+                                ac.result = self._build_markup(actionresult)
                             except:
-                                print ("description or result not specified")
-                                if actiondesc.text is None:
+                                print "description or result not specified"
+                                if not actiondesc.text:
                                     ac.desc = 'not available'
-                                if actionresult.text is None:
                                     ac.result = 'not available'
-                            print "action desc  : " + self._build_markup(actiondesc)
-                            print "action result: " + self._build_markup(actionresult)
                         else:
-                            # append steptitle to steps
+                            # append actiontitle to action
                             ac.title  = action.text
-                            print "action title : " + action.text
+                            #print "action title : " + action.text
                     case.actions.append(ac)
-        session.commit()
+        #session.commit()
         return tree
 
-    def _build_markup(self,node):
+    def _build_markup(self, node):
         # helperfunction to append additional markup tags
         # TODO: validate that text is built right
         nodemarkup = node.text
@@ -104,9 +86,21 @@ class TestcaseParser:
                 nodemarkup += child.text
         return nodemarkup
 
-    def parseTestcase(self,pagename):
-        wikipage = self._get_page(pagename)
-        document = publish_parts(wikipage.text,writer_name = 'xml')
-        testcase = self._parse_xml(document)
+    def parseTestcase(self, pagename):
+        # get the wiki page
+        wikipage      = self._get_page(pagename)
+        # get the xml representation of a testcase
+        self.xml = publish_parts(wikipage.text,writer_name = 'xml')['whole']
+        # parse it :)
+        self._parse_xml()
 
-        return None
+    def _get_page(self, pagename):
+        try:
+            self.pagename = pagename
+            wikipage = WikiPage(self.env, pagename)
+            self.wikipage = wikipage
+        except Exception, e:
+            print 'Page %s not found.' % (pagename)
+            wikipage = None
+        return wikipage
+

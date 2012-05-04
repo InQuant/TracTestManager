@@ -31,7 +31,6 @@ class Action(Entity):
     """
     
     id       = Field(Integer, primary_key=True)
-    testcase = Field(Unicode(128))
     title    = Field(UnicodeText)
     desc     = Field(UnicodeText)
     result   = Field(UnicodeText)
