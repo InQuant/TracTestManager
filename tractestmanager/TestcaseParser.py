@@ -71,8 +71,8 @@ class TestcaseParser(object):
                             # append actiontitle to action
                             ac.title  = action.text
                     case.actions.append(ac)
-        session.commit()
-        return tree
+        #session.commit()
+        return case
 
     def _build_markup(self, node):
         # helperfunction to append additional markup tags
@@ -88,7 +88,7 @@ class TestcaseParser(object):
         wikipage      = self._get_page(pagename)
         # get the xml representation of a testcase
         self.xml = publish_parts(wikipage.text,writer_name = 'xml')['whole']
-        self._parse_xml()
+        return self._parse_xml()
 
     def _get_page(self, pagename):
         try:
