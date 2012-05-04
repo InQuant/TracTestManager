@@ -61,20 +61,19 @@ class TestcaseParser(object):
                             # we have two paragraphs - action description and expected result
                             # XXX: Failure Handling
                             try:
-                                actiondesc, actionresult = action.getchildren()
-                                ac.desc   = self._build_markup(actiondesc)
-                                ac.result = self._build_markup(actionresult)
-                            except:
-                                print "description or result not specified"
-                                if not actiondesc.text:
-                                    ac.desc = 'not available'
-                                    ac.result = 'not available'
+                                actiondesc   = action.getchildren()[0]
+                                actionresult = action.getchildren()[1]
+                                ac.desc      = self._build_markup(actiondesc)
+                                ac.result    = self._build_markup(actionresult)
+                            except Exception, e:
+                                ac.desc      = self._build_markup(actiondesc)
+                                ac.result    = "no expected result available"
                         else:
                             # append actiontitle to action
                             ac.title  = action.text
-                            #print "action title : " + action.text
+                            print ac
                     case.actions.append(ac)
-        #session.commit()
+        session.commit()
         return tree
 
     def _build_markup(self, node):
