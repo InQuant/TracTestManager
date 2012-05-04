@@ -27,13 +27,12 @@ import xml.etree.ElementTree as Tree
 from models import *
 
 class TestcaseParser(object):
-    """Model class for Testcases
+    """ Testcase parser class
     """
     def __init__(self, env):
         self.env   = env
         setup_all(True)
         create_all()
-        self.steps = list()
 
     def _parse_xml(self):
         tree = Tree.fromstring(self.xml)
@@ -71,7 +70,6 @@ class TestcaseParser(object):
                         else:
                             # append actiontitle to action
                             ac.title  = action.text
-                            print ac
                     case.actions.append(ac)
         session.commit()
         return tree
@@ -90,7 +88,6 @@ class TestcaseParser(object):
         wikipage      = self._get_page(pagename)
         # get the xml representation of a testcase
         self.xml = publish_parts(wikipage.text,writer_name = 'xml')['whole']
-        # parse it :)
         self._parse_xml()
 
     def _get_page(self, pagename):
