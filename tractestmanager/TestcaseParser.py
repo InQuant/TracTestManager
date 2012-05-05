@@ -54,7 +54,7 @@ class TestcaseParser(object):
                 for child in node.getchildren():
                     # every child has two children "term" and "definition"
                     # they are called action
-                    ac = Action()
+                    ac = Testaction()
                     for action in child.getchildren():
                         if action.tag == 'definition':
                             # we have two paragraphs - action description and expected result
