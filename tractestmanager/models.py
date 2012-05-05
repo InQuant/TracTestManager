@@ -18,6 +18,7 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 from elixir import *
+import datetime
 
 __author__ = 'Otto Hockel <otto.hockel@inquant.de>'
 __docformat__ = 'plaintext'
@@ -25,8 +26,8 @@ __docformat__ = 'plaintext'
 metadata.bind = "sqlite:///testmanager.sqlite"
 metadata.bind.echo = True
 
-class Action(Entity):
-    """ Action model
+class Testaction(Entity):
+    """ Testaction model
         an action is part of a testcase
     """
     
@@ -37,19 +38,33 @@ class Action(Entity):
     testcase = ManyToOne('Testcase')
 
     def __repr__(self):
-        return '<Action: "%s">' % (self.title)
+        return '<Testaction: "%s">' % (self.title)
 
 class Testcase(Entity):
     """ Testcase model
     """
 
-    id      = Field(Integer, primary_key=True)
-    wiki    = Field(Unicode(128))
-    title   = Field(UnicodeText)
-    actions = OneToMany('Action')
-    #tester  = Field(Unicode(128))
+    id        = Field(Integer, primary_key=True)
+    wiki      = Field(Unicode(128))
+    title     = Field(UnicodeText)
+    tester    = Field(Unicode(128))
+    actions   = OneToMany('Testaction')
+    testcases = ManyToOne('Testrun')
 
     def __repr__(self):
         return '<Testcase: "%s">' % (self.title)
 
+class Testrun(Entity):
+    """ Testrun model
+        a Testplan is expected to be a wiki page
+    """
+
+    id				= Field(Integer, primary_key=True)
+    start			= Field(DateTime, default=datetime.datetime.now)
+    end				= Field(DateTime)
+    config		= Field(UnicodeText)
+    testcases = OneToMany('Testcase')
+
+    def __repr__(self):
+        return '<Testrun: started on "%s">' % (self.start)
 
