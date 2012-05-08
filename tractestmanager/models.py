@@ -30,7 +30,7 @@ class Testaction(Entity):
     """ Testaction model
         an action is part of a testcase
     """
-    
+
     id       = Field(Integer, primary_key=True)
     title    = Field(UnicodeText)
     desc     = Field(UnicodeText)
@@ -59,11 +59,11 @@ class Testrun(Entity):
         a Testplan is expected to be a wiki page
     """
 
-    id				= Field(Integer, primary_key=True)
-    start			= Field(DateTime, default=datetime.datetime.now)
-    end				= Field(DateTime)
-    config		= Field(UnicodeText)
-    testcases = OneToMany('Testcase')
+    id              = Field(Integer, primary_key=True)
+    start           = Field(DateTime, default=datetime.datetime.now)
+    end             = Field(DateTime)
+    config          = Field(UnicodeText)
+    testcases       = OneToMany('Testcase')
 
     def __repr__(self):
         return '<Testrun: started on "%s">' % (self.start)
