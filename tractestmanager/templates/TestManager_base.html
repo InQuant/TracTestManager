@@ -6,7 +6,7 @@
       py:with="modify_perm = 'WIKI_MODIFY' in perm(page.resource);
                admin_perm = 'WIKI_ADMIN' in perm(page.resource)">
 
-  <xi:include href="TestManager.html" />
+  <xi:include href="TestManager_panels.html" />
   <head>
     <title py:if="title">$title</title>
     <meta py:if="version or page.author == 'trac'" name="ROBOTS" content="NOINDEX, NOFOLLOW" />
