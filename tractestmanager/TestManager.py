@@ -199,7 +199,7 @@ class HomePanel(Component):
         data["page"] = WikiPage(self.env, pagename)
         add_stylesheet(req, 'common/css/wiki.css')
 
-        return 'TestManager_home.html' , data
+        return 'TestManager_base.html' , data
     
 class TestPlanPanel(Component):
     """ Link to available TestPlans
@@ -221,9 +221,9 @@ class TestPlanPanel(Component):
         data["error"] = req.args.get("error", "")
         data["info"] = 'wasted wiedi rockt berlin'
         # The template to be rendered
-        data["page"] = 'TestManager_Tester.html'
+        data["page"] = 'TestManager_base.html'
 
-        return 'TestManager_home.html' , data
+        return 'TestManager_base.html' , data
 
 class TestCasesPanel(Component):
     """ Link to available TestPlans
@@ -233,7 +233,7 @@ class TestCasesPanel(Component):
     def get_admin_panels(self, req):
         """ returns the Section and the Name for the Navigation
         """
-        yield ('general', _('General'), 'tester', _('TestCases'))
+        yield ('general', _('General'), 'testcases', _('TestCases'))
 
 
     def render_admin_panel(self, req, cat, page, path_info):
@@ -245,6 +245,6 @@ class TestCasesPanel(Component):
         data["error"] = req.args.get("error", "")
         data["info"] = 'wasted tommyboy rockt berlin'
         # The template to be rendered
-        data["page"] = 'TestManager_Tester.html'
+        data["page"] = 'TestManager_base.html'
 
-        return 'TestManager_home.html' , data
+        return 'TestManager_base.html' , data
