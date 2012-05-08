@@ -18,7 +18,7 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-__author__ = 'Hans-Peter Locher <hans-peter.locher@inquant.de>'
+__author__ = 'Rainer Hihn <rainer.hihn@inquant.de>'
 __docformat__ = 'plaintext'
 
 import re
@@ -201,15 +201,15 @@ class HomePanel(Component):
 
         return 'TestManager_home.html' , data
     
-class TesterPanel(Component):
-    """ foobar
+class TestPlanPanel(Component):
+    """ Link to available TestPlans
     """
     implements(ITestManagerPanelProvider)
     
     def get_admin_panels(self, req):
         """ returns the Section and the Name for the Navigation
         """
-        yield ('general', _('General'), 'tester', _('Tester'))
+        yield ('general', _('General'), 'testplans', _('TestPlans'))
 
 
     def render_admin_panel(self, req, cat, page, path_info):
@@ -219,5 +219,32 @@ class TesterPanel(Component):
         data["info"] = req.args.get("info", "")
         data["warning"] = req.args.get("warning", "")
         data["error"] = req.args.get("error", "")
+        data["info"] = 'wasted wiedi rockt berlin'
+        # The template to be rendered
+        data["page"] = 'TestManager_Tester.html'
 
-        return 'TestManager_Tester.html' , data
+        return 'TestManager_home.html' , data
+
+class TestCasesPanel(Component):
+    """ Link to available TestPlans
+    """
+    implements(ITestManagerPanelProvider)
+    
+    def get_admin_panels(self, req):
+        """ returns the Section and the Name for the Navigation
+        """
+        yield ('general', _('General'), 'tester', _('TestCases'))
+
+
+    def render_admin_panel(self, req, cat, page, path_info):
+        """ main request handler
+        """
+        data = dict() #template data
+        data["info"] = req.args.get("info", "")
+        data["warning"] = req.args.get("warning", "")
+        data["error"] = req.args.get("error", "")
+        data["info"] = 'wasted tommyboy rockt berlin'
+        # The template to be rendered
+        data["page"] = 'TestManager_Tester.html'
+
+        return 'TestManager_home.html' , data
