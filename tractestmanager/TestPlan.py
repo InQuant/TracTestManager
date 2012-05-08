@@ -53,8 +53,13 @@ class TestPlanMacro(WikiMacroBase):
     def expand_macro(self, formatter, name, text, args):
         """Execute the macro
         """
+        from TestcaseParser import TestcaseParser
+        case = TestcaseParser(self.env)
+        #wikipage = case.parseTestcase("Testcases/UC011")
         # Parse config and testcases
         conf, testcases = self.parse_config(text)
+        for key in testcases:
+            case.parseTestcase(key)
         # Build config params in wiki syntax
         text = self._build_configs_wiki(conf)
         # Build testcases in wiki syntax
@@ -70,18 +75,49 @@ class TestPlanMacro(WikiMacroBase):
            returns a dictionary of attributes
         """
         attributes = dict()
-        testcases = list()
+        caselines  = dict()
         lines = text.splitlines()
         # parse attributes
         for line in lines:
+            # this is a test parameter
             if ':' in line:
                 line.replace(' ','')
                 x,y = line.split(':')
                 attributes[x] = y
+            # and this a testcase markup
             if '/' in line:
                 testcasepath, user = line.split()
-                testcases.append({testcasepath:user})
+                caselines[testcasepath] = user
+                testcases = self._parse_testcasemarkup(caselines)
         return attributes, testcases
+
+    def _get_wiki_pages(self,prefix):
+        """ wrap the wiki api
+        """
+        for page in WikiSystem(self.env).get_pages(prefix):
+            yield page
+
+    def _parse_testcasemarkup(self, markup):
+        """ take the 'Testcases/*' syntax and get all uc for them
+            return a dict with a pagename and the user
+            {'Testcases/UC011':'johndoe'}
+        """
+        testcases = dict()
+        for key in markup:
+            path = key.split('*')[0]
+            path = path.rstrip('/')
+            for title in self._get_wiki_pages(path):
+                testcases[title] = markup[key]
+        return testcases
+
+    def _build_testcases_wiki(self, testcases):
+        """ builds the testcases in wiki syntax
+            returns wikitext
+        """
+        text = "\n== Zu testende Testcases ==\n||'''Testcase'''||'''User'''||\n"
+        for key in testcases:
+            text += '||%s||%s||\n' % (key, testcases[key])
+        return text
 
     def _build_configs_wiki(self,config):
         """ builds wiki formatting for the configuration table
@@ -91,24 +127,5 @@ class TestPlanMacro(WikiMacroBase):
         for key in config.keys():
             table += '||%s||%s||\n' % (key, config[key])
         return text + table
-
-    def _build_testcases_wiki(self, testcases):
-        """ builds the testcases in wiki syntax
-            returns wikitext
-        """
-        text = "\n== Zu testende Testcases ==\n||'''Testcase'''||'''User'''||\n"
-        for testcase in testcases:
-            for key in testcase:
-                path = key.split('*')[0]
-                path = path.rstrip('/')
-                for title in self._get_wiki_pages(path):
-                    text += '||%s||%s||\n' % (title, testcase[key])
-        return text
-
-    def _get_wiki_pages(self,prefix):
-        """ wrap the wiki api
-        """
-        for page in WikiSystem(self.env).get_pages(prefix):
-            yield page
 
 # vim: set ft=python ts=4 sw=4 expandtab :

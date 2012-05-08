@@ -4,14 +4,14 @@ Show the where used report for multiple EPMDocs.  Select two parts in the CS and
 WS list view and display there where used reports in one report form.
 
 Create new workspace
-  Navigate to product container  P1271_ru-300 Create a new workspace (workspace
-  activated) Workspace name: test_cadactions"
+  Navigate to product container  `P1271_ru-300` 
+  Create a new workspace (workspace activated)
+  Workspace name: `test_cadactions`
   
   Workspace created
 
 Browse CS
-  Navigate to CS Folder: `/ P1271_ru-300 / s_vehicle_linkage_devices /
-  sf_gangways_facilities / 11_uebergang-druckertuechtigt`
+  Navigate to CS Folder: `/ P1271_ru-300 / s_vehicle_linkage_devices / sf_gangways_facilities / 11_uebergang-druckertuechtigt`
   
   Folder contents displayed
 
@@ -40,3 +40,4 @@ Exec where used report
   
   a new tab will be openened and two tables with the where used structure is
   shown
+
