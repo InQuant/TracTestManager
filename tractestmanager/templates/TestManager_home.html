@@ -1,0 +1,34 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:py="http://genshi.edgewall.org/"
+      xmlns:i18n="http://genshi.edgewall.org/i18n"
+      xmlns:xi="http://www.w3.org/2001/XInclude"
+      py:with="modify_perm = 'WIKI_MODIFY' in perm(page.resource);
+               admin_perm = 'WIKI_ADMIN' in perm(page.resource)">
+
+  <xi:include href="TestManager.html" />
+  <head>
+    <title py:if="title">$title</title>
+    <meta py:if="version or page.author == 'trac'" name="ROBOTS" content="NOINDEX, NOFOLLOW" />
+    <script type="text/javascript">
+      jQuery(document).ready(function($) {
+        $("#content").find("h1,h2,h3,h4,h5,h6").addAnchor(_("Link to this section"));
+        $("#content").find(".wikianchor").each(function() {
+          $(this).addAnchor(babel.format(_("Link to #%(id)s"), {id: $(this).attr('id')}));
+        });
+        $(".foldable").enableFolding(true, true);
+      });
+    </script>
+  </head>
+
+  <body>
+    <div id="content" class="wiki teamchillhome">
+      <div class="wikipage searchable">
+          <div py:content="wiki_to_html(context, page.text)" />
+      </div>
+    </div>
+  </body>
+
+</html>
+
+<!-- vim: set ft=html ts=2 sw=2 expandtab : -->
