@@ -22,6 +22,6 @@ __author__ = 'Otto Hockel <otto.hockel@inquant.de>'
 __docformat__ = 'plaintext'
 
 from TestPlan import *
-import web_ui
-import permission
+from TestManager import *
+from interfaces import *
 # vim: set ft=python ts=4 sw=4 expandtab :
