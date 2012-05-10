@@ -219,9 +219,19 @@ class TestPlanPanel(Component):
         data["info"] = req.args.get("info", "")
         data["warning"] = req.args.get("warning", "")
         data["error"] = req.args.get("error", "")
-        data["info"] = 'wasted wiedi rockt berlin'
         # The template to be rendered
         data["page"] = 'TestManager_base.html'
+        # XXX: this is all gay
+        #      available testplans
+        testplans = []
+        #import pdb; pdb.set_trace()
+        from TestManagerLib import *
+        ret = getTestRuns()
+        for testplan in WikiSystem(self.env).get_pages('Testplan'):
+            testplans.append(testplan.title())
+        if len(testplans) < 1:
+            data["info"] = 'There are no running testplans'
+        data["testplans"] = testplans
 
         return 'TestManager_base.html' , data
 
@@ -248,3 +258,5 @@ class TestCasesPanel(Component):
         data["page"] = 'TestManager_base.html'
 
         return 'TestManager_base.html' , data
+
+# vim: set ft=python ts=4 sw=4 expandtab :
