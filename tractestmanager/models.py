@@ -41,16 +41,20 @@ class TracDBModel(object):
     def __repr__(self):
         return "<TestManager:TracDBModel>"
 
-class Testaction(dict):
+class Testaction(TracDBModel):
     """ Testaction model
         an action is part of a testcase
     """
 
-    #id       = Field(Integer, primary_key=True)
-    #title    = Field(UnicodeText)
-    #desc     = Field(UnicodeText)
-    #result   = Field(UnicodeText)
-    #testcase = ManyToOne('Testcase')
+    #def __init__(self,env):
+        #super(Testaction, self).__init__(env)
+
+    #id              
+    #testcase        
+    #comment         
+    #description     
+    #status          
+    #expected_result 
 
     def __repr__(self):
         return '<Testaction: "%s">' % (self.title)
@@ -59,39 +63,17 @@ class Testcase(TracDBModel):
     """ Testcase model
     """
 
-    #id        = Field(Integer, primary_key=True)
-    id = None
-    #wiki      = Field(Unicode(128))
-    wiki = None
-    #title     = Field(UnicodeText)
-    title = None
-    #tester    = Field(Unicode(128))
-    tester = None
-    #actions   = OneToMany('Testaction')
-    actions = list()
-    #testcases = ManyToOne('Testrun')
-    testrun = None
+    #def __init__(self,env):
+        #super(Testcase, self).__init__(env)
+
+    #id      
+    #wiki    
+    #title   
+    #tester  
+    #actions
+    #testrun 
 
     def __repr__(self):
         return '<Testcase: "%s">' % (self.title)
-
-class Testrun(dict):
-    """ Testrun model
-        a Testplan is expected to be a wiki page
-    """
-
-    #id              = Field(Integer, primary_key=True)
-    id = None
-    #start           = Field(DateTime, default=datetime.datetime.now)
-    start = None
-    #end             = Field(DateTime)
-    end = None
-    #config          = Field(UnicodeText)
-    config = None
-    #testcases       = OneToMany('Testcase')
-    testcases = list()
-
-    def __repr__(self):
-        return '<Testrun: started on "%s">' % (self.start)
 
 # vim: set ft=python ts=4 sw=4 expandtab :
