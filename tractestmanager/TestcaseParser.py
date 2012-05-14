@@ -60,10 +60,10 @@ class TestcaseParser(object):
                             # we have two paragraphs - action description and expected result
                             # XXX: Failure Handling
                             try:
-                                actiondesc   = action.getchildren()[0]
-                                actionresult = action.getchildren()[1]
-                                ac.desc      = self._build_markup(actiondesc)
-                                ac.result    = self._build_markup(actionresult)
+                                actiondesc          = action.getchildren()[0]
+                                actionresult        = action.getchildren()[1]
+                                ac.description      = self._build_markup(actiondesc)
+                                ac.expected_result  = self._build_markup(actionresult)
                             except Exception, e:
                                 ac.desc      = self._build_markup(actiondesc)
                                 ac.result    = "no expected result available"
