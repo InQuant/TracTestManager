@@ -24,4 +24,5 @@ __docformat__ = 'plaintext'
 from TestPlan import *
 from TestManager import *
 from interfaces import *
+import schema
 # vim: set ft=python ts=4 sw=4 expandtab :
