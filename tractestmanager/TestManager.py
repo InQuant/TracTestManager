@@ -214,7 +214,7 @@ class TestPlanPanel(Component):
 
     def render_admin_panel(self, req, cat, page, path_info):
         """ main request handler
-        """
+        """        
         data = dict() #template data
         data["info"] = req.args.get("info", "")
         data["warning"] = req.args.get("warning", "")
@@ -258,5 +258,12 @@ class TestCasesPanel(Component):
         data["page"] = 'TestManager_base.html'
 
         return 'TestManager_base.html' , data
+
+class TestManagerPermissions(Component):
+    """ This class covers the permissions
+    """
+    implements(IPermissionRequestor)
+    def get_permission_actions(self):
+        return ('TM_TESTMANAGER', 'TM_TESTER')
 
 # vim: set ft=python ts=4 sw=4 expandtab :
