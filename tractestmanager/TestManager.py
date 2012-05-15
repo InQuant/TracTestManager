@@ -53,7 +53,7 @@ from trac.resource import Resource
 
 from interfaces import ITestManagerPanelProvider
 
-import db_models
+#import db_models
 
 class TestManagerPlugin(Component):
     """ TRAC Group Administration Plugin
@@ -65,7 +65,7 @@ class TestManagerPlugin(Component):
 
     def __init__(self):
         Component.__init__(self)
-        db_models.initenv(self.env)
+        #db_models.initenv(self.env)
 
     # INavigationContributor methods
     def get_active_navigation_item(self, req):
@@ -188,7 +188,7 @@ class HomePanel(Component):
     
     def __init__(self):
         Component.__init__(self)
-        db_models.initenv(self.env)
+        #db_models.initenv(self.env)
 
     def get_admin_panels(self, req):
         """ returns the Section and the Name for the Navigation
@@ -217,7 +217,7 @@ class TestPlanPanel(Component):
     implements(ITestManagerPanelProvider)
     def __init__(self):
         Component.__init__(self)
-        db_models.initenv(self.env)
+        #db_models.initenv(self.env)
 
     def get_admin_panels(self, req):
         """ returns the Section and the Name for the Navigation
@@ -255,7 +255,7 @@ class TestCasesPanel(Component):
     # XXX: this is not very cool
     def __init__(self):
         Component.__init__(self)
-        db_models.initenv(self.env)
+        #db_models.initenv(self.env)
     
     def get_admin_panels(self, req):
         """ returns the Section and the Name for the Navigation
@@ -271,12 +271,14 @@ class TestCasesPanel(Component):
         data["error"] = req.args.get("error", "")
 
         # get all TestCases assigned to the user and have status "not tested"
-        tcs = TestcaseFilter()
-        tc_list = tcs.get(user= self.env.user, status= models.NOT_TESTED)
+        import models
+        tcs = models.TestCaseFilter()
+        tc_list = tcs.get(user= req.authname, status= models.NOT_TESTED)
 
         # TODO: Ausgabe
 
         data["info"] = 'no testcases available'
+        data["info"] = tc_list[0].wiki
         # The template to be rendered
         data["page"] = 'TestManager_base.html'
 
