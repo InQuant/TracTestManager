@@ -245,7 +245,6 @@ class TestCasesPanel(Component):
         """
         yield ('general', _('General'), 'testcases', _('TestCases'))
 
-
     def render_admin_panel(self, req, cat, page, path_info):
         """ main request handler
         """
@@ -253,7 +252,7 @@ class TestCasesPanel(Component):
         data["info"] = req.args.get("info", "")
         data["warning"] = req.args.get("warning", "")
         data["error"] = req.args.get("error", "")
-        data["info"] = 'wasted tommyboy rockt berlin'
+        data["info"] = 'no testcases available'
         # The template to be rendered
         data["page"] = 'TestManager_base.html'
 

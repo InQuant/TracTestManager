@@ -19,7 +19,6 @@
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 from elixir import *
 import datetime
-from models import Testrun as Testrun
 
 from trac.wiki import WikiSystem
 
