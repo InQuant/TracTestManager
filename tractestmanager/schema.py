@@ -58,7 +58,7 @@ class TestActionModelProvider(Component):
             return True
         try:
             cursor = db.cursor()
-            cursor.execute("select count(*) from tags")
+            cursor.execute("select count(*) from testcases")
             cursor.fetchone()
             return False
         except Exception, e:
@@ -72,9 +72,8 @@ class TestActionModelProvider(Component):
     def _need_migration(self, db):
         try:
             cursor = db.cursor()
-            cursor.execute("select count(*) from wiki_namespace")
+            cursor.execute("select count(*) from testcases")
             cursor.fetchone()
-            self.env.log.debug("tractags needs to migrate old data")
             return True
         except Exception, e:
             self.log.error("DatabaseError: %s", e)
