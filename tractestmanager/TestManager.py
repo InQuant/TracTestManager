@@ -57,6 +57,7 @@ class TestManagerPlugin(Component):
     """ TRAC Group Administration Plugin
     """
 
+    db_models.init(env)
     panel_providers = ExtensionPoint(ITestManagerPanelProvider)
 
     implements(INavigationContributor, IRequestHandler, ITemplateProvider)
@@ -179,6 +180,7 @@ class HomePanel(Component):
         teamchill tab (because section *general* comes before the other sections in alphabet)
     """
     implements(ITestManagerPanelProvider)
+    db_models.init(env)
 
     def get_admin_panels(self, req):
         """ returns the Section and the Name for the Navigation
@@ -205,7 +207,8 @@ class TestPlanPanel(Component):
     """ Link to available TestPlans
     """
     implements(ITestManagerPanelProvider)
-    
+    db_models.init(env)
+
     def get_admin_panels(self, req):
         """ returns the Section and the Name for the Navigation
         """
@@ -239,6 +242,7 @@ class TestCasesPanel(Component):
     """ Link to available TestPlans
     """
     implements(ITestManagerPanelProvider)
+    db_models.init(env)
     
     def get_admin_panels(self, req):
         """ returns the Section and the Name for the Navigation
@@ -252,6 +256,13 @@ class TestCasesPanel(Component):
         data["info"] = req.args.get("info", "")
         data["warning"] = req.args.get("warning", "")
         data["error"] = req.args.get("error", "")
+
+        # get all TestCases assigned to the user and have status "not tested"
+        tcs= TestcaseQueryuser()
+        tc_list= tcs.query(user= self.env.user, status= models.NOT_TESTED)
+
+        # TODO: Ausgabe
+
         data["info"] = 'no testcases available'
         # The template to be rendered
         data["page"] = 'TestManager_base.html'
