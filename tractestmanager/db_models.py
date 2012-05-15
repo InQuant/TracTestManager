@@ -52,7 +52,6 @@ class DbTestCases(Component):
             pass
 
     def tcCreate(self, **kwargs):
-        # XXX This is all gay
         @with_transaction(self.env)
         def _tcCreate(db, kwargs):
             cursor = db.cursor()
@@ -228,7 +227,7 @@ class Testaction(TracDBModel):
 
 class DbTestcases(object):
     
-    def query(self, kwargs):
+    def get(self, kwargs):
         pass
 
 # vim: set ft=python ts=4 sw=4 expandtab :

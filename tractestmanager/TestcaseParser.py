@@ -72,7 +72,7 @@ class TestcaseParser(object):
                             ac.title  = action.text
                     case.actions.append(ac)
         # save into database
-        case.save()
+        #case.save()
         return case
 
     def _build_markup(self, node):
