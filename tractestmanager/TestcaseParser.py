@@ -31,14 +31,14 @@ class TestcaseParser(object):
     """
     def __init__(self, env):
         self.env   = env
-        setup_all(True)
-        create_all()
+        #setup_all(True)
+        #create_all()
 
     def _parse_xml(self):
         tree = Tree.fromstring(self.xml)
         # initial iteration
         # it is a Testcase
-        case = Testcase()
+        case = TestCase()
         case.wiki = self.pagename
         # we now have paragraph, paragraph and definition list
         # which represent "title", "description" and "actions"
@@ -54,7 +54,7 @@ class TestcaseParser(object):
                 for child in node.getchildren():
                     # every child has two children "term" and "definition"
                     # they are called action
-                    ac = Testaction()
+                    ac = TestAction()
                     for action in child.getchildren():
                         if action.tag == 'definition':
                             # we have two paragraphs - action description and expected result
@@ -71,7 +71,8 @@ class TestcaseParser(object):
                             # append actiontitle to action
                             ac.title  = action.text
                     case.actions.append(ac)
-        #session.commit()
+        # save into database
+        case.save()
         return case
 
     def _build_markup(self, node):
