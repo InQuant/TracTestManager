@@ -26,7 +26,7 @@ __docformat__ = 'plaintext'
 
 env= None
 
-def initenvs(_env):
+def initenv(_env):
     global env
     env= _env
 

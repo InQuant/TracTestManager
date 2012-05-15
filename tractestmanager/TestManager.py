@@ -53,16 +53,19 @@ from trac.resource import Resource
 
 from interfaces import ITestManagerPanelProvider
 
-from db_models import *
+import db_models
 
 class TestManagerPlugin(Component):
     """ TRAC Group Administration Plugin
     """
 
-    #db_models.init(env)
     panel_providers = ExtensionPoint(ITestManagerPanelProvider)
 
     implements(INavigationContributor, IRequestHandler, ITemplateProvider)
+
+    def __init__(self):
+        Component.__init__(self)
+        db_models.initenv(self.env)
 
     # INavigationContributor methods
     def get_active_navigation_item(self, req):
@@ -182,7 +185,10 @@ class HomePanel(Component):
         teamchill tab (because section *general* comes before the other sections in alphabet)
     """
     implements(ITestManagerPanelProvider)
-    db_models.init(env)
+    
+    def __init__(self):
+        Component.__init__(self)
+        db_models.initenv(self.env)
 
     def get_admin_panels(self, req):
         """ returns the Section and the Name for the Navigation
@@ -209,7 +215,9 @@ class TestPlanPanel(Component):
     """ Link to available TestPlans
     """
     implements(ITestManagerPanelProvider)
-    db_models.init(env)
+    def __init__(self):
+        Component.__init__(self)
+        db_models.initenv(self.env)
 
     def get_admin_panels(self, req):
         """ returns the Section and the Name for the Navigation
@@ -245,7 +253,9 @@ class TestCasesPanel(Component):
     """
     implements(ITestManagerPanelProvider)
     # XXX: this is not very cool
-    db_models.initenv(env)
+    def __init__(self):
+        Component.__init__(self)
+        db_models.initenv(self.env)
     
     def get_admin_panels(self, req):
         """ returns the Section and the Name for the Navigation
