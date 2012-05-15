@@ -34,7 +34,7 @@ class TestCase(object):
     status   = None
     actions  = list()
 
-    def __init__(self, wiki     = None, title    = None, revision = None, tester   = None, testrun  = None, status   = None):
+    def __init__(self, wiki = None, title = None, revision = None, tester = None, testrun = None, status = None):
         self.wiki     = wiki
         self.title    = title
         self.revision = revision
@@ -68,19 +68,20 @@ class TestRun(object):
     ticket = None
 
 
-class TestcaseQuery(object):
+class TestCaseFilter(object):
     """
     filters testcases from db.
     """
     
-    def query(self, **kwargs):
-        #
-        dbtcs  = DbTestcases()
-        tcrows = dbtcs.query(kwargs)
+    def get(self, **kwargs):
+        dbtcs     = DbTestcases()
+        tcrows    = dbtcs.query(kwargs)
+        testcases = list()
 
         for row in tcrows:
-            tc = Testcase(row)
+            testcases.append(Testcase(row))
 
-        return TestCase("TcDocCreate", title = "= TcDocCreate =", revision = "3", tester = "lmende", testrun = "2", status = NOT_TESTED)
+        # return testcases
+        return [TestCase("TcDocCreate", title = "= TcDocCreate =", revision = "3", tester = "lmende", testrun = "2", status = NOT_TESTED)]
 
 # vim: set ft=python ts=4 sw=4 expandtab :
