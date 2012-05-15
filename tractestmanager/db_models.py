@@ -18,30 +18,47 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+from trac.core import Component
 import trac.db
 from trac.db import with_transaction
 
 __author__ = 'Otto Hockel <otto.hockel@inquant.de>'
 __docformat__ = 'plaintext'
 
-env= None
-def initenv(_env):
-    global env
-    env= _env
-
+#def initenv(_env):
+    #global ENV
+    #ENV = _env
 
 class DbException(Exception):
     pass
 class DbAlreadyExistException(DbException):
     pass
 
-@with_transaction(env)
-def tcCreate(db, KeyValues):
-    cursor = dB.cursor()
-    cursor.execute("""INSERT INTO testcases 
-        (wiki,title,revision,tester,testrun,status)
-        VALUES (%(wiki)s,%(title)s,%(revision)s,%(tester)s,%(testrun)s,%(status)s)""" % dict(KeyValues)
+class DbTestCases(Component):
+    """ Wrap the database to query TestCases
+    """
 
+    def get(self):
+        @with_transaction(self.env)
+        def _get(self, db, **kwargs):
+            cursor = db.cursor()
+            stmt = ("SELECT wiki,title,revision,tester,testrun,status"
+                           "FROM testcases "
+                           "WHERE")
+            for key, value in dict(KeyValues):
+                stmt = ("%s AND %s=%s" % (stmt, key, value))
+            cursor.execute(stmt)
+            row = cursor.fetchone()
+            pass
+
+    def tcCreate(self, **kwargs):
+        # XXX This is all gay
+        @with_transaction(self.env)
+        def _tcCreate(db, kwargs):
+            cursor = db.cursor()
+            cursor.execute("""INSERT INTO testcases 
+                (wiki,title,revision,tester,testrun,status)
+                VALUES (%(wiki)s,%(title)s,%(revision)s,%(tester)s,%(testrun)s,%(status)s)""" % kwargs)
 
 class TracDBModel(object):
     """ Generic DB Model
@@ -89,7 +106,7 @@ class Testcase(TracDBModel):
 
     def _fetch(self, id, db=None):
         if not db:
-        db = self.env.get_db_cnx()
+            db = self.env.get_db_cnx()
         cursor = db.cursor()
         cursor.execute("SELECT wiki,title,revision,tester,testrun,status"
                        "FROM testcases "

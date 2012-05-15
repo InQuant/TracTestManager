@@ -26,45 +26,23 @@ class TestCase(object):
     """ Testcase model
     """
 
-    wiki     = None
-    title    = None
-    revision = None
-    tester   = None
-    testrun  = None # ticket number
-    status   = None
-    actions  = list()
-
     def __init__(self, **kwargs):
-        self.wiki     = kwargs['wiki']
-        self.title    = kwargs['title']
-        self.revision = kwargs['revision']
-        self.tester   = kwargs['tester']
-        self.testrun  = kwargs['testrun']
-        self.status   = kwargs['status']
-
-    def toTuples(self):
-        return (
-                ('wiki', self.wiki),
-                ('title', self.title)
-                ('revision', self.revision)
-                ('tester', self.tester)
-                ('testrun', self.testrun)
-                ('status', self.status)
-                )
-
+        self.kwargs = kwargs
+        self.wiki = kwargs['wiki']
+            
     def save(self):
         # TODO: should save testcase and actions into database
         
         try:
-            db_models.tcCreate(self.toTuples())
+            db_models.tcCreate(self.kwargs)
         except db_models.DbAlreadyExistException:
-            db_models.tcUpdate(self.toTuples())
+            db_models.tcUpdate(self.kwargs)
 
         for action in self.actions:
             try:
-                db_models.actionCreate(action.toTuples())
+                db_models.actionCreate(action)
             except db_models.DbAlreadyExistException:
-                db_models.actionUpdate(action.toTuples())
+                db_models.actionUpdate(action)
 
 
 class TestAction(object):
@@ -72,11 +50,15 @@ class TestAction(object):
         an action is part of a testcase
     """
 
-    testcase        = None
-    comment         = None
-    status          = None
-    description     = None
-    expected_result = None
+    #testcase        = None
+    #comment         = None
+    #status          = None
+    #description     = None
+    #expected_result = None
+
+    def __init__(self, **kwargs):
+        self.kwargs = kwargs
+        pass
 
     def save(self):
         # TODO: should save actions into database
@@ -95,14 +77,14 @@ class TestCaseFilter(object):
     """
     
     def get(self, **kwargs):
-        dbtcs     = DbTestcases()
-        tcrows    = dbtcs.query(kwargs)
-        testcases = list()
+        #dbtcs     = db_models.DbTestCases()
+        #tcrows    = dbtcs.get(kwargs)
+        #testcases = list()
 
-        for row in tcrows:
-            testcases.append(Testcase(row))
+        #for row in tcrows:
+            #testcases.append(TestCase(row))
 
         # return testcases
-        return [TestCase(wiki= "TcDocCreate", title = "= TcDocCreate =", revision = "3", tester = "lmende", testrun = "2", status = NOT_TESTED)]
+        return [TestCase(wiki="TcDocCreate", title="= TcDocCreate =", revision="3", tester="lmende", testrun="2", status=NOT_TESTED)]
 
 # vim: set ft=python ts=4 sw=4 expandtab :
