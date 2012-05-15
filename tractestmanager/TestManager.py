@@ -258,8 +258,8 @@ class TestCasesPanel(Component):
         data["error"] = req.args.get("error", "")
 
         # get all TestCases assigned to the user and have status "not tested"
-        tcs= TestcaseQueryuser()
-        tc_list= tcs.query(user= self.env.user, status= models.NOT_TESTED)
+        tcs = TestcaseFilter()
+        tc_list = tcs.get(user= self.env.user, status= models.NOT_TESTED)
 
         # TODO: Ausgabe
 
