@@ -278,7 +278,7 @@ class TestCasesPanel(Component):
         # TODO: Ausgabe
 
         data["info"] = 'no testcases available'
-        data["info"] = tc_list[0].wiki
+        data["info"] = tc_list[0]
         # The template to be rendered
         data["page"] = 'TestManager_base.html'
 
