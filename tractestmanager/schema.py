@@ -26,7 +26,7 @@ from trac.env import IEnvironmentSetupParticipant
 from trac.db import Table, Column, Index
 
 
-class TestActionModelProvider(Component):
+class TestManagerModelProvider(Component):
     implements(IEnvironmentSetupParticipant)
 
     SCHEMA = [
@@ -56,29 +56,12 @@ class TestActionModelProvider(Component):
     def environment_needs_upgrade(self, db):
         if self._need_migration(db):
             return True
-        try:
-            cursor = db.cursor()
-            cursor.execute("select count(*) from testcases")
-            cursor.fetchone()
-            return False
-        except Exception, e:
-            self.log.error("DatabaseError: %s", e)
-            db.rollback()
-            return True
 
     def upgrade_environment(self, db):
         self._upgrade_db(db)
 
     def _need_migration(self, db):
-        try:
-            cursor = db.cursor()
-            cursor.execute("select count(*) from testcases")
-            cursor.fetchone()
-            return True
-        except Exception, e:
-            self.log.error("DatabaseError: %s", e)
-            db.rollback()
-            return False
+        pass
 
     def _upgrade_db(self, db):
         try:
@@ -94,14 +77,6 @@ class TestActionModelProvider(Component):
                     self.env.log.debug(stmt)
                     cursor.execute(stmt)
             db.commit()
-
-            # Migrate old data
-            if self._need_migration(db):
-                cursor = db.cursor()
-                cursor.execute("INSERT INTO tags (tagspace, name, tag) SELECT "
-                               "'wiki', name, namespace FROM wiki_namespace")
-                cursor.execute("DROP TABLE wiki_namespace")
-                db.commit()
         except Exception, e:
             self.log.error("DatabaseError: %s", e)
             db.rollback()
