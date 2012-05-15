@@ -62,7 +62,14 @@ class TestManagerModelProvider(Component):
         self._upgrade_db(db)
 
     def _need_migration(self, db):
-        return False
+        try:
+            cursor = db.cursor()
+            cursor.execute("select * from testaction")
+            return False
+        except Exception, e:
+            self.log.error("DatabaseError: %s", e)
+            db.rollback()
+            return True
 
     def _upgrade_db(self, db):
         try:
