@@ -53,6 +53,34 @@ class TestActionModelProvider(Component):
     def environment_created(self):
         self._upgrade_db(self.env.get_db_cnx())
         
+    def environment_needs_upgrade(self, db):
+        if self._need_migration(db):
+            return True
+        try:
+            cursor = db.cursor()
+            cursor.execute("select count(*) from tags")
+            cursor.fetchone()
+            return False
+        except Exception, e:
+            self.log.error("DatabaseError: %s", e)
+            db.rollback()
+            return True
+
+    def upgrade_environment(self, db):
+        self._upgrade_db(db)
+
+    def _need_migration(self, db):
+        try:
+            cursor = db.cursor()
+            cursor.execute("select count(*) from wiki_namespace")
+            cursor.fetchone()
+            self.env.log.debug("tractags needs to migrate old data")
+            return True
+        except Exception, e:
+            self.log.error("DatabaseError: %s", e)
+            db.rollback()
+            return False
+
     def _upgrade_db(self, db):
         try:
             try:
@@ -78,4 +106,4 @@ class TestActionModelProvider(Component):
         except Exception, e:
             self.log.error("DatabaseError: %s", e)
             db.rollback()
-            raise        
+            raise
