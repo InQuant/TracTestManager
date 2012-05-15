@@ -18,174 +18,69 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import trac.db
-from trac.db import with_transaction
+from db_models import *
 
-__author__ = 'Otto Hockel <otto.hockel@inquant.de>'
-__docformat__ = 'plaintext'
+NOT_TESTED= 'not tested'
 
-class TracDBModel(object):
-    """ Generic DB Model
-    """
-
-    def __init__(self, env):
-        self.env = env
-        #self.db  = env.get_db_cnx()
-        #self.cursor = self.db.cursor()
-
-    def __repr__(self):
-        return "<TestManager:TracDBModel>"
-
-class Testcase(TracDBModel):
+class TestCase(object):
     """ Testcase model
     """
 
-    id       = None
     wiki     = None
     title    = None
-    # the wiki page revision to take
     revision = None
     tester   = None
-    # one testcase has one or more actions
-    actions  = list()
-    # one or more testcases belong to one testrun
-    testrun  = None
+    testrun  = None # ticket number
     status   = None
+    actions  = list()
 
-    # a Testcase can be initialized with an existing id.
-    # if the id exists, the full object will be loaded
+    def __init__(self, wiki     = None, title    = None, revision = None, tester   = None, testrun  = None, status   = None):
+        self.wiki     = wiki
+        self.title    = title
+        self.revision = revision
+        self.tester   = tester
+        self.testrun  = testrun
+        self.status   = status
 
-    def __init__(self, env, id=None):
-        if id is not None:
-            super(Testaction, self).__init__(env)
-            # TODO: exception handling if testaction not in db
-            self.id = id
-            _fetch(id, self.db)
-            _loadActions(self.db)
-        else:
-            # TODO: not implemented yet, for insertion purpose
-            pass
-
-    def __repr__(self):
-        return '<Testcase: "%s">' % (self.title)
-
-    def _fetch(self, id, db=None):
-        if not db:
-            db = self.env.get_db_cnx()
-        cursor = db.cursor()
-        cursor.execute("SELECT wiki,title,revision,tester,testrun,status"
-                       "FROM testcases "
-                       "WHERE id=%s", int(id))
-        row = cursor.fetchone()
-        # if not row -> testcase not available
-        if row:
-            wiki, title, revision, tester, testrun, status = row
-            self.wiki     = wiki
-            self.title    = title
-            self.revision = revision
-            self.tester   = tester
-            self.testrun  = testrun
-            self.status   = status
-            self.id       = id
-            # Fetch all testactions for this testcase
-            # "SELECT * FROM testactions WHERE testcase_id=%s", int(id)
-            # for row in cursor.fetchall(): testactions.append(row)
-            #pass
-
-    def _loadActions(self, db=None):
-        @self.env.with_transaction(db)
-        def do_loadActions(db):
-            cursor = db.cursor()
-            cursor.execute("SELECT id,description,expected_result
-                           "FROM testactions "
-                           "WHERE testcase=", int(self.id))
-            rows = cursor.fetchall()
-            for row in rows:
-                self.actions.append(row)
-
-    def save(self, db=None):
-        @self.env.with_transaction(db)
-        def do_save(db):
-            cursor = db.cursor()
-            cursor.execute("""
-                    INSERT INTO testcases (wiki,title,revision,tester,
-                                           actions,testrun,status)
-                    VALUES (%s,%s,%s,%s,%s,%s)
-                    """, (self.wiki, self.title, self.revision, self.tester,
-                        self.testrun, self.status)
-
-    def delete(self, db=None):
-        @self.env.with_transaction(db)
-        def do_save(db):
-            pass
+    def save(self):
+        # TODO: should save testcase and actions into database
         pass
 
-    def check_integrity(self):
-        # TODO: check integrity of the whole testaction
-        #       return errors and things like this
-        return True
-
-class Testaction(TracDBModel):
+class TestAction(object):
     """ Testaction model
         an action is part of a testcase
     """
 
-    id              = None
-    # one or more testactions belong to one testcase
     testcase        = None
-    # the comment is appended to the testrun. for the
-    # purpose of integrity, we need the action as base
     comment         = None
     status          = None
     description     = None
     expected_result = None
 
-    # a Testaction can be initialized with an existing id.
-    # if the id exists, the full object will be loaded
-
-    def __init__(self,env,id=None):
-        if id is not None:
-            super(Testaction, self).__init__(env)
-            # TODO: exception handling if testaction not in db
-            self.id = id
-            _fetch(id, self.db)
-        else:
-            # TODO: not implemented yet, for insertion purpose
-            pass
-
-    def _fetch(self, id, db=None):
-        if not db:
-            db = self.env.get_db_cnx()
-        cursor = db.cursor()
-        cursor.execute("SELECT testcase,comment,status,description,expected_result"
-                       "FROM testactions "
-                       "WHERE id=%s", int(id))
-        row = cursor.fetchone()
-        # if not row -> testcase not available
-        if row:
-            testcase, comment, status, description, expected_result = row
-            self.testcase = testcase
-            self.comment = comment
-            self.status = status
-            self.description = description
-            self.expected_result = expected_result
-            self.id = id
-
-    def __repr__(self):
-        return '<Testaction: "%s">' % (self.title)
-
-    def save(self, db=None):
+    def save(self):
+        # TODO: should save actions into database
         pass
 
-    def delete(self, db=None):
-        pass
+class TestRun(object):
+    """ TestRun model
+    """
 
-    def getXML(self, id, db=None):
-        pass
+    ticket = None
 
-    def check_integrity(self):
-        # TODO: check integrity of the whole testaction
-        #       return errors and things like this
-        return True
+
+class TestcaseQuery(object):
+    """
+    filters testcases from db.
+    """
+    
+    def query(self, **kwargs):
+        #
+        dbtcs  = DbTestcases()
+        tcrows = dbtcs.query(kwargs)
+
+        for row in tcrows:
+            tc = Testcase(row)
+
+        return TestCase("TcDocCreate", title = "= TcDocCreate =", revision = "3", tester = "lmende", testrun = "2", status = NOT_TESTED)
 
 # vim: set ft=python ts=4 sw=4 expandtab :
