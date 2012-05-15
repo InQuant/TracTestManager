@@ -25,10 +25,23 @@ __author__ = 'Otto Hockel <otto.hockel@inquant.de>'
 __docformat__ = 'plaintext'
 
 env= None
-
 def initenv(_env):
     global env
     env= _env
+
+
+class DbException(Exception):
+    pass
+class DbAlreadyExistException(DbException):
+    pass
+
+@with_transaction(env)
+def tcCreate(db, KeyValues):
+    cursor = dB.cursor()
+    cursor.execute("""INSERT INTO testcases 
+        (wiki,title,revision,tester,testrun,status)
+        VALUES (%(wiki)s,%(title)s,%(revision)s,%(tester)s,%(testrun)s,%(status)s)""" % dict(KeyValues)
+
 
 class TracDBModel(object):
     """ Generic DB Model
@@ -76,7 +89,7 @@ class Testcase(TracDBModel):
 
     def _fetch(self, id, db=None):
         if not db:
-            db = self.env.get_db_cnx()
+        db = self.env.get_db_cnx()
         cursor = db.cursor()
         cursor.execute("SELECT wiki,title,revision,tester,testrun,status"
                        "FROM testcases "

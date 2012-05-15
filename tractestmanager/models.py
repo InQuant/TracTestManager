@@ -18,7 +18,7 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-from db_models import *
+import db_models
 
 NOT_TESTED= 'not tested'
 
@@ -34,17 +34,38 @@ class TestCase(object):
     status   = None
     actions  = list()
 
-    def __init__(self, wiki = None, title = None, revision = None, tester = None, testrun = None, status = None):
-        self.wiki     = wiki
-        self.title    = title
-        self.revision = revision
-        self.tester   = tester
-        self.testrun  = testrun
-        self.status   = status
+    def __init__(self, **kwargs):
+        self.wiki     = kwargs['wiki']
+        self.title    = kwargs['title']
+        self.revision = kwargs['revision']
+        self.tester   = kwargs['tester']
+        self.testrun  = kwargs['testrun']
+        self.status   = kwargs['status']
+
+    def toTuples(self):
+        return (
+                ('wiki', self.wiki),
+                ('title', self.title)
+                ('revision', self.revision)
+                ('tester', self.tester)
+                ('testrun', self.testrun)
+                ('status', self.status)
+                )
 
     def save(self):
         # TODO: should save testcase and actions into database
-        pass
+        
+        try:
+            db_models.tcCreate(self.toTuples())
+        except db_models.DbAlreadyExistException:
+            db_models.tcUpdate(self.toTuples())
+
+        for action in self.actions:
+            try:
+                db_models.actionCreate(action.toTuples())
+            except db_models.DbAlreadyExistException:
+                db_models.actionUpdate(action.toTuples())
+
 
 class TestAction(object):
     """ Testaction model
@@ -82,6 +103,6 @@ class TestCaseFilter(object):
             testcases.append(Testcase(row))
 
         # return testcases
-        return [TestCase("TcDocCreate", title = "= TcDocCreate =", revision = "3", tester = "lmende", testrun = "2", status = NOT_TESTED)]
+        return [TestCase(wiki= "TcDocCreate", title = "= TcDocCreate =", revision = "3", tester = "lmende", testrun = "2", status = NOT_TESTED)]
 
 # vim: set ft=python ts=4 sw=4 expandtab :
