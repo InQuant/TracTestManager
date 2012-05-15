@@ -53,11 +53,13 @@ from trac.resource import Resource
 
 from interfaces import ITestManagerPanelProvider
 
+from db_models import *
+
 class TestManagerPlugin(Component):
     """ TRAC Group Administration Plugin
     """
 
-    db_models.init(env)
+    #db_models.init(env)
     panel_providers = ExtensionPoint(ITestManagerPanelProvider)
 
     implements(INavigationContributor, IRequestHandler, ITemplateProvider)
@@ -242,7 +244,8 @@ class TestCasesPanel(Component):
     """ Link to available TestPlans
     """
     implements(ITestManagerPanelProvider)
-    db_models.init(env)
+    # XXX: this is not very cool
+    db_models.initenv(env)
     
     def get_admin_panels(self, req):
         """ returns the Section and the Name for the Navigation
