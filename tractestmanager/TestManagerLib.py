@@ -17,8 +17,6 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-from elixir import *
-import datetime
 
 from trac.wiki import WikiSystem
 
@@ -31,9 +29,6 @@ def _get_wiki_pages(self,prefix):
 def getTestRuns():
     """ get active testruns
     """
-    setup_all()
-    create_all()
-    #qry = Testrun.get(Testrun.id==1)
     return []
 
 # vim: set ft=python ts=4 sw=4 expandtab :

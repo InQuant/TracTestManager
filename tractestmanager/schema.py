@@ -56,12 +56,13 @@ class TestManagerModelProvider(Component):
     def environment_needs_upgrade(self, db):
         if self._need_migration(db):
             return True
+        return False
 
     def upgrade_environment(self, db):
         self._upgrade_db(db)
 
     def _need_migration(self, db):
-        pass
+        return False
 
     def _upgrade_db(self, db):
         try:
