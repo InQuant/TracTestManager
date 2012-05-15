@@ -28,7 +28,8 @@ class TestCase(object):
 
     def __init__(self, **kwargs):
         self.kwargs = kwargs
-        self.wiki = kwargs['wiki']
+        self.actions = []
+        #self.wiki = kwargs['wiki']
             
     def save(self):
         # TODO: should save testcase and actions into database
