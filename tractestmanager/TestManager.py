@@ -52,6 +52,7 @@ from trac.mimeview.api import Context
 from trac.resource import Resource
 
 from interfaces import ITestManagerPanelProvider
+from config import MANAGER_PERMISSION, TESTER_PERMISSION
 
 #import db_models
 
@@ -75,13 +76,15 @@ class TestManagerPlugin(Component):
         It should return the name of the navigation item that should be
         highlighted as active/current.
         """
-        return 'TestManager'
+        if TESTER_PERMISSION in req.perm:
+            return 'TestManager'
 
     def get_navigation_items(self, req):
         """ Should return an iterable object over the list of navigation items
         to add, each being a tuple in the form (category, name, text).
         """
-        yield 'mainnav', 'TestManager', tag.a(_('TestManager'), href=req.href.TestManager(),
+        if TESTER_PERMISSION in req.perm:
+            yield 'mainnav', 'TestManager', tag.a(_('TestManager'), href=req.href.TestManager(),
                                             title=_('TestManager'))
     # IRequestHandler methods
     def match_request(self, req):
@@ -96,43 +99,44 @@ class TestManagerPlugin(Component):
     def process_request(self, req):
         """ process the request and render the response template
         """
-        # add default trac admin css
-        add_stylesheet(req, 'common/css/admin.css')
-        # custom css
-        add_stylesheet(req, 'TestManager/stylesheets/TestManager.css')
-
-        # get the panels and their providers
-        panels, providers = self._get_panels(req)
-        if not panels:
-            # no providers found
-            raise HTTPNotFound(_('No TestManager panels available'))
-
-        # Navigation tree
-        cat_id    = req.args.get('cat_id') or panels[0][0]
-        panel_id  = req.args.get('panel_id')
-        path_info = req.args.get('path_info')
-        if not panel_id:
-            panel_id = filter(lambda panel: panel[0] == cat_id, panels)[0][2]
-
-        provider = providers.get((cat_id, panel_id), None)
-        if not provider:
-            raise HTTPNotFound(_('Unknown TestManager panel'))
-
-        data = dict()
-        if hasattr(provider, 'render_admin_panel'):
-            template, data = provider.render_admin_panel(req, cat_id, panel_id, path_info)
-
-        data.update({
-            'active_cat': cat_id,
-            'active_panel': panel_id,
-            'panel_href': partial(req.href, 'TestManager', cat_id, panel_id),
-            'panels': [{
-                'category': {'id': panel[0], 'label': panel[1]},
-                'panel': {'id': panel[2], 'label': panel[3]}
-            } for panel in panels]
-        })
-
-        return template, data, None
+        if TESTER_PERMISSION in req.perm:
+            # add default trac admin css
+            add_stylesheet(req, 'common/css/admin.css')
+            # custom css
+            add_stylesheet(req, 'TestManager/stylesheets/TestManager.css')
+    
+            # get the panels and their providers
+            panels, providers = self._get_panels(req)
+            if not panels:
+                # no providers found
+                raise HTTPNotFound(_('No TestManager panels available'))
+    
+            # Navigation tree
+            cat_id    = req.args.get('cat_id') or panels[0][0]
+            panel_id  = req.args.get('panel_id')
+            path_info = req.args.get('path_info')
+            if not panel_id:
+                panel_id = filter(lambda panel: panel[0] == cat_id, panels)[0][2]
+    
+            provider = providers.get((cat_id, panel_id), None)
+            if not provider:
+                raise HTTPNotFound(_('Unknown TestManager panel'))
+    
+            data = dict()
+            if hasattr(provider, 'render_admin_panel'):
+                template, data = provider.render_admin_panel(req, cat_id, panel_id, path_info)
+    
+            data.update({
+                'active_cat': cat_id,
+                'active_panel': panel_id,
+                'panel_href': partial(req.href, 'TestManager', cat_id, panel_id),
+                'panels': [{
+                    'category': {'id': panel[0], 'label': panel[1]},
+                    'panel': {'id': panel[2], 'label': panel[3]}
+                } for panel in panels]
+            })
+    
+            return template, data, None
 
     # ITemplateProvider methods
     def get_templates_dirs(self):
@@ -199,17 +203,18 @@ class HomePanel(Component):
     def render_admin_panel(self, req, cat, page, path_info):
         """ main request handler
         """
-        data = dict() #template data
-        data["info"] = req.args.get("info", "")
-        data["warning"] = req.args.get("warning", "")
-        data["error"] = req.args.get("error", "")
-
-        pagename = "TestManagerHome"
-        data["pagename"] = pagename
-        data["page"] = WikiPage(self.env, pagename)
-        add_stylesheet(req, 'common/css/wiki.css')
-
-        return 'TestManager_base.html' , data
+        if TESTER_PERMISSION in req.perm:
+            data = dict() #template data
+            data["info"] = req.args.get("info", "")
+            data["warning"] = req.args.get("warning", "")
+            data["error"] = req.args.get("error", "")
+    
+            pagename = "TestManagerHome"
+            data["pagename"] = pagename
+            data["page"] = WikiPage(self.env, pagename)
+            add_stylesheet(req, 'common/css/wiki.css')
+    
+            return 'TestManager_base.html' , data
     
 class TestPlanPanel(Component):
     """ Link to available TestPlans
@@ -222,31 +227,33 @@ class TestPlanPanel(Component):
     def get_admin_panels(self, req):
         """ returns the Section and the Name for the Navigation
         """
-        yield ('general', _('General'), 'testplans', _('TestPlans'))
+        if MANAGER_PERMISSION in req.perm:
+            yield ('general', _('General'), 'testplans', _('TestPlans'))
 
 
     def render_admin_panel(self, req, cat, page, path_info):
         """ main request handler
-        """        
-        data = dict() #template data
-        data["info"] = req.args.get("info", "")
-        data["warning"] = req.args.get("warning", "")
-        data["error"] = req.args.get("error", "")
-        # The template to be rendered
-        data["page"] = 'TestManager_base.html'
-        # XXX: this is all gay
-        #      available testplans
-        testplans = []
-        #import pdb; pdb.set_trace()
-        from TestManagerLib import *
-        ret = getTestRuns()
-        for testplan in WikiSystem(self.env).get_pages('Testplan'):
-            testplans.append(testplan.title())
-        if len(testplans) < 1:
-            data["info"] = 'There are no running testplans'
-        data["testplans"] = testplans
-
-        return 'TestManager_base.html' , data
+        """
+        if MANAGER_PERMISSION in req.perm:
+            data = dict() #template data
+            data["info"] = req.args.get("info", "")
+            data["warning"] = req.args.get("warning", "")
+            data["error"] = req.args.get("error", "")
+            # The template to be rendered
+            data["page"] = 'TestManager_base.html'
+            # XXX: this is all gay
+            #      available testplans
+            testplans = []
+            #import pdb; pdb.set_trace()
+            from TestManagerLib import *
+            ret = getTestRuns()
+            for testplan in WikiSystem(self.env).get_pages('Testplan'):
+                testplans.append(testplan.title())
+            if len(testplans) < 1:
+                data["info"] = 'There are no running testplans'
+            data["testplans"] = testplans
+    
+            return 'TestManager_base.html' , data
 
 class TestCasesPanel(Component):
     """ Link to available TestPlans
@@ -265,30 +272,32 @@ class TestCasesPanel(Component):
     def render_admin_panel(self, req, cat, page, path_info):
         """ main request handler
         """
-        data = dict() #template data
-        data["info"] = req.args.get("info", "")
-        data["warning"] = req.args.get("warning", "")
-        data["error"] = req.args.get("error", "")
-
-        # get all TestCases assigned to the user and have status "not tested"
-        import models
-        tcs = models.TestCaseFilter()
-        tc_list = tcs.get(user= req.authname, status= models.NOT_TESTED)
-
-        # TODO: Ausgabe
-
-        data["info"] = 'no testcases available'
-        data["info"] = tc_list[0]
-        # The template to be rendered
-        data["page"] = 'TestManager_base.html'
-
-        return 'TestManager_base.html' , data
+        if TESTER_PERMISSION in req.perm:
+            data = dict() #template data
+            data["info"] = req.args.get("info", "")
+            data["warning"] = req.args.get("warning", "")
+            data["error"] = req.args.get("error", "")
+    
+            # get all TestCases assigned to the user and have status "not tested"
+            import models
+            tcs = models.TestCaseFilter()
+            tc_list = tcs.get(user= req.authname, status= models.NOT_TESTED)
+    
+            # TODO: Ausgabe
+    
+            data["info"] = 'no testcases available'
+            data["info"] = tc_list[0]
+            # The template to be rendered
+            data["page"] = 'TestManager_base.html'
+    
+            return 'TestManager_base.html' , data
 
 class TestManagerPermissions(Component):
     """ This class covers the permissions
+        @see: config.py
     """
     implements(IPermissionRequestor)
     def get_permission_actions(self):
-        return ('TM_TESTMANAGER', 'TM_TESTER')
+        return (MANAGER_PERMISSION, TESTER_PERMISSION)
 
 # vim: set ft=python ts=4 sw=4 expandtab :
