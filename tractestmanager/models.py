@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# File: TestPlan.py
+# File: models.py
 #
 # Copyright (c) Inquant GmbH
 #
@@ -18,6 +18,9 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+__author__ = 'Otto Hockel <otto.hockel@inquant.de>'
+__docformat__ = 'plaintext'
+
 import db_models
 
 NOT_TESTED= 'not tested'
@@ -29,6 +32,7 @@ class TestCase(object):
     def __init__(self, **kwargs):
         self.kwargs = kwargs
         self.actions = []
+        self.errors = {}
         #self.wiki = kwargs['wiki']
             
     def save(self):
@@ -56,9 +60,11 @@ class TestAction(object):
     #status          = None
     #description     = None
     #expected_result = None
+    broken           = None
 
     def __init__(self, **kwargs):
         self.kwargs = kwargs
+        self.broken = False
         pass
 
     def save(self):

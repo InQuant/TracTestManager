@@ -39,7 +39,10 @@ class TestcaseParser(object):
         # initial iteration
         # it is a Testcase
         case = TestCase()
-        case.wiki = self.pagename
+        try:
+            case.wiki = self.pagename
+        except Exception, e:
+            ("This is only a dryrun")
         # we now have paragraph, paragraph and definition list
         # which represent "title", "description" and "actions"
         for node in tree:
@@ -60,13 +63,15 @@ class TestcaseParser(object):
                             # we have two paragraphs - action description and expected result
                             # XXX: Failure Handling
                             try:
-                                actiondesc          = action.getchildren()[0]
-                                actionresult        = action.getchildren()[1]
-                                ac.description      = self._build_markup(actiondesc)
-                                ac.expected_result  = self._build_markup(actionresult)
+                                actiondesc                  = action.getchildren()[0]
+                                actionresult                = action.getchildren()[1]
+                                ac.description              = self._build_markup(actiondesc)
+                                ac.expected_result          = self._build_markup(actionresult)
                             except Exception, e:
-                                ac.desc      = self._build_markup(actiondesc)
-                                ac.result    = "no expected result available"
+                                ac.description              = self._build_markup(actiondesc)
+                                ac.expected_result          = "no expected result available"
+                                case.errors[ac.description] = "no expected result"
+                                ac.broken           = True
                         else:
                             # append actiontitle to action
                             ac.title  = action.text
@@ -84,12 +89,17 @@ class TestcaseParser(object):
                 nodemarkup += child.text
         return nodemarkup
 
-    def parseTestcase(self, pagename):
-        # get the wiki page
-        wikipage      = self._get_page(pagename)
-        # get the xml representation of a testcase
-        self.xml = publish_parts(wikipage.text,writer_name = 'xml')['whole']
-        return self._parse_xml()
+    def parseTestcase(self, pagename=None, text=None):
+        # if we give a text - we only want to evaluate
+        if text is not None:
+            self.xml = publish_parts(text,writer_name = 'xml')['whole']
+            return self._parse_xml()
+        else:
+            # get the wiki page
+            wikipage      = self._get_page(pagename)
+            # get the xml representation of a testcase
+            self.xml = publish_parts(wikipage.text,writer_name = 'xml')['whole']
+            return self._parse_xml()
 
     def _get_page(self, pagename):
         try:
@@ -101,3 +111,16 @@ class TestcaseParser(object):
             wikipage = None
         return wikipage
 
+class NoDescriptionException(Exception):
+
+    def __init__(self, message, errors):
+        Exception.__init__(self, message)
+        self.errors = "No description set"
+
+class NoExpectedResultException(Exception):
+
+    def __init__(self, message, errors):
+        Exception.__init__(self, message)
+        self.errors = "No expected result set"
+
+# vim: set ft=python ts=4 sw=4 expandtab :
