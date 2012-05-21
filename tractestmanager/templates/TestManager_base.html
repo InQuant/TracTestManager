@@ -26,23 +26,36 @@
       <table class="listing reports"
              py:with="any_edit = any(can_edit for id, title, can_edit, can_delete in reports);
                       any_delete = any(can_delete for id, title, can_edit, can_delete in reports)">
-        <thead py:if="testplans"><tr>
+        <thead py:if="testruns"><tr>
           <th>TestRun</th>
           <th>started on</th>
-          <th>ending</th>
           <th>status</th>
+        </tr></thead>
+
+        <tbody py:choose="">
+          <tr py:when="testruns" py:for="testrun in testruns">
+            <td class="report">$testrun.summary</td>
+            <td class="title">$testrun.created</td>
+            <td class="action">OK</td>
+          </tr>
+        </tbody>
+      </table>
+        
+      <table class="listing reports"
+             py:with="any_edit = any(can_edit for id, title, can_edit, can_delete in reports);
+                      any_delete = any(can_delete for id, title, can_edit, can_delete in reports)">
+        <thead py:if="testplans"><tr>
+          <th>TestPlans</th>
+          <th>Author</th>
         </tr></thead>
 
         <tbody py:choose="">
           <tr py:when="testplans" py:for="testplan in testplans">
             <td class="report">$testplan</td>
             <td class="title">foob4r</td>
-            <td class="action">foob4r</td>
-            <td class="action">foob4r</td>
           </tr>
         </tbody>
       </table>
-        
     </div>
     <div id="content" class="wiki teamchillhome">
       <div class="wikipage searchable">

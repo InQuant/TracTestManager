@@ -243,15 +243,13 @@ class TestPlanPanel(Component):
             data["page"] = 'TestManager_base.html'
             # XXX: this is all gay
             #      available testplans
-            testplans = []
-            #import pdb; pdb.set_trace()
             from TestManagerLib import *
-            ret = getTestRuns()
-            for testplan in WikiSystem(self.env).get_pages('Testplan'):
-                testplans.append(testplan.title())
-            if len(testplans) < 1:
+            runs = getTestRuns(self.env)
+            #for testplan in WikiSystem(self.env).get_pages('Test'):
+                #testplans.append(testplan.title())
+            if len(runs) < 1:
                 data["info"] = 'There are no running testplans'
-            data["testplans"] = testplans
+            data["testruns"] = runs
     
             return 'TestManager_base.html' , data
 
