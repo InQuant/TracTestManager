@@ -241,15 +241,26 @@ class TestPlanPanel(Component):
             data["error"] = req.args.get("error", "")
             # The template to be rendered
             data["page"] = 'TestManager_base.html'
-            # XXX: this is all gay
-            #      available testplans
+            if 'start_plan' in req.args:
+                # start testplan
+                pagename = req.args['start_plan']
+                self.log.debug("starting testplan " + pagename)
+                wikiplan = WikiPage(self.env, pagename)
+                from macros import TestPlanMacro
+                # now we reuse the macro to get the things done
+                attributes, testcases = TestPlanMacro(self.env).parse_config(wikiplan.text)
+            # render plans
             from TestManagerLib import *
             runs = getTestRuns(self.env)
-            #for testplan in WikiSystem(self.env).get_pages('Test'):
-                #testplans.append(testplan.title())
+            testplans = list()
+            for testplan in WikiSystem(self.env).get_pages('Testplan'):
+                testplans.append(testplan)
+            if len(testplans) < 1:
+                data["info"] = 'There are no testplans'
             if len(runs) < 1:
                 data["info"] = 'There are no running testplans'
             data["testruns"] = runs
+            data["testplans"] = testplans
     
             return 'TestManager_base.html' , data
 
