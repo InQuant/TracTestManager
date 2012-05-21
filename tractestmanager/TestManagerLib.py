@@ -41,7 +41,6 @@ def getTestRuns(env):
 
     for ticket in tickets:
         tc = {}
-        from pdb import set_trace; set_trace()
         tc['id']      = ticket.id
         tc['summary'] = ticket.values['summary']
         tc['created'] = ticket.time_created.ctime()
