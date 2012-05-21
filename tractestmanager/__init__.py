@@ -21,7 +21,7 @@
 __author__ = 'Otto Hockel <otto.hockel@inquant.de>'
 __docformat__ = 'plaintext'
 
-from TestPlan import *
+from macros import *
 from TestManager import *
 from interfaces import *
 import schema
