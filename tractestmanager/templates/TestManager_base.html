@@ -36,13 +36,13 @@
           <tr py:when="testruns" py:for="testrun in testruns">
             <td class="report">$testrun.summary</td>
             <td class="title">$testrun.created</td>
-            <td class="action">OK</td>
+            <td class="action">placeholder</td>
           </tr>
         </tbody>
       </table>
       <br /><br />
+      <b py:if="testplans">Available Testplans</b><br />
       <form py:choose="testplans" action="testplans" method="POST">
-        <b>Available Testplans</b><br />
         <select py:when="testplans" name="start_plan">
           <option py:for="option in testplans" value="$option">$option</option>
         </select>
