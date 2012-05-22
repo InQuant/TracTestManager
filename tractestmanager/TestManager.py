@@ -217,7 +217,6 @@ class HomePanel(Component):
             pagename = "TestManagerHome"
             data["pagename"] = pagename
             data["page"] = WikiPage(self.env, pagename)
-            from pdb import set_trace; set_trace()
             add_stylesheet(req, 'common/css/wiki.css')
             data["title"] = 'Testmanager Home'
     
