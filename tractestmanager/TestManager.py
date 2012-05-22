@@ -281,6 +281,9 @@ class TestPlanPanel(Component):
                         ret = defect_testrun(self.env, testrun_id)
             # render plans
             runs = getTestRuns(self.env)
+            for run in runs:
+                from genshi.builder import tag
+                run['ref'] = tag.a('#', run['id'], ' ', run['summary'], href=req.href.ticket(run['id']))
             testplans = list()
             for testplan in WikiSystem(self.env).get_pages('Testplan'):
                 testplans.append(testplan)
