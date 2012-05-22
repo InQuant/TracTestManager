@@ -264,7 +264,21 @@ class TestPlanPanel(Component):
                     # TODO: verify that testcases are valid
                     for pagename, user in testcases.iteritems():
                         testcase = parser.parseTestcase(pagename=pagename)
-                        #db.save(testcase, user)
+                        # XXX: this is shit - we have to set testcase-params
+                        testcase.kwargs['tester'] = user
+                        testcase.kwargs['testrun'] = testrun_id
+                        testcase.kwargs['status'] = 'NOT_TESTED'
+                        # XXX: this is gaylord - we have to set a testrun,
+                        # status to a testaction - not needed (foreign key)
+                        for testaction in testcase.actions:
+                            testaction.kwargs['testrun'] = testrun_id
+                            testaction.kwargs['status'] = 'NOT_TESTED'
+                            if testcase.errors:
+                                data['error'] = 'error parsing testcases: - ' % case.errors
+                        if not data['error']:
+                            testcase.save()
+                    if data['error']:
+                        ret = defect_testrun(self.env, testrun_id)
             # render plans
             runs = getTestRuns(self.env)
             testplans = list()
