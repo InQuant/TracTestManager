@@ -48,6 +48,9 @@
         </select>
         <input py:if="testplans" type="submit" value="start testplan" />
       </form>
+      <div class="wikipage searchable"> 
+        <div py:content="wiki_to_html(context, page.text)" /> 
+      </div>
     </div>
   </body>
 

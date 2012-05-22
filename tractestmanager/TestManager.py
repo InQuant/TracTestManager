@@ -108,7 +108,7 @@ class TestManagerPlugin(Component):
             # add default trac admin css
             add_stylesheet(req, 'common/css/admin.css')
             # custom css
-            add_stylesheet(req, 'TestManager/stylesheets/TestManager.css')
+            #add_stylesheet(req, 'TestManager/stylesheets/TestManager.css')
     
             # get the panels and their providers
             panels, providers = self._get_panels(req)
@@ -217,7 +217,9 @@ class HomePanel(Component):
             pagename = "TestManagerHome"
             data["pagename"] = pagename
             data["page"] = WikiPage(self.env, pagename)
+            from pdb import set_trace; set_trace()
             add_stylesheet(req, 'common/css/wiki.css')
+            data["title"] = 'Testmanager Home'
     
             return 'TestManager_base.html' , data
     
@@ -275,6 +277,7 @@ class TestPlanPanel(Component):
                 data["info"] = 'There are no running testplans'
             data["testruns"] = runs
             data["testplans"] = testplans
+            data["title"] = 'TestPlans'
 
             return 'TestManager_base.html' , data
 
@@ -312,6 +315,7 @@ class TestCasesPanel(Component):
             data["info"] = tc_list[0]
             # The template to be rendered
             data["page"] = 'TestManager_base.html'
+            data["title"] = 'TestCases'
     
             return 'TestManager_base.html' , data
 
