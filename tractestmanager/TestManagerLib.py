@@ -50,7 +50,6 @@ def getTestRuns(env):
 def add_testrun(env, config, user, macro_text):
     """ add new testrun ticket
     """
-    from pdb import set_trace; set_trace()
     data = dict()
     data['owner'] = user
     data['reporter'] = user
@@ -61,5 +60,10 @@ def add_testrun(env, config, user, macro_text):
     t = Ticket(env)
     t.populate(data)
     return t.insert()
+
+def defect_testrun(env, id):
+    t = Ticket(env, id)
+    t['status'] = 'new'
+    return t.update()
 
 # vim: set ft=python ts=4 sw=4 expandtab :
