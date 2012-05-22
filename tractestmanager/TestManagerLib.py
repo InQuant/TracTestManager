@@ -47,4 +47,19 @@ def getTestRuns(env):
         testruns.append(tc)
     return testruns
 
+def add_testrun(env, config, user, macro_text):
+    """ add new testrun ticket
+    """
+    from pdb import set_trace; set_trace()
+    data = dict()
+    data['owner'] = user
+    data['reporter'] = user
+    data['summary'] = config['id']
+    data['description'] = macro_text
+    data['type'] = 'testrun'
+    data['status'] = 'accepted'
+    t = Ticket(env)
+    t.populate(data)
+    return t.insert()
+
 # vim: set ft=python ts=4 sw=4 expandtab :

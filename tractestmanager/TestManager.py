@@ -51,6 +51,11 @@ from trac.wiki.parser import WikiParser
 from trac.mimeview.api import Context
 from trac.resource import Resource
 
+# testman specific imports
+from TestManagerLib import *
+from TestcaseParser import *
+from macros import TestPlanMacro
+
 from interfaces import ITestManagerPanelProvider
 from config import MANAGER_PERMISSION, TESTER_PERMISSION
 
@@ -246,11 +251,20 @@ class TestPlanPanel(Component):
                 pagename = req.args['start_plan']
                 self.log.debug("starting testplan " + pagename)
                 wikiplan = WikiPage(self.env, pagename)
-                from macros import TestPlanMacro
+
                 # now we reuse the macro to get the things done
+                # we get two variables - testcases as a dict: {'Testcases/UC011':'johndoe'}
                 attributes, testcases = TestPlanMacro(self.env).parse_config(wikiplan.text)
+                # generate new testrun ticket
+                testrun_id = add_testrun(self.env, attributes, req.authname, wikiplan.text)
+
+                if testrun_id:
+                    parser = TestcaseParser(self.env)
+                    # TODO: verify that testcases are valid
+                    for pagename, user in testcases.iteritems():
+                        testcase = parser.parseTestcase(pagename=pagename)
+                        #db.save(testcase, user)
             # render plans
-            from TestManagerLib import *
             runs = getTestRuns(self.env)
             testplans = list()
             for testplan in WikiSystem(self.env).get_pages('Testplan'):
@@ -261,7 +275,7 @@ class TestPlanPanel(Component):
                 data["info"] = 'There are no running testplans'
             data["testruns"] = runs
             data["testplans"] = testplans
-    
+
             return 'TestManager_base.html' , data
 
 class TestCasesPanel(Component):
