@@ -33,8 +33,10 @@ class TestCase(object):
         self.kwargs = kwargs
         self.actions = []
         self.errors = {}
-        #self.wiki = kwargs['wiki']
-            
+        if self.kwargs:
+            for key, value in kwargs.iteritems():
+                setattr(self, key, value)
+
     def save(self):
         # TODO: should save testcase and actions into database
         
@@ -92,6 +94,6 @@ class TestCaseFilter(object):
             #testcases.append(TestCase(row))
 
         # return testcases
-        return [TestCase(wiki="TcDocCreate", title="= TcDocCreate =", revision="3", tester="lmende", testrun="2", status=NOT_TESTED)]
+        return [TestCase(id="1", wiki="TcDocCreate", description="create a document in the workspace", title="= TcDocCreate =", revision="3", tester="lmende", testrun="2", status=NOT_TESTED)]
 
 # vim: set ft=python ts=4 sw=4 expandtab :

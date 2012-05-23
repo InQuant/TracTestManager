@@ -83,6 +83,7 @@ class TestPlanMacro(WikiMacroBase):
             if ':' in line:
                 line.replace(' ','')
                 x,y = line.split(':')
+                x = x.lower()
                 attributes[x] = y
             # and this a testcase markup
             if '/' in line:

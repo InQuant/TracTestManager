@@ -1,0 +1,70 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:py="http://genshi.edgewall.org/"
+      xmlns:i18n="http://genshi.edgewall.org/i18n"
+      xmlns:xi="http://www.w3.org/2001/XInclude"
+      py:with="modify_perm = 'WIKI_MODIFY' in perm(page.resource);
+               admin_perm = 'WIKI_ADMIN' in perm(page.resource)">
+
+    
+  <head>
+    <title py:if="title">$title</title>
+    <meta py:if="version or page.author == 'trac'" name="ROBOTS" content="NOINDEX, NOFOLLOW" />
+    <script type="text/javascript" src="${href.chrome()}/common/js/jquery.js"></script>
+    <script type="text/javascript">
+    jQuery(document).ready(function($) {
+        // Accordion
+        $('.trigger').not('.trigger_active').next('.toggle_container').hide();
+        // show the first container - buggy!
+        // $("[class^=toggle_container]:first").show();
+        $('.trigger').click( function() {
+            var trig = $(this);
+            if ( trig.hasClass('trigger_active') ) {
+                trig.next('.toggle_container').slideToggle('slow');
+                trig.removeClass('trigger_active');
+            } else {
+                $('.trigger_active').next('.toggle_container').slideToggle('slow');
+                $('.trigger_active').removeClass('trigger_active');
+                trig.next('.toggle_container').slideToggle('slow');
+                trig.addClass('trigger_active');
+            };
+            return false;
+        });
+    });
+  </script>
+  <style>
+      .trigger {
+          cursor:pointer;
+      }
+  </style>
+  </head>
+
+  <body>
+    <div id="content">
+        <h3 class="trigger">Accordion Box 1</h3>
+        <div class="toggle_container">
+            <p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.</p>
+        </div>
+        <h3 class="trigger">Accordion Box 2</h3>
+        <div class="toggle_container">
+            <p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.</p>
+        </div>        
+        <h3 class="trigger">Accordion Box 3</h3>
+        <div class="toggle_container">
+            <p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.</p>
+        </div>
+        <h3 class="trigger">Accordion Box 4</h3>
+        <div class="toggle_container">
+            <p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.</p>
+        </div>
+    </div>
+    <div id="content" class="wiki teamchillhome">
+      <div class="wikipage searchable">
+          <div py:content="wiki_to_html(context, page.text)" />
+      </div>
+    </div>
+  </body>
+
+</html>
+
+<!-- vim: set ft=html ts=2 sw=2 expandtab : -->

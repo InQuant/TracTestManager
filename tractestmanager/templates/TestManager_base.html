@@ -26,27 +26,45 @@
       <table class="listing reports"
              py:with="any_edit = any(can_edit for id, title, can_edit, can_delete in reports);
                       any_delete = any(can_delete for id, title, can_edit, can_delete in reports)">
-        <thead py:if="testplans"><tr>
+        <thead py:if="testruns"><tr>
           <th>TestRun</th>
           <th>started on</th>
-          <th>ending</th>
           <th>status</th>
         </tr></thead>
 
-        <tbody py:choose="">
-          <tr py:when="testplans" py:for="testplan in testplans">
-            <td class="report">$testplan</td>
-            <td class="title">foob4r</td>
-            <td class="action">foob4r</td>
-            <td class="action">foob4r</td>
+        <tbody py:choose="testruns">
+          <tr py:when="testruns" py:for="testrun in testruns">
+            <td class="report">$testrun.ref</td>
+            <td class="title">$testrun.created</td>
+            <td class="action">placeholder</td>
           </tr>
         </tbody>
+
+        <thead py:if="testcases"><tr>
+          <th>TestCase</th>
+          <th>summary</th>
+          <th>status</th>
+        </tr></thead>
+
+        <tbody py:choose="testcases">
+          <tr py:when="testcases" py:for="testcase in testcases">
+            <td class="report">$testcase.ref</td>
+            <td class="title">$testcase.description</td>
+            <td class="action">$testcase.status</td>
+          </tr>
+        </tbody>
+
       </table>
-        
-    </div>
-    <div id="content" class="wiki teamchillhome">
-      <div class="wikipage searchable">
-          <div py:content="wiki_to_html(context, page.text)" />
+      <br /><br />
+      <b py:if="testplans">Available Testplans</b><br />
+      <form py:choose="testplans" action="testplans" method="POST">
+        <select py:when="testplans" name="start_plan">
+          <option py:for="option in testplans" value="$option">$option</option>
+        </select>
+        <input py:if="testplans" type="submit" value="start testplan" />
+      </form>
+      <div class="wikipage searchable"> 
+        <div py:content="wiki_to_html(context, page.text)" /> 
       </div>
     </div>
   </body>
