@@ -151,9 +151,14 @@ class TestCaseMacro(WikiMacroBase):
         case = parser.parseTestcase(text=text)
         out = StringIO.StringIO()
         # TODO: Escape wiki markup for text
-        matt = Formatter(self.env, formatter.context)
-        matt.format(text,out)
-        return Markup(out.getvalue())
+        from ipdb import set_trace ; set_trace()
+        f = Formatter(self.env, formatter.context)
+        foo = f.format(text, out)
+        bar = 3
+        return
+        #matt = Formatter(self.env, formatter.context)
+        #matt.format(text,out)
+        #return Markup(out.getvalue())
 
     def _format_TestCase(self, env, formatter, case):
         oneliner = Formatter(env, formatter.context)

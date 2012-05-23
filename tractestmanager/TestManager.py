@@ -241,6 +241,7 @@ class TestPlanPanel(Component):
             data["error"] = req.args.get("error", "")
             # The template to be rendered
             data["page"] = 'TestManager_base.html'
+            
             # XXX: this is all gay
             #      available testplans
             testplans = []
@@ -262,7 +263,7 @@ class TestCasesPanel(Component):
     # XXX: this is not very cool
     def __init__(self):
         Component.__init__(self)
-        #db_models.initenv(self.env)
+        #db_m    odels.initenv(self.env)
     
     def get_admin_panels(self, req):
         """ returns the Section and the Name for the Navigation
@@ -272,7 +273,7 @@ class TestCasesPanel(Component):
     def render_admin_panel(self, req, cat, page, path_info):
         """ main request handler
         """
-        if TESTER_PERMISSION in req.perm:
+        if TESTER_PERMISSION in req.perm:            
             data = dict() #template data
             data["info"] = req.args.get("info", "")
             data["warning"] = req.args.get("warning", "")
@@ -290,7 +291,7 @@ class TestCasesPanel(Component):
             # The template to be rendered
             data["page"] = 'TestManager_base.html'
     
-            return 'TestManager_base.html' , data
+            return 'TestManager_Accordion.html' , data
 
 class TestManagerPermissions(Component):
     """ This class covers the permissions
