@@ -319,20 +319,24 @@ class TestCasesPanel(Component):
             data["info"] = req.args.get("info", "")
             data["warning"] = req.args.get("warning", "")
             data["error"] = req.args.get("error", "")
-    
             # get all TestCases assigned to the user and have status "not tested"
+
             import models
             tcs = models.TestCaseFilter()
             tc_list = tcs.get(user= req.authname, status= models.NOT_TESTED)
-    
-            # TODO: Ausgabe
-    
-            data["info"] = 'no testcases available'
-            data["info"] = tc_list[0]
+            if not tc_list:
+                data["info"] = 'no testcases available'
+            else:
+                # build link with genshi
+                for tc in tc_list:
+                    # refer to the testaction module to load the testcase execution
+                    #tc.ref = tag.a(tc.wiki, href=req.href.testaction(tc.id))
+                    tc.ref = tag.a(tc.wiki, href=req.href.testaction(tc.id))
+                data["testcases"] = tc_list
             # The template to be rendered
             data["page"] = 'TestManager_base.html'
             data["title"] = 'TestCases'
-    
+
             return 'TestManager_base.html' , data
 
 class TestManagerPermissions(Component):
