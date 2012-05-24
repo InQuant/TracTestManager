@@ -23,7 +23,7 @@
 
   <body>
     <div id="content">
-      <div py:content="page" /> 
+      <div class="home" py:content="page" /> 
       <table class="listing reports"
              py:with="any_edit = any(can_edit for id, title, can_edit, can_delete in reports);
                       any_delete = any(can_delete for id, title, can_edit, can_delete in reports)">

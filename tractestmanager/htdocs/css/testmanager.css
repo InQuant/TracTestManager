@@ -24,3 +24,5 @@
 #tabcontent form.mod { margin-top: 1em; overflow: visible; padding: 0 }
 
 #content.admin h1 { float: left; }
+
+.testmanager .home h1 { float: none !important; }

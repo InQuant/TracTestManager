@@ -108,7 +108,7 @@ class TestManagerPlugin(Component):
             # add default trac admin css
             add_stylesheet(req, 'common/css/admin.css')
             # custom css
-            #add_stylesheet(req, 'TestManager/stylesheets/TestManager.css')
+            add_stylesheet(req, 'TestManager/css/testmanager.css')
     
             # get the panels and their providers
             panels, providers = self._get_panels(req)
@@ -218,6 +218,7 @@ class HomePanel(Component):
             data["pagename"] = pagename
             data['page'] = wiki_to_html(WikiPage(self.env, pagename).text, self.env, req)
             add_stylesheet(req, 'common/css/wiki.css')
+            add_stylesheet(req, 'TestManager/css/testmanager.css')
             data["title"] = 'Testmanager Home'
     
             return 'TestManager_base.html' , data
