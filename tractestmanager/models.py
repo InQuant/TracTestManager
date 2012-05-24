@@ -4,19 +4,6 @@
 #
 # Copyright (c) Inquant GmbH
 #
-#  This program is free software; you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation; either version 2 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program; if not, write to the Free Software
-#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 __author__ = 'Otto Hockel <otto.hockel@inquant.de>'
 __docformat__ = 'plaintext'
@@ -24,35 +11,33 @@ __docformat__ = 'plaintext'
 from trac.ticket.query import Query as TicketQuery
 from trac.ticket.model import Ticket
 import db_models
-
-NOT_TESTED= 'not tested'
+from db_models import NOT_TESTED, PASSED, FAILED, PASSED_COMMENT
 
 class TestCase(object):
     """ Testcase model
     """
 
     def __init__(self, **kwargs):
-        self.kwargs = kwargs
+        db= db_models.DbLite()
         self.actions = []
         self.errors = {}
-        if self.kwargs:
+        for key in db_models.TC_KEYS: setattr(self, key, None)
+
+        if kwargs:
             for key, value in kwargs.iteritems():
                 setattr(self, key, value)
 
-    def save(self):
+    def getattrs( self ):
+        return map( lambda x: getattr( self, x), db_models.TC_KEYS )
+
+    def insert(self):
         # TODO: should save testcase and actions into database
-        
-        try:
-            db_models.tcCreate(self.kwargs)
-        except db_models.DbAlreadyExistException:
-            db_models.tcUpdate(self.kwargs)
 
-        for action in self.actions:
-            try:
-                db_models.actionCreate(action)
-            except db_models.DbAlreadyExistException:
-                db_models.actionUpdate(action)
+        # build a list of action dicts
+        actionsattrs= list()
+        for action in self.actions: actionsattrs.append( action.getattrs() )
 
+        db.insertTestCase( self.getattrs(), actionsattrs )
 
 class TestAction(object):
     """ Testaction model
@@ -67,13 +52,16 @@ class TestAction(object):
     broken           = None
 
     def __init__(self, **kwargs):
-        self.kwargs = kwargs
         self.broken = False
-        pass
 
-    def save(self):
-        # TODO: should save actions into database
-        pass
+        for key in db_models.TA_KEYS: setattr(self, key, None)
+
+        if kwargs:
+            for key, value in kwargs.iteritems():
+                setattr(self, key, value)
+
+    def getattrs( self ):
+        return map( lambda x: getattr( self, x), db_models.TA_KEYS )
 
 class TestRun(object):
     """ TestRun model

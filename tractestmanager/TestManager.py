@@ -30,6 +30,7 @@ from genshi.util import plaintext
 from trac.core import Component
 from trac.core import ExtensionPoint
 from trac.core import implements
+from trac.core import TracError
 
 from trac.web import HTTPNotFound
 from trac.web import IRequestHandler
@@ -59,7 +60,8 @@ from macros import TestPlanMacro
 from interfaces import ITestManagerPanelProvider
 from config import MANAGER_PERMISSION, TESTER_PERMISSION
 
-#import db_models
+import db_models
+import models
 
 class TestManagerPlugin(Component):
     """ TRAC Group Administration Plugin
@@ -229,7 +231,7 @@ class TestPlanPanel(Component):
     implements(ITestManagerPanelProvider)
     def __init__(self):
         Component.__init__(self)
-        #db_models.initenv(self.env)
+        db_models.TRACENV= self.env
 
     def get_admin_panels(self, req):
         """ returns the Section and the Name for the Navigation
@@ -241,75 +243,88 @@ class TestPlanPanel(Component):
     def render_admin_panel(self, req, cat, page, path_info):
         """ main request handler
         """
-        if MANAGER_PERMISSION in req.perm:
-            data = dict() #template data
-            data["info"] = req.args.get("info", "")
-            data["warning"] = req.args.get("warning", "")
-            data["error"] = req.args.get("error", "")
-            # The template to be rendered
-            data["page"] = 'TestManager_base.html'
-            if 'start_plan' in req.args:
-                # start testplan
-                pagename = req.args['start_plan']
-                self.log.debug("starting testplan " + pagename)
-                wikiplan = WikiPage(self.env, pagename)
+        if not MANAGER_PERMISSION in req.perm: 
+            return
 
-                # now we reuse the macro to get the things done
-                # we get two variables - testcases as a dict: {'Testcases/UC011':'johndoe'}
-                attributes, testcases = TestPlanMacro(self.env).parse_config(wikiplan.text)
-                # generate new testrun ticket
-                # testrun = Testrun(self.env, attributes, req.authname, wikiplan.text)
-                
-                testrun_id = add_testrun(self.env, attributes, req.authname, wikiplan.text)
+        data = dict() #template data
+        data["info"] = req.args.get("info", "")
+        data["warning"] = req.args.get("warning", "")
+        data["error"] = req.args.get("error", "")
+        # The template to be rendered
+        data["page"] = 'TestManager_base.html'
 
-                # TODO: populate with TestRun model
-                # if testrun.id:
-                if testrun_id:
-                    parser = TestcaseParser(self.env)
-                    # TODO: verify that testcases are valid
-                    for pagename, user in testcases.iteritems():
-                        testcase = parser.parseTestcase(pagename=pagename)
-                        # XXX: this is shit - we have to set testcase-params
-                        testcase.kwargs['tester'] = user
-                        #testcase.kwargs['testrun'] = testrun.id
-                        testcase.kwargs['testrun'] = testrun_id
-                        testcase.kwargs['status'] = 'NOT_TESTED'
-                        # XXX: this is gaylord - we have to set a testrun,
-                        # status to a testaction - not needed (foreign key)
-                        for testaction in testcase.actions:
-                            #testaction.kwargs['testrun'] = testrun.id
-                            testaction.kwargs['testrun'] = testrun_id
-                            testaction.kwargs['status'] = 'NOT_TESTED'
-                        if testcase.errors:
-                            if not data['error']:
-                                data['error'] = 'error parsing testcases: '
-                            data['error'] += 'in testcase %s %s; ' % (testcase.wiki, testcase.errors)
-                        #if not data['error']:
-                            #testcase.save()
-                    if data['error']:
-                        # testrun.set_defect(data['error'])
-                        ret = defect_testrun(self.env, testrun_id, data['error'])
-            # render plans
-            runs = TestRun().query(self.env, status='accepted')
+        if 'start_plan' in req.args:
+
+            # TODO: start testplan in sep. funktion auslagern
+            pagename = req.args['start_plan']
+            self.log.debug("starting testplan " + pagename)
+            wikiplan = WikiPage(self.env, pagename)
+
+            # now we reuse the macro to get the things done
+            # we get two variables - testcases as a dict: {'Testcases/UC011':'johndoe'}
+            attributes, testcases = TestPlanMacro(self.env).parse_config(wikiplan.text)
+            # generate new testrun ticket
+            # testrun = Testrun(self.env, attributes, req.authname, wikiplan.text)
+            
+            # adds a ticket of type testrun
+            # FIXME - raise exception if no ticket can be created
+            testrun_id = add_testrun(self.env, attributes, req.authname, wikiplan.text)
+
             # TODO: populate with TestRun model
-            for run in runs:
-                from genshi.builder import tag
-                run['ref'] = tag.a('#', run['id'], ' ', run['summary'], href=req.href.ticket(run['id']))
-            testplans = list()
-            for testplan in WikiSystem(self.env).get_pages('Testplan'):
-                testplans.append(testplan)
-            if len(testplans) < 1:
-                data["info"] = 'There are no testplans'
-            if len(runs) < 1:
-                data["info"] = 'There are no running testplans'
-            # get active and valid testruns
-            data["testruns"] = runs
-            data["testplans"] = testplans
-            # TODO: to be implemented in order to populate an already startet but brick testrun
-            data["defect_runs"] = TestRun().query(self.env, status='new')
-            data["title"] = 'TestPlans'
+            # if testrun.id:
+            parser = TestcaseParser(self.env)
+            # TODO: verify that testcases are valid
+            for pagename, user in testcases.iteritems():
 
-            return 'TestManager_base.html' , data
+                try:
+                    testcase = parser.parseTestcase(pagename=pagename)
+                except (NoExpectedResult, TracError), e:
+                    if not data['error']:
+                        data['error']= e.message
+                    else:
+                        data['error'] += e.message
+                        continue
+
+
+                testcase.tester = user
+                testcase.testrun = testrun_id
+                testcase.status = models.NOT_TESTED
+
+                # XXX: this is gaylord - we have to set a testrun,
+                # status to a testaction - not needed (foreign key)
+                for testaction in testcase.actions:
+                    #testaction.kwargs['testrun'] = testrun.id
+                    testaction.testrun = testrun_id
+                    testaction.status = models.NOT_TESTED
+
+                #if not data['error']:
+                    #testcase.insert()
+
+            if data['error']:
+                # testrun.set_defect(data['error'])
+                ret = defect_testrun(self.env, testrun_id, data['error'])
+
+        # render plans
+        runs = TestRun().query(self.env, status='accepted')
+        # TODO: populate with TestRun model
+        for run in runs:
+            from genshi.builder import tag
+            run['ref'] = tag.a('#', run['id'], ' ', run['summary'], href=req.href.ticket(run['id']))
+        testplans = list()
+        for testplan in WikiSystem(self.env).get_pages('Testplan'):
+            testplans.append(testplan)
+        if len(testplans) < 1:
+            data["info"] = 'There are no testplans'
+        if len(runs) < 1:
+            data["info"] = 'There are no running testplans'
+        # get active and valid testruns
+        data["testruns"] = runs
+        data["testplans"] = testplans
+        # TODO: to be implemented in order to populate an already startet but brick testrun
+        data["defect_runs"] = TestRun().query(self.env, status='new')
+        data["title"] = 'TestPlans'
+
+        return 'TestManager_base.html' , data
 
 class TestCasesPanel(Component):
     """ Link to available TestPlans
@@ -334,7 +349,6 @@ class TestCasesPanel(Component):
             data["error"] = req.args.get("error", "")
             # get all TestCases assigned to the user and have status "not tested"
 
-            import models
             tcs = models.TestCaseFilter()
             tc_list = tcs.get(user= req.authname, status= models.NOT_TESTED)
             if not tc_list:

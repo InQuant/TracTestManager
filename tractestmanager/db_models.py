@@ -8,7 +8,7 @@
 __author__ = 'Lutz Mende <lutz.mende@inquant.de>'
 __docformat__ = 'plaintext'
 
-from trac.core import Component
+from trac.env import Environment
 from trac.db import with_transaction
 import trac.db
 
@@ -17,6 +17,8 @@ import string
 
 LOGGER="db_models"
 def debug(msg): logging.getLogger(LOGGER).debug(msg)
+
+TRACENV= None
 
 # modul exceptions
 class DbException(Exception):
@@ -62,7 +64,6 @@ def getInsertPlaceHolders(keys):
     return string.join(['%s' for i in range(len(keys))], ', ')
 
 ##############################################################################
-#class DbLite(Component):
 class DbLite(object):
     """
     Class to wrap the SQL stuff about TestCases and TestActions ...
@@ -70,7 +71,7 @@ class DbLite(object):
     >>> from trac.env import Environment
     >>> env= Environment( '/Users/lmende/Dropbox/projekte/BoschRexroth/TracTestManager/testman' )
     
-    1. Instanciate the class and set it up.
+    1. Instanciate the class and set it up aka create the tables.
 
     >>> db= DbLite(env)
 
@@ -109,9 +110,9 @@ class DbLite(object):
     """
 
     ##########################################################################
-    def __init__(self, _env= None):
+    def __init__(self):
         debug('DbLite.__init__()')
-        if _env: self.env= _env
+        self.env= TRACENV
 
     ##########################################################################
     def setup(self):
