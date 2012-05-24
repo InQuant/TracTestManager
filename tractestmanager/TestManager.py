@@ -46,8 +46,8 @@ from trac.perm import PermissionError
 
 from trac.wiki.api import WikiSystem
 from trac.wiki import WikiPage
+from trac.wiki.formatter import wiki_to_html
 from trac.wiki.formatter import format_to_html
-from trac.wiki.parser import WikiParser
 from trac.mimeview.api import Context
 from trac.resource import Resource
 
@@ -216,7 +216,7 @@ class HomePanel(Component):
     
             pagename = "TestManagerHome"
             data["pagename"] = pagename
-            data["page"] = WikiPage(self.env, pagename)
+            data['page'] = wiki_to_html(WikiPage(self.env, pagename).text, self.env, req)
             add_stylesheet(req, 'common/css/wiki.css')
             data["title"] = 'Testmanager Home'
     
@@ -273,12 +273,14 @@ class TestPlanPanel(Component):
                         for testaction in testcase.actions:
                             testaction.kwargs['testrun'] = testrun_id
                             testaction.kwargs['status'] = 'NOT_TESTED'
-                            if testcase.errors:
-                                data['error'] = 'error parsing testcases: - ' % testcase.errors
+                        if testcase.errors:
+                            if not data['error']:
+                                data['error'] = 'error parsing testcases: '
+                            data['error'] += 'in testcase %s %s; ' % (testcase.wiki, testcase.errors)
                         #if not data['error']:
                             #testcase.save()
                     if data['error']:
-                        ret = defect_testrun(self.env, testrun_id)
+                        ret = defect_testrun(self.env, testrun_id, data['error'])
             # render plans
             runs = getTestRuns(self.env)
             for run in runs:
