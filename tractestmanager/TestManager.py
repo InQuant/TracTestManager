@@ -345,6 +345,8 @@ class TestCasesPanel(Component):
                     # refer to the testaction module to load the testcase execution
                     #tc.ref = tag.a(tc.wiki, href=req.href.testaction(tc.id))
                     tc.ref = tag.a(tc.wiki, href=req.href.testcase(tc.id))
+                    # @TODO rain0r
+                    # tc.ref = tag(tag.script('document.write(alert( /testcase/1 ) );\n', type='text/javascript'))
                 data["testcases"] = tc_list
             # The template to be rendered
             data["page"] = 'TestManager_base.html'
@@ -352,53 +354,53 @@ class TestCasesPanel(Component):
 
             return 'TestManager_base.html' , data
 
-#class TestCasePanel(Component):
-    #""" a panel to fit requests for executing testcases
-    #"""
-    #implements(ITestManagerPanelProvider)
-    #def __init__(self):
-        #Component.__init__(self)
+class TestCasePanel(Component):
+    """ a panel to fit requests for executing testcases
+    """
+    implements(ITestManagerPanelProvider)
+    def __init__(self):
+        Component.__init__(self)
     
-    #def get_admin_panels(self, req):
-        #""" returns the Section and the Name for the Navigation
-        #"""
-        ## should not be visible
-        #yield ('general', _('General'), 'testcase', _('TestCase'))
+    def get_admin_panels(self, req):
+        """ returns the Section and the Name for the Navigation
+        """
+        # should not be visible
+        yield ('general', _('General'), 'testcase', _('TestCase'))
 
-    ##def match_request(self, req):
-        ##match = re.match(r'/testcase/([0-9]+)$', req.path_info)
-        ##if match:
-            ##req.args['id'] = match.group(1)
-            ##return True
+    #def match_request(self, req):
+        #match = re.match(r'/testcase/([0-9]+)$', req.path_info)
+        #if match:
+            #req.args['id'] = match.group(1)
+            #return True
 
-    #def render_admin_panel(self, req, cat, page, path_info):
-        #""" main request handler
-        #"""
-        #if TESTER_PERMISSION in req.perm:
-            #data = dict() #template data
-            #data["info"] = req.args.get("info", "")
-            #data["warning"] = req.args.get("warning", "")
-            #data["error"] = req.args.get("error", "")
-            #data["id"] = req.args.get("id", "")
-            ## TODO: get the testcase
-            #if data["id"]:
-                #import models
-                #testcase = models.TestCaseFilter()
-                #if not testcase:
-                    ## not found
-                    #data["error"] = 'the requested testcase could not be found or has been erased'
-                #elif self.authuser != testcase.tester:
-                    ## assigned to someone else - but can be done by mr urlaubsvertretung
-                    #data["warning"] = 'this testcase has been assigned to %s' % testcase.tester
-                #else:
-                    #data["execute"] = testcase
-                    ## The template to be rendered
-                    #data["title"] = 'TestCase %s' % testcase.id
-                #return 'TestManager_accordion.html' , data
-            ## TODO: redict to TestManager home
-            #pagename = "TestManagerHome"
-            #data["pagename"] = pagename
-            #data["page"] = WikiPage(self.env, pagename)
+    def render_admin_panel(self, req, cat, page, path_info):
+        """ main request handler
+        """
+        if TESTER_PERMISSION in req.perm:
+            data = dict() #template data
+            data["info"] = req.args.get("info", "")
+            data["warning"] = req.args.get("warning", "")
+            data["error"] = req.args.get("error", "")
+            data["id"] = req.args.get("id", "")
+            # TODO: get the testcase
+            if data["id"]:
+                import models
+                testcase = models.TestCaseFilter()
+                if not testcase:
+                    # not found
+                    data["error"] = 'the requested testcase could not be found or has been erased'
+                elif self.authuser != testcase.tester:
+                    # assigned to someone else - but can be done by mr urlaubsvertretung
+                    data["warning"] = 'this testcase has been assigned to %s' % testcase.tester
+                else:
+                    data["execute"] = testcase
+                    # The template to be rendered
+                    data["title"] = 'TestCase %s' % testcase.id
+                return 'TestManager_accordion.html' , data
+            # TODO: redict to TestManager home
+            pagename = "TestManagerHome"
+            data["pagename"] = pagename
+            data["page"] = WikiPage(self.env, pagename)
 
 class TestManagerPermissions(Component):
     """ This class covers the permissions
