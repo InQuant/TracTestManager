@@ -61,9 +61,10 @@ def add_testrun(env, config, user, macro_text):
     t.populate(data)
     return t.insert()
 
-def defect_testrun(env, id):
+def defect_testrun(env, id, error_message):
     t = Ticket(env, id)
     t['status'] = 'new'
-    return t.update()
+    t['description'] += error_message
+    return t.save_changes()
 
 # vim: set ft=python ts=4 sw=4 expandtab :
