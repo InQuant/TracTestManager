@@ -359,6 +359,8 @@ class TestCasesPanel(Component):
                     # refer to the testaction module to load the testcase execution
                     #tc.ref = tag.a(tc.wiki, href=req.href.testaction(tc.id))
                     tc.ref = tag.a(tc.wiki, href=req.href.testcase(tc.id))
+                    # @TODO rain0r
+                    # tc.ref = tag(tag.script('document.write(alert( /testcase/1 ) );\n', type='text/javascript'))
                 data["testcases"] = tc_list
             # The template to be rendered
             data["page"] = 'TestManager_base.html'
@@ -397,6 +399,7 @@ class TestCasePanel(Component):
             # TODO: get the testcase
             if data["id"]:
                 import models
+
                 testcase = models.TestCaseFilter(id=data['id'])
                 if not testcase:
                     # not found
