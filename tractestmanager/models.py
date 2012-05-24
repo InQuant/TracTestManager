@@ -21,6 +21,8 @@
 __author__ = 'Otto Hockel <otto.hockel@inquant.de>'
 __docformat__ = 'plaintext'
 
+from trac.ticket.query import Query as TicketQuery
+from trac.ticket.model import Ticket
 import db_models
 
 NOT_TESTED= 'not tested'
@@ -77,8 +79,34 @@ class TestRun(object):
     """ TestRun model
     """
 
-    ticket = None
+    #ticket = None
+    def query(self, env, **kwargs):
+        """ query testruns through trac query
+            testruns = TestRun().query(env, status=new)
+            testrun returns a list of tickets with type=testrun and status=new
+            returns a list of tickets
+        """
+        tickets = list()
+        testruns = list()
+        if kwargs:
+            querystring = 'type=testrun'
+            for key, value in kwargs.iteritems():
+                querystring += '&%s=%s' % (key, value)
+            self.query = TicketQuery.from_string(env, querystring)
+        else:
+            # query * testrun tickets
+            self.query = TicketQuery.from_string(env, 'type=testrun')
+        ticket_dicts = self.query.execute()
+        for t in ticket_dicts:
+            tickets.append(Ticket(env, tkt_id=t['id']))
 
+        for ticket in tickets:
+            tc = {}
+            tc['id']      = ticket.id
+            tc['summary'] = ticket.values['summary']
+            tc['created'] = ticket.time_created.ctime()
+            testruns.append(tc)
+        return testruns
 
 class TestCaseFilter(object):
     """
