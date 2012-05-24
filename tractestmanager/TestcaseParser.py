@@ -22,6 +22,7 @@ __author__ = 'Otto Hockel <otto.hockel@inquant.de>'
 __docformat__ = 'plaintext'
 
 from trac.wiki import WikiPage
+
 from docutils.core import publish_parts
 import xml.etree.ElementTree as Tree
 from models import *
@@ -35,14 +36,15 @@ class TestcaseParser(object):
         #create_all()
 
     def _parse_xml(self, version):
+        # TODO: refactore the parsing of nodes...
+
         tree = Tree.fromstring(self.xml)
         # initial iteration
         # it is a Testcase
         case = TestCase()
-        case.kwargs['version'] = version
+        case.version = version
         try:
             case.wiki = self.pagename
-            case.kwargs['wiki'] = self.pagename
         except Exception, e:
             ("This is only a dryrun")
         # we now have paragraph, paragraph and definition list
@@ -50,12 +52,11 @@ class TestcaseParser(object):
         for node in tree:
             # set title and description
             if node.tag == 'paragraph':
+                # TODO: if description has more paragraphs...
                 if '=' in node.text:
                     case.title = node.text
-                    case.kwargs['title'] = node.text
                 else:
-                    case.desc = node.text
-                    case.kwargs['description'] = node.text
+                    case.description = node.text
             # now we have actions as definition list items
             else:
                 for child in node.getchildren():
@@ -65,25 +66,17 @@ class TestcaseParser(object):
                     for action in child.getchildren():
                         if action.tag == 'definition':
                             # we have two paragraphs - action description and expected result
-                            # XXX: Failure Handling
                             try:
                                 actiondesc                  = action.getchildren()[0]
                                 actionresult                = action.getchildren()[1]
                                 ac.description              = self._build_markup(actiondesc)
-                                ac.kwargs['description'] = self._build_markup(actiondesc)
                                 ac.expected_result          = self._build_markup(actionresult)
-                                ac.kwargs['expected_result'] = self._build_markup(actionresult)
-                            except Exception, e:
-                                ac.description              = self._build_markup(actiondesc)
-                                ac.kwargs['description'] = self._build_markup(actiondesc)
-                                ac.expected_result          = "no expected result available"
-                                ac.kwargs['expected_result'] = "no expected result available"
-                                case.errors[ac.description] = "no expected result"
-                                #ac.broken           = True
+                            except IndexError:
+                                # TODO: %s - dinger rein
+                                raise NoExpectedResult('No expected result set.')
                         else:
                             # append actiontitle to action
                             ac.title  = action.text
-                            ac.kwargs['title'] = action.text
                     case.actions.append(ac)
         return case
 
@@ -103,31 +96,17 @@ class TestcaseParser(object):
             return self._parse_xml(wikipage.version)
         else:
             # get the wiki page
-            wikipage      = self._get_page(pagename)
+            wikipage      = WikiPage(self.env, pagename)
             # get the xml representation of a testcase
             self.xml = publish_parts(wikipage.text,writer_name = 'xml')['whole']
             return self._parse_xml(wikipage.version)
 
-    def _get_page(self, pagename):
-        try:
-            self.pagename = pagename
-            wikipage = WikiPage(self.env, pagename)
-            self.wikipage = wikipage
-        except Exception, e:
-            print 'Page %s not found.' % (pagename)
-            wikipage = None
-        return wikipage
 
-class NoDescriptionException(Exception):
+class NoExpectedResult(Exception):
+    pass
 
-    def __init__(self, message, errors):
-        Exception.__init__(self, message)
-        self.errors = "No description set"
-
-class NoExpectedResultException(Exception):
-
-    def __init__(self, message, errors):
-        Exception.__init__(self, message)
-        self.errors = "No expected result set"
+#   def __init__(self, message, errors):
+#       Exception.__init__(self, message)
+#       self.errors = "No expected result set"
 
 # vim: set ft=python ts=4 sw=4 expandtab :
