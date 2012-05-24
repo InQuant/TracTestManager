@@ -257,8 +257,12 @@ class TestPlanPanel(Component):
                 # we get two variables - testcases as a dict: {'Testcases/UC011':'johndoe'}
                 attributes, testcases = TestPlanMacro(self.env).parse_config(wikiplan.text)
                 # generate new testrun ticket
+                # testrun = Testrun(self.env, attributes, req.authname, wikiplan.text)
+                
                 testrun_id = add_testrun(self.env, attributes, req.authname, wikiplan.text)
 
+                # TODO: populate with TestRun model
+                # if testrun.id:
                 if testrun_id:
                     parser = TestcaseParser(self.env)
                     # TODO: verify that testcases are valid
@@ -266,11 +270,13 @@ class TestPlanPanel(Component):
                         testcase = parser.parseTestcase(pagename=pagename)
                         # XXX: this is shit - we have to set testcase-params
                         testcase.kwargs['tester'] = user
+                        #testcase.kwargs['testrun'] = testrun.id
                         testcase.kwargs['testrun'] = testrun_id
                         testcase.kwargs['status'] = 'NOT_TESTED'
                         # XXX: this is gaylord - we have to set a testrun,
                         # status to a testaction - not needed (foreign key)
                         for testaction in testcase.actions:
+                            #testaction.kwargs['testrun'] = testrun.id
                             testaction.kwargs['testrun'] = testrun_id
                             testaction.kwargs['status'] = 'NOT_TESTED'
                         if testcase.errors:
@@ -280,9 +286,11 @@ class TestPlanPanel(Component):
                         #if not data['error']:
                             #testcase.save()
                     if data['error']:
+                        # testrun.set_defect(data['error'])
                         ret = defect_testrun(self.env, testrun_id, data['error'])
             # render plans
-            runs = getTestRuns(self.env)
+            runs = TestRun().query(self.env, status='accepted')
+            # TODO: populate with TestRun model
             for run in runs:
                 from genshi.builder import tag
                 run['ref'] = tag.a('#', run['id'], ' ', run['summary'], href=req.href.ticket(run['id']))
@@ -293,8 +301,11 @@ class TestPlanPanel(Component):
                 data["info"] = 'There are no testplans'
             if len(runs) < 1:
                 data["info"] = 'There are no running testplans'
+            # get active and valid testruns
             data["testruns"] = runs
             data["testplans"] = testplans
+            # TODO: to be implemented in order to populate an already startet but brick testrun
+            data["defect_runs"] = TestRun().query(self.env, status='new')
             data["title"] = 'TestPlans'
 
             return 'TestManager_base.html' , data
