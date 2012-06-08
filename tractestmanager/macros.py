@@ -23,6 +23,7 @@ __docformat__ = 'plaintext'
 
 from genshi.core import Markup
 
+from trac.wiki.formatter import system_message
 from trac.wiki.macros import WikiMacroBase
 from trac.wiki import Formatter
 from trac.wiki import WikiSystem
@@ -36,7 +37,7 @@ class TestPlanMacro(WikiMacroBase):
            {{{
            #!TestPlan
            Id: TA14
-           Testart: UsecaseTest 
+           Testart: UsecaseTest
            Build: DC-3.1.1
            Konfiguration: IE7-Win, FF-LUX
            Usecases: BaugruppenVerwalten, ObjekteSuchen
@@ -149,17 +150,18 @@ class TestCaseMacro(WikiMacroBase):
         """
         from TestcaseParser import TestcaseParser
         parser = TestcaseParser(self.env)
-        case = parser.parseTestcase(text=text)
         out = StringIO.StringIO()
-        # TODO: Escape wiki markup for text
-        from ipdb import set_trace ; set_trace()
         f = Formatter(self.env, formatter.context)
-        foo = f.format(text, out)
-        bar = 3
-        return
+        try:
+            parser.parseTestcase(text=text)
+        except Exception, e:
+            out.write(system_message("Parsing error", text=e))
+        # TODO: Escape wiki markup for text
+        #return
         #matt = Formatter(self.env, formatter.context)
         #matt.format(text,out)
-        #return Markup(out.getvalue())
+        f.format(text, out)
+        return Markup(out.getvalue())
 
     def _format_TestCase(self, env, formatter, case):
         oneliner = Formatter(env, formatter.context)
