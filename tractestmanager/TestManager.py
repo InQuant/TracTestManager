@@ -61,6 +61,7 @@ from interfaces import ITestManagerPanelProvider
 from config import MANAGER_PERMISSION, TESTER_PERMISSION
 
 import db_models
+import models
 from models import TestRun
 
 class TestManagerPlugin(Component):
@@ -359,14 +360,10 @@ class TestCasesPanel(Component):
                     # refer to the testaction module to load the testcase execution
                     #tc.ref = tag.a(tc.wiki, href=req.href.testaction(tc.id))
                     #tc.ref = tag.a(tc.wiki, href=req.href.testcase(tc.id))
-                    tc.ref = tag.a(tc.wiki, onclick='window.open("http://hihn.org", "Popupfenster", "width=400,height=300,resizable=yes");' )
+                    #import ipdb; ipdb.set_trace()                
+                    # url = self.env.abs_href("/TestManager/general/testcase/"+tc.id )
                     
-                    # @TODO rain0r
-                    #tc.ref = tag.script("document.write(alert('foobar'););\n", type='text/javascript')
-                    #js = tag.script("alert('foobar');", type="text/javascript")
-                    #tc.ref = ( tag.script("alert('foobar');", type="text/javascript") )                    
-                    #tc.ref = tag.script(onclick='window.open("http://hihn.org", "Popupfenster", "width=400,height=300,resizable=yes");')
-                    
+                    tc.ref = tag.a(tc.wiki, href='#', onclick='window.open("testcase/'+tc.id+'", "Popupfenster", "width=400,height=300,resizable=yes");' )  
                 data["testcases"] = tc_list
             # The template to be rendered
             data["page"] = 'TestManager_base.html'
@@ -418,6 +415,10 @@ class TestCasePanel(Component):
                     # The template to be rendered
                     data["title"] = 'TestCase %s' % testcase.id
                 return 'TestManager_accordion.html' , data
+            else:
+                data["page"] = 'TestManager_accordion.html'
+                return 'TestManager_accordion.html' , data
+            
             # TODO: redict to TestManager home
             pagename = "TestManagerHome"
             data["pagename"] = pagename

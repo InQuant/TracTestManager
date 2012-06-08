@@ -19,13 +19,14 @@
         // $("[class^=toggle_container]:first").show();
         $('.trigger').click( function() {
             var trig = $(this);
+            var duration = 100;
             if ( trig.hasClass('trigger_active') ) {
-                trig.next('.toggle_container').slideToggle('slow');
+                trig.next('.toggle_container').slideToggle(duration);
                 trig.removeClass('trigger_active');
             } else {
-                $('.trigger_active').next('.toggle_container').slideToggle('slow');
+                $('.trigger_active').next('.toggle_container').slideToggle(duration);
                 $('.trigger_active').removeClass('trigger_active');
-                trig.next('.toggle_container').slideToggle('slow');
+                trig.next('.toggle_container').slideToggle(duration);
                 trig.addClass('trigger_active');
             };
             return false;
