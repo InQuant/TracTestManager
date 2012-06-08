@@ -61,7 +61,7 @@ from interfaces import ITestManagerPanelProvider
 from config import MANAGER_PERMISSION, TESTER_PERMISSION
 
 import db_models
-import models
+from models import TestRun
 
 class TestManagerPlugin(Component):
     """ TRAC Group Administration Plugin
