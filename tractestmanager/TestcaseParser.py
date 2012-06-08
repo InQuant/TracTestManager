@@ -25,7 +25,7 @@ from trac.wiki import WikiPage
 
 from docutils.core import publish_parts
 import xml.etree.ElementTree as Tree
-from models import *
+from models import TestAction, TestCase
 
 class TestcaseParser(object):
     """ Testcase parser class
@@ -35,7 +35,7 @@ class TestcaseParser(object):
         #setup_all(True)
         #create_all()
 
-    def _parse_xml(self, version):
+    def _parse_xml(self, version=None):
         # TODO: refactore the parsing of nodes...
 
         tree = Tree.fromstring(self.xml)
@@ -49,10 +49,12 @@ class TestcaseParser(object):
             ("This is only a dryrun")
         # we now have paragraph, paragraph and definition list
         # which represent "title", "description" and "actions"
+        line = 0
         for node in tree:
             # set title and description
             if node.tag == 'paragraph':
                 # TODO: if description has more paragraphs...
+                line += 1
                 if '=' in node.text:
                     case.title = node.text
                 else:
@@ -71,12 +73,14 @@ class TestcaseParser(object):
                                 actionresult                = action.getchildren()[1]
                                 ac.description              = self._build_markup(actiondesc)
                                 ac.expected_result          = self._build_markup(actionresult)
+                                line+=2
                             except IndexError:
                                 # TODO: %s - dinger rein
-                                raise NoExpectedResult('No expected result set.')
+                                raise NoExpectedResult('No Expected Result near line %s: %s' % (line, actiondesc.text))
                         else:
                             # append actiontitle to action
                             ac.title  = action.text
+                            line +=1
                     case.actions.append(ac)
         return case
 
@@ -93,7 +97,7 @@ class TestcaseParser(object):
         # if we give a text - we only want to evaluate
         if text is not None:
             self.xml = publish_parts(text,writer_name = 'xml')['whole']
-            return self._parse_xml(wikipage.version)
+            return self._parse_xml()
         else:
             # get the wiki page
             wikipage      = WikiPage(self.env, pagename)
