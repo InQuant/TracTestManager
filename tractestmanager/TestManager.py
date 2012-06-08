@@ -414,8 +414,10 @@ class TestCasePanel(Component):
                     data["execute"] = testcase
                     # The template to be rendered
                     data["title"] = 'TestCase %s' % testcase.id
+                    
                 return 'TestManager_accordion.html' , data
             else:
+                @TODO datenbank auslesen usw usf
                 data["page"] = 'TestManager_accordion.html'
                 return 'TestManager_accordion.html' , data
             
