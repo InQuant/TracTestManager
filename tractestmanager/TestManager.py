@@ -358,9 +358,15 @@ class TestCasesPanel(Component):
                 for tc in tc_list:
                     # refer to the testaction module to load the testcase execution
                     #tc.ref = tag.a(tc.wiki, href=req.href.testaction(tc.id))
-                    tc.ref = tag.a(tc.wiki, href=req.href.testcase(tc.id))
+                    #tc.ref = tag.a(tc.wiki, href=req.href.testcase(tc.id))
+                    tc.ref = tag.a(tc.wiki, onclick='window.open("http://hihn.org", "Popupfenster", "width=400,height=300,resizable=yes");' )
+                    
                     # @TODO rain0r
-                    # tc.ref = tag(tag.script('document.write(alert( /testcase/1 ) );\n', type='text/javascript'))
+                    #tc.ref = tag.script("document.write(alert('foobar'););\n", type='text/javascript')
+                    #js = tag.script("alert('foobar');", type="text/javascript")
+                    #tc.ref = ( tag.script("alert('foobar');", type="text/javascript") )                    
+                    #tc.ref = tag.script(onclick='window.open("http://hihn.org", "Popupfenster", "width=400,height=300,resizable=yes");')
+                    
                 data["testcases"] = tc_list
             # The template to be rendered
             data["page"] = 'TestManager_base.html'
