@@ -22,11 +22,7 @@ __author__ = 'Rainer Hihn <rainer.hihn@inquant.de>'
 __docformat__ = 'plaintext'
 
 import re
-import urllib
-
 from genshi.builder import tag
-from genshi.util import plaintext
-
 from trac.core import Component
 from trac.core import ExtensionPoint
 from trac.core import implements
@@ -62,7 +58,6 @@ from config import MANAGER_PERMISSION, TESTER_PERMISSION
 
 import db_models
 import models
-from models import TestRun
 
 class TestManagerPlugin(Component):
     """ TRAC Group Administration Plugin
@@ -193,11 +188,10 @@ class TestManagerPlugin(Component):
 class HomePanel(Component):
     """ start page of testmanager, renders the content of wiki page
         TestManagerHome
-        this page is displayed by default when clicking the 
+        this page is displayed by default when clicking the
         testmanager tab (because section *general* comes before the other sections in alphabet)
     """
     implements(ITestManagerPanelProvider)
-    
     def __init__(self):
         Component.__init__(self)
         #db_models.initenv(self.env)
@@ -244,7 +238,7 @@ class TestPlanPanel(Component):
     def render_admin_panel(self, req, cat, page, path_info):
         """ main request handler
         """
-        if not MANAGER_PERMISSION in req.perm: 
+        if not MANAGER_PERMISSION in req.perm:
             return
 
         data = dict() #template data
@@ -258,55 +252,15 @@ class TestPlanPanel(Component):
 
             # TODO: start testplan in sep. funktion auslagern
             pagename = req.args['start_plan']
-            self.log.debug("starting testplan " + pagename)
-            wikiplan = WikiPage(self.env, pagename)
-
-            # now we reuse the macro to get the things done
-            # we get two variables - testcases as a dict: {'Testcases/UC011':'johndoe'}
-            attributes, testcases = TestPlanMacro(self.env).parse_config(wikiplan.text)
-            # generate new testrun ticket
-            # testrun = Testrun(self.env, attributes, req.authname, wikiplan.text)
-            
-            # adds a ticket of type testrun
-            # FIXME - raise exception if no ticket can be created
-            testrun_id = add_testrun(self.env, attributes, req.authname, wikiplan.text)
-
-            # TODO: populate with TestRun model
-            # if testrun.id:
-            parser = TestcaseParser(self.env)
-            # TODO: verify that testcases are valid
-            for pagename, user in testcases.iteritems():
-
-                try:
-                    testcase = parser.parseTestcase(pagename=pagename)
-                except (NoExpectedResult, TracError), e:
-                    if not data['error']:
-                        data['error']= e.message
-                    else:
-                        data['error'] += e.message
-                        continue
-
-
-                testcase.tester = user
-                testcase.testrun = testrun_id
-                testcase.status = models.NOT_TESTED
-
-                # XXX: this is gaylord - we have to set a testrun,
-                # status to a testaction - not needed (foreign key)
-                for testaction in testcase.actions:
-                    #testaction.kwargs['testrun'] = testrun.id
-                    testaction.testrun = testrun_id
-                    testaction.status = models.NOT_TESTED
-
-                #if not data['error']:
-                    #testcase.insert()
-
-            if data['error']:
-                # testrun.set_defect(data['error'])
-                ret = defect_testrun(self.env, testrun_id, data['error'])
+            self.log.debug("trying to start testplan " + pagename)
+            run = models.TestRun()
+            try:
+                run.setup(self.env, pagename, req.authname)
+            except TracError:
+                data['error'] += run.errors
 
         # render plans
-        runs = TestRun().query(self.env, status='accepted')
+        runs = models.TestRun().query(self.env, status='accepted')
         # TODO: populate with TestRun model
         for run in runs:
             from genshi.builder import tag
@@ -322,10 +276,9 @@ class TestPlanPanel(Component):
         data["testruns"] = runs
         data["testplans"] = testplans
         # TODO: to be implemented in order to populate an already startet but brick testrun
-        data["defect_runs"] = TestRun().query(self.env, status='new')
+        data["defect_runs"] = models.TestRun().query(self.env, status='new')
         data["title"] = 'TestPlans'
-
-        return 'TestManager_base.html' , data
+        return data['page'] , data
 
 class TestCasesPanel(Component):
     """ Link to available TestPlans
@@ -359,11 +312,9 @@ class TestCasesPanel(Component):
                 for tc in tc_list:
                     # refer to the testaction module to load the testcase execution
                     #tc.ref = tag.a(tc.wiki, href=req.href.testaction(tc.id))
-                    #tc.ref = tag.a(tc.wiki, href=req.href.testcase(tc.id))
-                    #import ipdb; ipdb.set_trace()                
-                    # url = self.env.abs_href("/TestManager/general/testcase/"+tc.id )
-                    
-                    tc.ref = tag.a(tc.wiki, href='#', onclick='window.open("testcase/'+tc.id+'", "Popupfenster", "width=400,height=300,resizable=yes");' )  
+                    tc.ref = tag.a(tc.wiki, href=req.href.testcase(tc.id))
+                    # @TODO rain0r
+                    # tc.ref = tag(tag.script('document.write(alert( /testcase/1 ) );\n', type='text/javascript'))
                 data["testcases"] = tc_list
             # The template to be rendered
             data["page"] = 'TestManager_base.html'
@@ -414,13 +365,7 @@ class TestCasePanel(Component):
                     data["execute"] = testcase
                     # The template to be rendered
                     data["title"] = 'TestCase %s' % testcase.id
-                    
                 return 'TestManager_accordion.html' , data
-            else:
-                @TODO datenbank auslesen usw usf
-                data["page"] = 'TestManager_accordion.html'
-                return 'TestManager_accordion.html' , data
-            
             # TODO: redict to TestManager home
             pagename = "TestManagerHome"
             data["pagename"] = pagename
