@@ -22,10 +22,12 @@ __author__ = 'Otto Hockel <otto.hockel@inquant.de>'
 __docformat__ = 'plaintext'
 
 from trac.wiki import WikiPage
+from trac.core import TracError
 
 from docutils.core import publish_parts
 import xml.etree.ElementTree as Tree
-from models import TestAction, TestCase
+from models import TestCase
+from models import TestAction
 
 class TestcaseParser(object):
     """ Testcase parser class
@@ -45,7 +47,7 @@ class TestcaseParser(object):
         case.version = version
         try:
             case.wiki = self.pagename
-        except Exception, e:
+        except Exception:
             ("This is only a dryrun")
         # we now have paragraph, paragraph and definition list
         # which represent "title", "description" and "actions"
@@ -76,7 +78,7 @@ class TestcaseParser(object):
                                 line+=2
                             except IndexError:
                                 # TODO: %s - dinger rein
-                                raise NoExpectedResult('No Expected Result near line %s: %s' % (line, actiondesc.text))
+                                raise TracError('No Expected Result near line %s: %s' % (line, actiondesc.text))
                         else:
                             # append actiontitle to action
                             ac.title  = action.text
@@ -103,7 +105,11 @@ class TestcaseParser(object):
             wikipage      = WikiPage(self.env, pagename)
             # get the xml representation of a testcase
             self.xml = publish_parts(wikipage.text,writer_name = 'xml')['whole']
-            return self._parse_xml(wikipage.version)
+            try:
+                case = self._parse_xml(wikipage.version)
+            except TracError, e:
+                raise e
+            return case
 
 
 class NoExpectedResult(Exception):
