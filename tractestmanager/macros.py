@@ -23,6 +23,7 @@ __docformat__ = 'plaintext'
 
 from genshi.core import Markup
 
+from trac.core import TracError
 from trac.wiki.formatter import system_message
 from trac.wiki.macros import WikiMacroBase
 from trac.wiki import Formatter
@@ -55,12 +56,17 @@ class TestPlanMacro(WikiMacroBase):
         """Execute the macro
         """
         from TestcaseParser import TestcaseParser
-        case = TestcaseParser(self.env)
+        parser = TestcaseParser(self.env)
+        errors = list()
         #wikipage = case.parseTestcase("Testcases/UC011")
         # Parse config and testcases
         conf, testcases = self.parse_config(text)
         for key in testcases:
-            case.parseTestcase(key)
+            try:
+                parser.parseTestcase(key)
+            except TracError, e:
+                error_message = "Parsing error in Testcase %s:" % key
+                errors.append(system_message(error_message, text=e.message))
         # Build config params in wiki syntax
         text = self._build_configs_wiki(conf)
         # Build testcases in wiki syntax
@@ -69,6 +75,8 @@ class TestPlanMacro(WikiMacroBase):
         out = StringIO.StringIO()
         # TODO: Escape wiki markup for text
         Formatter(self.env, formatter.context).format(text,out)
+        for e in errors:
+            out.write(e)
         return Markup(out.getvalue())
 
     def parse_config(self, text):
