@@ -49,10 +49,6 @@ from trac.mimeview.api import Context
 from trac.resource import Resource
 
 # testman specific imports
-from TestManagerLib import *
-from TestcaseParser import *
-from macros import TestPlanMacro
-
 from interfaces import ITestManagerPanelProvider
 from config import MANAGER_PERMISSION, TESTER_PERMISSION
 
@@ -311,10 +307,10 @@ class TestCasesPanel(Component):
                 # build link with genshi
                 for tc in tc_list:
                     # refer to the testaction module to load the testcase execution
-                    #tc.ref = tag.a(tc.wiki, href=req.href.testaction(tc.id))
-                    tc.ref = tag.a(tc.wiki, href=req.href.testcase(tc.id))
-                    # @TODO rain0r
-                    # tc.ref = tag(tag.script('document.write(alert( /testcase/1 ) );\n', type='text/javascript'))
+                    # tc.ref = tag.a(tc.wiki, href=req.href.testaction(tc.id))
+                    # url = self.env.abs_href("/TestManager/general/testcase/"+tc.id ) 
+                    tc.ref = tag.a(tc.wiki, href='#',
+                            onclick='window.open("testcase/%s", "Popupfenster", "width=400,height=300,resizable=yes");' % tc.id)
                 data["testcases"] = tc_list
             # The template to be rendered
             data["page"] = 'TestManager_base.html'
@@ -350,6 +346,7 @@ class TestCasePanel(Component):
             data["warning"] = req.args.get("warning", "")
             data["error"] = req.args.get("error", "")
             data["id"] = req.args.get("id", "")
+            data["page"] = 'TestManager_accordion.html'
             # TODO: get the testcase
             if data["id"]:
                 import models
@@ -358,18 +355,14 @@ class TestCasePanel(Component):
                 if not testcase:
                     # not found
                     data["error"] = 'the requested testcase could not be found or has been erased'
-                elif self.authuser != testcase.tester:
-                    # assigned to someone else - but can be done by mr urlaubsvertretung
-                    data["warning"] = 'this testcase has been assigned to %s' % testcase.tester
                 else:
+                    if req.authuser != testcase.tester:
+                        # assigned to someone else - but can be done by mr urlaubsvertretung
+                        data["warning"] = 'this testcase has been assigned to %s' % testcase.tester
+                    # TODO: datenbank auslesen usw usf
                     data["execute"] = testcase
-                    # The template to be rendered
                     data["title"] = 'TestCase %s' % testcase.id
-                return 'TestManager_accordion.html' , data
-            # TODO: redict to TestManager home
-            pagename = "TestManagerHome"
-            data["pagename"] = pagename
-            data["page"] = WikiPage(self.env, pagename)
+            return data["page"] , data
 
 class TestManagerPermissions(Component):
     """ This class covers the permissions
