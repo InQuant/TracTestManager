@@ -12,6 +12,9 @@ from trac.ticket.query import Query as TicketQuery
 from trac.ticket.model import Ticket
 import db_models
 from db_models import NOT_TESTED, PASSED, FAILED, PASSED_COMMENT
+from trac.wiki import WikiPage
+from trac.core import TracError
+from macros import TestPlanMacro
 
 class TestCase(object):
     """ Testcase model
@@ -37,7 +40,7 @@ class TestCase(object):
         actionsattrs= list()
         for action in self.actions: actionsattrs.append( action.getattrs() )
 
-        db.insertTestCase( self.getattrs(), actionsattrs )
+        self.db.insertTestCase( self.getattrs(), actionsattrs )
 
 class TestAction(object):
     """ Testaction model
@@ -65,9 +68,45 @@ class TestAction(object):
 
 class TestRun(object):
     """ TestRun model
+        This is a ticket
     """
 
-    #ticket = None
+    def setup(self, env, pagename, manager):
+        self.wikiplan = WikiPage(env, pagename)
+        # now we reuse the macro to get the things done
+        # we get two variables - testcases as a dict: {'Testcases/UC011':'johndoe'}
+        attributes, testcases = TestPlanMacro(env).parse_config(self.wikiplan.text)
+        self.attributes = attributes
+        self.testcases = testcases
+        # add new testrun ticket
+        try:
+            self._init_ticket(env, manager)
+        except TracError:
+            raise "TestRun could not be initiated"
+        from TestcaseParser import TestcaseParser
+        parser = TestcaseParser(env)
+        # TODO: verify that testcases are valid
+        self.errors = dict()
+        for pagename, user in self.testcases.iteritems():
+            try:
+                testcase = parser.parseTestcase(pagename=pagename)
+                testcase.tester = user
+                testcase.testrun = self.tid
+                testcase.status = NOT_TESTED
+                # XXX: this is gaylord - we have to set a testrun,
+                # status to a testaction - not needed (foreign key)
+                for testaction in testcase.actions:
+                    #testaction.kwargs['testrun'] = testrun.id
+                    testaction.testrun = self.tid
+                    testaction.status = NOT_TESTED
+            except TracError, e:
+                self.errors[pagename] = e.message
+                continue
+        if self.errors:
+            self._set_defect(env, self.errors)
+        #else save :)
+
+    # TODO: refactor to deliver a list of testruns
     def query(self, env, **kwargs):
         """ query testruns through trac query
             testruns = TestRun().query(env, status=new)
@@ -93,14 +132,33 @@ class TestRun(object):
             tc['id']      = ticket.id
             tc['summary'] = ticket.values['summary']
             tc['created'] = ticket.time_created.ctime()
+            tc['status']  = ticket.values['status']
             testruns.append(tc)
         return testruns
+
+    def _init_ticket(self, env, user):
+        data = dict()
+        data['owner'] = user
+        data['reporter'] = user
+        data['summary'] = self.attributes['id']
+        data['description'] = self.wikiplan.text
+        data['type'] = 'testrun'
+        data['status'] = 'accepted'
+        t = Ticket(env)
+        t.populate(data)
+        self.tid = t.insert()
+
+    def _set_defect(self, env, error_messages):
+        t = Ticket(env, self.tid)
+        t['status'] = 'new'
+        for error in error_messages:
+            t['description'] += error
+        return t.save_changes()
 
 class TestCaseFilter(object):
     """
     filters testcases from db.
     """
-    
     def get(self, **kwargs):
         #dbtcs     = db_models.DbTestCases()
         #tcrows    = dbtcs.get(kwargs)
