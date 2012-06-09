@@ -61,6 +61,7 @@ from interfaces import ITestManagerPanelProvider
 from config import MANAGER_PERMISSION, TESTER_PERMISSION
 
 import db_models
+import models
 from models import TestRun
 
 class TestManagerPlugin(Component):
@@ -358,9 +359,11 @@ class TestCasesPanel(Component):
                 for tc in tc_list:
                     # refer to the testaction module to load the testcase execution
                     #tc.ref = tag.a(tc.wiki, href=req.href.testaction(tc.id))
-                    tc.ref = tag.a(tc.wiki, href=req.href.testcase(tc.id))
-                    # @TODO rain0r
-                    # tc.ref = tag(tag.script('document.write(alert( /testcase/1 ) );\n', type='text/javascript'))
+                    #tc.ref = tag.a(tc.wiki, href=req.href.testcase(tc.id))
+                    #import ipdb; ipdb.set_trace()                
+                    # url = self.env.abs_href("/TestManager/general/testcase/"+tc.id )
+                    
+                    tc.ref = tag.a(tc.wiki, href='#', onclick='window.open("testcase/'+tc.id+'", "Popupfenster", "width=400,height=300,resizable=yes");' )  
                 data["testcases"] = tc_list
             # The template to be rendered
             data["page"] = 'TestManager_base.html'
@@ -411,7 +414,13 @@ class TestCasePanel(Component):
                     data["execute"] = testcase
                     # The template to be rendered
                     data["title"] = 'TestCase %s' % testcase.id
+                    
                 return 'TestManager_accordion.html' , data
+            else:
+                @TODO datenbank auslesen usw usf
+                data["page"] = 'TestManager_accordion.html'
+                return 'TestManager_accordion.html' , data
+            
             # TODO: redict to TestManager home
             pagename = "TestManagerHome"
             data["pagename"] = pagename

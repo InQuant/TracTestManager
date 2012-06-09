@@ -19,13 +19,14 @@
         // $("[class^=toggle_container]:first").show();
         $('.trigger').click( function() {
             var trig = $(this);
+            var duration = 100;
             if ( trig.hasClass('trigger_active') ) {
-                trig.next('.toggle_container').slideToggle('slow');
+                trig.next('.toggle_container').slideToggle(duration);
                 trig.removeClass('trigger_active');
             } else {
-                $('.trigger_active').next('.toggle_container').slideToggle('slow');
+                $('.trigger_active').next('.toggle_container').slideToggle(duration);
                 $('.trigger_active').removeClass('trigger_active');
-                trig.next('.toggle_container').slideToggle('slow');
+                trig.next('.toggle_container').slideToggle(duration);
                 trig.addClass('trigger_active');
             };
             return false;
@@ -39,8 +40,13 @@
   </style>
   </head>
 
-  <body>
+  <body>  
     <div id="content">
+        <form method="post" action="">
+            $foobar
+            <input type="submit" name="ok" value="OK" />
+            <input type="submit" name="failed" value="Failed" />
+        </form>            
         <h3 class="trigger">Accordion Box 1</h3>
         <div class="toggle_container">
             <p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.</p>
