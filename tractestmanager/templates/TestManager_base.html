@@ -37,7 +37,7 @@
           <tr py:when="testruns" py:for="testrun in testruns">
             <td class="report">$testrun.ref</td>
             <td class="title">$testrun.created</td>
-            <td class="action">placeholder</td>
+            <td class="action">$testrun.status</td>
           </tr>
         </tbody>
 
@@ -63,6 +63,14 @@
           <option py:for="option in testplans" value="$option">$option</option>
         </select>
         <input py:if="testplans" type="submit" value="start testplan" />
+      </form>
+      <br /><br />
+      <b py:if="defect_runs">Defect Testplans</b><br />
+      <form py:choose="defect_runs" action="testplans" method="POST">
+        <select py:when="defect_runs" name="restart_plan">
+          <option py:for="option in defect_runs" value="$option.id">$option.id - $option.summary</option>
+        </select>
+        <input py:if="defect_runs" type="submit" value="restart testplan" />
       </form>
     </div>
   </body>
