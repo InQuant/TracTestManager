@@ -328,8 +328,7 @@ class TestCasePanel(Component):
     def get_admin_panels(self, req):
         """ returns the Section and the Name for the Navigation
         """
-        # should not be visible
-        yield ('general', _('General'), 'testcase', _('TestCase'))
+        yield ('general', _('General'), 'testcase', _(None))
 
     def match_request(self, req):
         match = re.match(r'/testcase/([0-9]+)$', req.path_info)
