@@ -257,9 +257,9 @@ class TestPlanPanel(Component):
             # we have a defect testrun to be restarted
             runid = req.args['testplan_to_restart']
             self.log.debug("trying to restart testplan " + runid)
-            old_run = models.TestRun(runid)
+            old_run = models.TestRun()
             try:
-                old_run.restart(self.env, req.authname)
+                old_run.restart(self.env, runid, req.authname)
             except TracError, e:
                 data["error"] = e.message
 
