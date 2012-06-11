@@ -104,6 +104,7 @@ class TestRun(object):
                 continue
         if self.errors:
             self._set_defect(env, self.errors)
+            raise TracError("Testplan could not be started, for more information review ticket %s" % self.tid)
         #else save :)
 
     # TODO: refactor to deliver a list of testruns

@@ -249,11 +249,12 @@ class TestPlanPanel(Component):
             # TODO: start testplan in sep. funktion auslagern
             pagename = req.args['start_plan']
             self.log.debug("trying to start testplan " + pagename)
-            run = models.TestRun()
+            new_run = models.TestRun()
             try:
-                run.setup(self.env, pagename, req.authname)
-            except TracError:
-                data['error'] += run.errors
+                new_run.setup(self.env, pagename, req.authname)
+                from ipdb import set_trace; set_trace()
+            except TracError, e:
+                data["error"] = e.message
 
         # render plans
         runs = models.TestRun().query(self.env, status='accepted')
