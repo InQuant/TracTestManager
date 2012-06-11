@@ -75,7 +75,10 @@ class TestRun(object):
         self.wikiplan = WikiPage(env, pagename)
         # now we reuse the macro to get the things done
         # we get two variables - testcases as a dict: {'Testcases/UC011':'johndoe'}
-        attributes, testcases = TestPlanMacro(env).parse_config(self.wikiplan.text)
+        try:
+            attributes, testcases = TestPlanMacro(env).parse_config(self.wikiplan.text)
+        except TracError:
+            raise TracError("No testplan found on %s" % pagename)
         self.attributes = attributes
         self.testcases = testcases
         # add new testrun ticket
