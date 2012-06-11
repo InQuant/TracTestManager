@@ -41,43 +41,17 @@
   </head>
 
   <body>  
-    <div id="content">           
-        <h3 class="trigger">Accordion Box 1</h3>
-        <div class="toggle_container">
-            <p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.</p>
-            <form method="post" action="">
-                $foobar
-                <input type="submit" name="ok" value="OK" />
-                <input type="submit" name="failed" value="Failed" />
-            </form> 
-        </div>
-        <h3 class="trigger">Accordion Box 2</h3>
-        <div class="toggle_container">
-            <p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.</p>
-            <form method="post" action="">
-                $foobar
-                <input type="submit" name="ok" value="OK" />
-                <input type="submit" name="failed" value="Failed" />
-            </form>             
-        </div>        
-        <h3 class="trigger">Accordion Box 3</h3>
-        <div class="toggle_container">
-            <p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.</p>
-            <form method="post" action="">
-                $foobar
-                <input type="submit" name="ok" value="OK" />
-                <input type="submit" name="failed" value="Failed" />
-            </form>             
-        </div>
-        <h3 class="trigger">Accordion Box 4</h3>
-        <div class="toggle_container">
-            <p>Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.</p>
-            <form method="post" action="">
-                $foobar
-                <input type="submit" name="ok" value="OK" />
-                <input type="submit" name="failed" value="Failed" />
-            </form>             
-        </div>
+    <div id="content">
+        <span py:for="action in TestCaseActions">                        
+            <h3 class="trigger">$action.title</h3>
+            <div class="toggle_container">
+                <p>$action.description</p>
+                <form method="post" action="">
+                    <input type="submit" name="ok" value="OK" />
+                    <input type="submit" name="failed" value="Failed" />
+                </form> 
+            </div>            
+        </span>           
     </div>
     <div id="content" class="wiki teamchillhome">
       <div class="wikipage searchable">
