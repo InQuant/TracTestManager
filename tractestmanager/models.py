@@ -71,45 +71,6 @@ class TestRun(object):
         This is a ticket
     """
 
-    def setup(self, env, pagename, manager):
-        self.wikiplan = WikiPage(env, pagename)
-        # now we reuse the macro to get the things done
-        # we get two variables - testcases as a dict: {'Testcases/UC011':'johndoe'}
-        try:
-            attributes, testcases = TestPlanMacro(env).parse_config(self.wikiplan.text)
-        except TracError:
-            raise TracError("No testplan found on %s" % pagename)
-        self.attributes = attributes
-        self.testcases = testcases
-        # add new testrun ticket
-        try:
-            self._init_ticket(env, manager)
-        except TracError:
-            raise "TestRun could not be initiated"
-        from TestcaseParser import TestcaseParser
-        parser = TestcaseParser(env)
-        # TODO: verify that testcases are valid
-        self.errors = dict()
-        for pagename, user in self.testcases.iteritems():
-            try:
-                testcase = parser.parseTestcase(pagename=pagename)
-                testcase.tester = user
-                testcase.testrun = self.tid
-                testcase.status = NOT_TESTED
-                # XXX: this is gaylord - we have to set a testrun,
-                # status to a testaction - not needed (foreign key)
-                for testaction in testcase.actions:
-                    #testaction.kwargs['testrun'] = testrun.id
-                    testaction.testrun = self.tid
-                    testaction.status = NOT_TESTED
-            except TracError, e:
-                self.errors[pagename] = e.message
-                continue
-        if self.errors:
-            self._set_defect(env, self.errors)
-            raise TracError("Testplan could not be started, for more information review ticket %s" % self.tid)
-        #else save :)
-
     # TODO: refactor to deliver a list of testruns
     def query(self, env, **kwargs):
         """ query testruns through trac query
@@ -140,12 +101,59 @@ class TestRun(object):
             testruns.append(tc)
         return testruns
 
+    def setup(self, env, pagename, manager, runid=None):
+        self.wikiplan = WikiPage(env, pagename)
+        # now we reuse the macro to get the things done
+        # we get two variables - testcases as a dict: {'Testcases/UC011':'johndoe'}
+        try:
+            attributes, testcases = TestPlanMacro(env).parse_config(self.wikiplan.text)
+        except TracError:
+            raise TracError("No testplan found on %s" % pagename)
+        self.attributes = attributes
+        self.testcases = testcases
+        # add new testrun ticket
+        if not runid:
+            try:
+                self._init_ticket(env, manager)
+            except TracError:
+                raise "TestRun could not be initiated"
+        else:
+            ticket = Ticket(env, runid)
+            self.tid = ticket.id
+
+        from TestcaseParser import TestcaseParser
+        parser = TestcaseParser(env)
+        # TODO: verify that testcases are valid
+        self.errors = dict()
+        for pagename, user in self.testcases.iteritems():
+            try:
+                testcase = parser.parseTestcase(pagename=pagename)
+                testcase.tester = user
+                testcase.testrun = self.tid
+                testcase.status = NOT_TESTED
+                # XXX: this is gaylord - we have to set a testrun,
+                # status to a testaction - not needed (foreign key)
+                for testaction in testcase.actions:
+                    #testaction.kwargs['testrun'] = testrun.id
+                    testaction.testrun = self.tid
+                    testaction.status = NOT_TESTED
+            except TracError, e:
+                self.errors[pagename] = e.message
+                continue
+        if self.errors:
+            self._set_defect(env, self.errors)
+            raise TracError("Testplan could not be started, for more information review the testplan page '%s' and restart the testplan" % self.wikiplan.name)
+        if runid:
+            self._set_accepted(env)
+        #else save :)
+
     def _init_ticket(self, env, user):
         data = dict()
         data['owner'] = user
         data['reporter'] = user
-        data['summary'] = self.attributes['id']
+        data['summary'] = self.wikiplan.name
         data['description'] = self.wikiplan.text
+        data['keywords'] = self.attributes['id']
         data['type'] = 'testrun'
         data['status'] = 'accepted'
         t = Ticket(env)
@@ -155,8 +163,13 @@ class TestRun(object):
     def _set_defect(self, env, error_messages):
         t = Ticket(env, self.tid)
         t['status'] = 'new'
-        for error in error_messages:
-            t['description'] += error
+        #for error in error_messages:
+            #t['description'] += error
+        return t.save_changes()
+
+    def _set_accepted(self, env):
+        t = Ticket(env, self.tid)
+        t['status'] = 'accepted'
         return t.save_changes()
 
 class TestCaseFilter(object):
