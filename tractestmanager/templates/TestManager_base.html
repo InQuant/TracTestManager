@@ -1,80 +1,103 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:py="http://genshi.edgewall.org/"
-      xmlns:i18n="http://genshi.edgewall.org/i18n"
-      xmlns:xi="http://www.w3.org/2001/XInclude"
-      py:with="modify_perm = 'WIKI_MODIFY' in perm(page.resource);
-               admin_perm = 'WIKI_ADMIN' in perm(page.resource)">
+xmlns:py="http://genshi.edgewall.org/"
+xmlns:i18n="http://genshi.edgewall.org/i18n"
+xmlns:xi="http://www.w3.org/2001/XInclude"
+py:with="modify_perm = 'WIKI_MODIFY' in perm(page.resource);
+admin_perm = 'WIKI_ADMIN' in perm(page.resource)">
+    <xi:include href="TestManager_panels.html" />
+    <head>
+        <title py:if="title">$title</title>
+        <meta py:if="version or page.author == 'trac'" name="ROBOTS" content="NOINDEX, NOFOLLOW" />
+        <script type="text/javascript">
+            jQuery(document).ready(function($) {
+                $("#content").find("h1,h2,h3,h4,h5,h6").addAnchor(_("Link to this section"));
+                $("#content").find(".wikianchor").each(function() {
+                    $(this).addAnchor(babel.format(_("Link to #%(id)s"), {
+                        id : $(this).attr('id')
+                    }));
+                });
+                $(".foldable").enableFolding(true, true);
+            });
 
-  <xi:include href="TestManager_panels.html" />
-  <head>
-    <title py:if="title">$title</title>
-    <meta py:if="version or page.author == 'trac'" name="ROBOTS" content="NOINDEX, NOFOLLOW" />
-    <script type="text/javascript">
-      jQuery(document).ready(function($) {
-        $("#content").find("h1,h2,h3,h4,h5,h6").addAnchor(_("Link to this section"));
-        $("#content").find(".wikianchor").each(function() {
-          $(this).addAnchor(babel.format(_("Link to #%(id)s"), {id: $(this).attr('id')}));
-        });
-        $(".foldable").enableFolding(true, true);
-      });
-    </script>
-  </head>
-
-  <body>
-    <div id="content">
-      <div class="home" py:content="page" /> 
-      <table class="listing reports"
-             py:with="any_edit = any(can_edit for id, title, can_edit, can_delete in reports);
-                      any_delete = any(can_delete for id, title, can_edit, can_delete in reports)">
-        <thead py:if="testruns"><tr>
-          <th>TestRun</th>
-          <th>started on</th>
-          <th>status</th>
-        </tr></thead>
-
-        <tbody py:choose="testruns">
-          <tr py:when="testruns" py:for="testrun in testruns">
-            <td class="report">$testrun.ref</td>
-            <td class="title">$testrun.created</td>
-            <td class="action">$testrun.status</td>
-          </tr>
-        </tbody>
-
-        <thead py:if="testcases"><tr>
-          <th>TestCase</th>
-          <th>summary</th>
-          <th>status</th>
-        </tr></thead>
-
-        <tbody py:choose="testcases">
-          <tr py:when="testcases" py:for="testcase in testcases">
-            <td class="report">$testcase.ref</td>
-            <td class="title">$testcase.description</td>
-            <td class="action">$testcase.status</td>
-          </tr>
-        </tbody>
-
-      </table>
-      <br /><br />
-      <b py:if="testplans">Available Testplans</b><br />
-      <form py:choose="testplans" action="testplans" method="POST">
-        <select py:when="testplans" name="start_plan">
-          <option py:for="option in testplans" value="$option">$option</option>
-        </select>
-        <input py:if="testplans" type="submit" value="start testplan" />
-      </form>
-      <br /><br />
-      <b py:if="defect_runs">Defect Testplans</b><br />
-      <form py:choose="defect_runs" action="testplans" method="POST">
-        <select py:when="defect_runs" name="restart_plan">
-          <option py:for="option in defect_runs" value="$option.id">$option.id - $option.summary</option>
-        </select>
-        <input py:if="defect_runs" type="submit" value="restart testplan" />
-      </form>
-    </div>
-  </body>
-
+        </script>
+    </head>
+    <body>
+        <div id="content">
+            <div class="home" py:content="page" />
+            <table class="listing reports"
+            py:with="any_edit = any(can_edit for id, title, can_edit, can_delete in reports);
+            any_delete = any(can_delete for id, title, can_edit, can_delete in reports)">
+                <thead py:if="testruns">
+                    <tr>
+                        <th>TestRun</th>
+                        <th>started on</th>
+                        <th>status</th>
+                    </tr>
+                </thead>
+                <tbody py:choose="testruns">
+                    <tr py:when="testruns" py:for="testrun in testruns">
+                        <td class="report">$testrun.ref</td>
+                        <td class="title">$testrun.created</td>
+                        <td class="action">$testrun.status</td>
+                    </tr>
+                </tbody>
+                <thead py:if="testcases">
+                    <tr>
+                        <th>TestCase</th>
+                        <th>summary</th>
+                        <th>status</th>
+                    </tr>
+                </thead>
+                <tbody py:choose="testcases">
+                    <tr py:when="testcases" py:for="testcase in testcases">
+                        <td class="report">$testcase.ref</td>
+                        <td class="title">$testcase.description</td>
+                        <td class="action">$testcase.status</td>
+                    </tr>
+                </tbody>
+            </table>
+            <br />
+            <br />
+            <b py:if="testplans">Available Testplans</b>
+            <br />
+            <form py:choose="testplans" action="testplans" method="POST">
+                <select py:when="testplans" name="start_plan">
+                    <option py:for="option in testplans" value="$option">$option</option>
+                </select>
+                <input py:if="testplans" type="submit" value="start testplan" />
+            </form>
+            <br />
+            <br />
+            <b py:if="defect_runs">Defect Testplans</b>
+            <br />
+            <form py:choose="defect_runs" action="testplans" method="POST"  py:if="defect_runs">
+                <table class="listing reports">
+                    <thead>
+                        <tr>
+                            <th>&nbsp;</th>
+                            <th>ID</th>
+                            <th>Summary</th>
+                            <th>Started on</th>
+                        </tr>
+                    </thead>
+                    <tbody py:choose="defect_runs">
+                        <tr py:when="defect_runs" py:for="option in defect_runs">
+                            <td align="center"><input type="checkbox" name="testplan_to_restart" value="$option.id" /></td>
+                            <td class="title">$option.summary</td>
+                            <td class="title">$option.created</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <!--
+                <select py:when="defect_runs" name="restart_plan">
+                    <option py:for="option in defect_runs" value="$option.id">$option.id - $option.summary</option>
+                </select>
+                -->
+                <input py:if="defect_runs" type="submit" value="restart testplan" />                
+            </form>
+        </div>
+    </body>
 </html>
-
 <!-- vim: set ft=html ts=2 sw=2 expandtab : -->
