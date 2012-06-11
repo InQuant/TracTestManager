@@ -83,7 +83,8 @@ admin_perm = 'WIKI_ADMIN' in perm(page.resource)">
                     </thead>
                     <tbody py:choose="defect_runs">
                         <tr py:when="defect_runs" py:for="option in defect_runs">
-                            <td align="center"><input type="checkbox" name="testplan_to_restart" value="$option.id" /></td>
+                            <td align="center"><input type="checkbox" name="testplan_to_restart" value="$option.id" id="$option.id" /></td>
+                            <td class="title">$option.ref</td>
                             <td class="title">$option.summary</td>
                             <td class="title">$option.created</td>
                         </tr>

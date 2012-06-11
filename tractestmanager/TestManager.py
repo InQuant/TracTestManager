@@ -281,6 +281,8 @@ class TestPlanPanel(Component):
         data["testplans"] = testplans
         # TODO: to be implemented in order to populate an already startet but brick testrun
         data["defect_runs"] = models.TestRun().query(self.env, status='new')
+        for defect_run in data["defect_runs"]:
+            defect_run['ref'] = tag.a('#', defect_run['id'], ' ', defect_run['summary'], href=req.href.ticket(defect_run['id']))
         data["title"] = 'TestPlans'
         return data['page'] , data
 
