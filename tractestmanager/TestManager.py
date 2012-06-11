@@ -252,7 +252,6 @@ class TestPlanPanel(Component):
             new_run = models.TestRun()
             try:
                 new_run.setup(self.env, pagename, req.authname)
-                from ipdb import set_trace; set_trace()
             except TracError, e:
                 data["error"] = e.message
 
