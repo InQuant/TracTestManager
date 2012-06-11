@@ -245,13 +245,21 @@ class TestPlanPanel(Component):
         data["page"] = 'TestManager_base.html'
 
         if 'start_plan' in req.args:
-
             # TODO: start testplan in sep. funktion auslagern
             pagename = req.args['start_plan']
             self.log.debug("trying to start testplan " + pagename)
             new_run = models.TestRun()
             try:
                 new_run.setup(self.env, pagename, req.authname)
+            except TracError, e:
+                data["error"] = e.message
+        elif 'testplan_to_restart' in req.args:
+            # we have a defect testrun to be restarted
+            runid = req.args['testplan_to_restart']
+            self.log.debug("trying to restart testplan " + runid)
+            old_run = models.TestRun(runid)
+            try:
+                old_run.restart(self.env, req.authname)
             except TracError, e:
                 data["error"] = e.message
 
