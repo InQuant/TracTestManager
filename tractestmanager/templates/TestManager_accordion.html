@@ -23,10 +23,12 @@
             if ( trig.hasClass('trigger_active') ) {
                 trig.next('.toggle_container').slideToggle(duration);
                 trig.removeClass('trigger_active');
+                trig.css("background","white");                
             } else {
                 $('.trigger_active').next('.toggle_container').slideToggle(duration);
-                $('.trigger_active').removeClass('trigger_active');
+                $('.trigger_active').removeClass('trigger_active');                
                 trig.next('.toggle_container').slideToggle(duration);
+                trig.css("background","#eee");
                 trig.addClass('trigger_active');
             };
             return false;
@@ -44,11 +46,14 @@
     <div id="content">
         <span py:for="action in TestCaseActions">                        
             <h3 class="trigger">$action.title</h3>
-            <div class="toggle_container">
+            <div class="toggle_container" style="background:#eee">
                 <p>$action.description</p>
                 <form method="post" action="">
                     <input type="submit" name="ok" value="OK" />
                     <input type="submit" name="failed" value="Failed" />
+                    <p>
+                    <textarea>$action.id</textarea>
+                    </p>
                 </form> 
             </div>            
         </span>           
