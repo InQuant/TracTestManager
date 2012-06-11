@@ -310,12 +310,11 @@ class TestCasesPanel(Component):
                     # tc.ref = tag.a(tc.wiki, href=req.href.testaction(tc.id))
                     # url = self.env.abs_href("/TestManager/general/testcase/"+tc.id ) 
                     tc.ref = tag.a(tc.wiki, href='#',
-                            onclick='window.open("testcase/%s", "Popupfenster", "width=400,height=300,resizable=yes");' % tc.id)
+                            onclick='window.open("testcase/%s", "Popupfenster", "width=400,height=400,resizable=yes");' % tc.id)
                 data["testcases"] = tc_list
             # The template to be rendered
             data["page"] = 'TestManager_base.html'
-            data["title"] = 'TestCases'
-
+            data["title"] = 'TestCases'            
             return 'TestManager_base.html' , data
 
 class TestCasePanel(Component):
@@ -339,6 +338,7 @@ class TestCasePanel(Component):
     def render_admin_panel(self, req, cat, page, path_info):
         """ main request handler
         """
+        from TestcaseParser import TestcaseParser
         if TESTER_PERMISSION in req.perm:
             data = dict() #template data
             data["info"] = req.args.get("info", "")
@@ -347,6 +347,12 @@ class TestCasePanel(Component):
             data["id"] = req.args.get("id", "")
             data["page"] = 'TestManager_accordion.html'
             # TODO: get the testcase
+
+            #import ipdb; ipdb.set_trace()
+            tcp = TestcaseParser(self.env)
+            tco = tcp.parseTestcase("UC012")
+            data["TestCaseActions"] = tco.actions 
+                
             if data["id"]:
                 import models
 
@@ -358,7 +364,7 @@ class TestCasePanel(Component):
                     if req.authuser != testcase.tester:
                         # assigned to someone else - but can be done by mr urlaubsvertretung
                         data["warning"] = 'this testcase has been assigned to %s' % testcase.tester
-                    # TODO: datenbank auslesen usw usf
+                    # TODO: datenbank auslesen usw usf                    
                     data["execute"] = testcase
                     data["title"] = 'TestCase %s' % testcase.id
             return data["page"] , data
