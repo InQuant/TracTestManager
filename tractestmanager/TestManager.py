@@ -258,7 +258,6 @@ class TestPlanPanel(Component):
             runid = req.args['testplan_to_restart']
             self.log.debug("trying to restart testplan " + runid)
             runticket = models.TestRun().query(self.env, id=runid)
-            from ipdb import set_trace; set_trace()
             old_run = models.TestRun()
             try:
                 old_run.setup(self.env, runticket[0]['summary'], req.authname, runid=runid)
@@ -326,7 +325,7 @@ class TestCasesPanel(Component):
                 data["testcases"] = tc_list
             # The template to be rendered
             data["page"] = 'TestManager_base.html'
-            data["title"] = 'TestCases'            
+            data["title"] = 'TestCases'
             return 'TestManager_base.html' , data
 
 class TestCasePanel(Component):
@@ -335,7 +334,6 @@ class TestCasePanel(Component):
     implements(ITestManagerPanelProvider)
     def __init__(self):
         Component.__init__(self)
-    
     def get_admin_panels(self, req):
         """ returns the Section and the Name for the Navigation
         """
@@ -360,11 +358,9 @@ class TestCasePanel(Component):
             data["page"] = 'TestManager_accordion.html'
             # TODO: get the testcase
 
-            #import ipdb; ipdb.set_trace()
             tcp = TestcaseParser(self.env)
-            tco = tcp.parseTestcase("UC012")
-            data["TestCaseActions"] = tco.actions 
-                
+            tco = tcp.parseTestcase("Testcases/UC013")
+            data["TestCaseActions"] = tco.actions
             if data["id"]:
                 import models
 
