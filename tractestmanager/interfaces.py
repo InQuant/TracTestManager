@@ -43,5 +43,4 @@ class ITestManagerPanelProvider(Interface):
         where `template` is the name of the template to use and `data` is the
         data to be passed to the template.
         """
-
 # vim: set ft=python ts=4 sw=4 expandtab :
