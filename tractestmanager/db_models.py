@@ -33,9 +33,9 @@ PASSED_COMMENT= 'passed with comment'
 FAILED= 'failed'
 
 # TestCase collumns
-TC_KEYS= [ 'tcid', 'wiki', 'title', 'description', 'version', 'tester', 'testrun', 'status']
+TC_KEYS= [ 'tcid', 'wiki', 'title', 'description', 'revision', 'tester', 'testrun', 'status']
 # TestAction collumns
-TA_KEYS= ['testrun', 'tcid', 'title', 'description', 'expected_result', 'status', 'comment']
+TA_KEYS= [ 'id', 'tcid', 'testrun', 'title', 'description', 'expected_result', 'status', 'comment']
 
 ##############################################################################
 def orderedValues(keys, adict):
@@ -75,17 +75,15 @@ class DbLite(object):
 
     >>> db= DbLite(env)
 
-    >>> db.setup()
-
     2. Build a dict for a Testcase to add.
 
-    >>> tcvals= ['TcDocCreate', 'Create Docs', None, 2, 'lmende', 3, NOT_TESTED]
+    >>> tcvals= ['TcDocCreate', 'Create Docs', 'bla', '2', 'lmende', 3, NOT_TESTED]
 
     3. Build a list of dicts for TestActions to add.
 
-    >>> vals1= [ 3, None, 'Add to Workspace', 'Add to WS desc', 'Docs added',PASSED, None ]
-    >>> vals2= [ 3, None, 'Checkout', 'Checkout desc', 'Docs checked out', NOT_TESTED, None ]
-    >>> actions= [dict(zip(TA_KEYS, vals1)), dict(zip(TA_KEYS, vals2))]
+    >>> vals1= [ 3, 'Add to Workspace', 'Add to WS desc', 'Docs added',PASSED, None ]
+    >>> vals2= [ 3, 'Checkout', 'Checkout desc', 'Docs checked out', NOT_TESTED, None ]
+    >>> actions= [dict(zip(TA_KEYS[2:], vals1)), dict(zip(TA_KEYS[2:], vals2))]
     
     4. Insert the test case and actions.
 
@@ -121,41 +119,6 @@ class DbLite(object):
         """
         debug('DbLite.setup()')
 
-        @with_transaction(self.env)
-        def _createTables(db):
-            c= db.cursor()
-
-            # create testcases table
-            cols= string.join([
-               'tcid INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT',
-               'wiki VARCHAR(512) NOT NULL',
-               'title VARCHAR(512) NOT NULL',
-               'description TEXT',
-               'version INTEGER NOT NULL',
-               'tester VARCHAR(80)',
-               'testrun INTEGER NOT NULL',
-               'status VARCHAR(80) NOT NULL',
-                    ], ', ')
-
-            stmt= """CREATE TABLE IF NOT EXISTS testcases (%s)""" % cols
-            debug(stmt)
-            c.execute(stmt)
-
-            # create testactions table
-            cols= string.join([
-               'testrun INTEGER NOT NULL',
-               'tcid INTEGER NOT NULL REFERENCES testcases (tcid)',
-               'title VARCHAR(512) NOT NULL',
-               'description TEXT',
-               'expected_result TEXT NOT NULL',
-               'status VARCHAR(80) NOT NULL',
-               'comment TEXT',
-                    ], ', ')
-
-            stmt= """CREATE TABLE IF NOT EXISTS testactions (%s, PRIMARY KEY
-            (testrun, tcid, title))""" % cols
-            debug(stmt)
-            c.execute(stmt)
 
     ##########################################################################
     def insertTestCase(self, tcDict, actionDicts= None):
@@ -190,14 +153,14 @@ class DbLite(object):
 
                 # constructs a statement of form "... VALUES (%s,%s,%s,%s)"
                 stmt= "INSERT INTO testactions (%s) VALUES (%s)" % (
-                    string.join(TA_KEYS, ',') , 
-                    getInsertPlaceHolders(TA_KEYS))
+                    string.join(TA_KEYS[1:], ',') , 
+                    getInsertPlaceHolders(TA_KEYS[1:]))
                 debug(stmt)
                 
                 # build list from action value lists
                 actions= []
                 for d in actionDicts:
-                    actions.append( orderedValues(TA_KEYS, d))
+                    actions.append( orderedValues(TA_KEYS[1:], d))
 
                 # insert all actions in one step
                 c.executemany(stmt, actions)
@@ -207,7 +170,7 @@ class DbLite(object):
         return TC_KEYS
 
     ##########################################################################
-    def getTestCases(self, testrun= None, status= None):
+    def getTestCases(self, tcid= None, testrun= None, tester= None, status= None):
         """
         selects all testcases of a given testrun with a given status.
         """
@@ -221,9 +184,15 @@ class DbLite(object):
             # build filter
             filters= []
             fvalues= []
+            if tcid: 
+                filters.append( 'tcid=%d' )
+                fvalues.append( tcid )
             if testrun: 
-                filters.append( 'testrun=%s' )
+                filters.append( 'testrun=%d' )
                 fvalues.append( testrun )
+            if tester: 
+                filters.append( 'tester=%s' )
+                fvalues.append( tester )
             if status: 
                 filters.append( 'status=%s' )
                 fvalues.append( status )
@@ -245,7 +214,7 @@ class DbLite(object):
         return TC_ACTIONS
 
     ##########################################################################
-    def getTestActions(self, testrun= None, tcid= None, status= None):
+    def getTestActions(self, id= None, tcid= None, testrun= None, status= None):
         """
         Selects all testactions of a given testrun and testcase id with a given
         status.
@@ -260,12 +229,15 @@ class DbLite(object):
             # build filter
             filters= []
             fvalues= []
-            if testrun: 
-                filters.append( 'testrun=%s' )
-                fvalues.append( testrun )
+            if id: 
+                filters.append( 'id=%d' )
+                fvalues.append( id )
             if tcid: 
-                filters.append( 'tcid=%s' )
+                filters.append( 'tcid=%d' )
                 fvalues.append( tcid )
+            if testrun: 
+                filters.append( 'testrun=%d' )
+                fvalues.append( testrun )
             if status: 
                 filters.append( 'status=%s' )
                 fvalues.append( status )
