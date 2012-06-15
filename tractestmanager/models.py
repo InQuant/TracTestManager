@@ -187,4 +187,11 @@ class TestCaseFilter(object):
         # return testcases
         return [TestCase(id="1", wiki="TcDocCreate", description="create a document in the workspace", title="= TcDocCreate =", revision="3", tester="lmende", testrun="2", status=NOT_TESTED)]
 
+class TestActionFilter(object):
+    """
+    filters testactions from db.
+    """
+    def get(self, **kwargs):
+        return [TestAction(testrun="1", tcid="1", description="create a document in the workspace", title="set doRunRun True", expected_result="run forever", status=NOT_TESTED, comment=None)]
+
 # vim: set ft=python ts=4 sw=4 expandtab :
