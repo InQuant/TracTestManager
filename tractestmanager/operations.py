@@ -40,7 +40,7 @@ from trac.web import IRequestHandler
 
 import json
 #import db_models
-#import models
+import models
 
 class TestCaseManipulator(Component):
     """ Component that supports the Testcase Execution
@@ -50,20 +50,14 @@ class TestCaseManipulator(Component):
     # XXX: This is a hack - refactor later
     #      every request with /json_operate/? in it will match
     def match_request(self, req):
-        return re.match(r'/json_operate/?', req.path_info) is not None
+        return re.match(r'/json_testaction/?', req.path_info) is not None
 
     def process_request(self, req):
         try:
-            # check operation
-            if req.args:
-                # mocking testaction set ok
-                try:
-                    # set_ok(ta_id=1)
-                    jsonstring = json.dumps({"success": True,
-                        "testaction_id" : req.args["ta_id"]})
-                    req.send(jsonstring)
-                except TracError, e:
-                    raise TracError(e)
+            # mocking testaction set ok
+            testaction = models.TestActionFilter().get(ta_id=req.args['ta_id'])[0]
+            testaction.set_status(**req.args)
+            req.send(json.dumps({"STATUS_UPDATE":"SUCCESS"}))
         except TracError, e:
             raise TracError(e)
 
