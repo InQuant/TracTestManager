@@ -35,7 +35,7 @@ class TestManagerModelProvider(Component):
             Column('description'),
             Column('revision'),
             Column('tester'),
-            Column('testrun', type= 'ini' ),
+            Column('testrun', type= 'int' ),
             Column('status'),
             Index(['tcid', 'wiki', 'title', 'testrun'])],
         ]

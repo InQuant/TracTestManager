@@ -69,13 +69,14 @@ class DbLite(object):
     Class to wrap the SQL stuff about TestCases and TestActions ...
 
     >>> from trac.env import Environment
-    >>> env= Environment( '/Users/lmende/Dropbox/projekte/BoschRexroth/TracTestManager/testman' )
+    >>> env= Environment( '/Users/lmende/develop/tractestman/buildout/parts/trac' )
     
     1. Instanciate the class and set it up aka create the tables.
 
     >>> db= DbLite(env)
 
     2. Build a dict for a Testcase to add.
+
 
     >>> tcvals= ['TcDocCreate', 'Create Docs', 'bla', '2', 'lmende', 3, NOT_TESTED]
 
@@ -108,9 +109,12 @@ class DbLite(object):
     """
 
     ##########################################################################
-    def __init__(self):
+    def __init__(self, _env= None):
         debug('DbLite.__init__()')
-        self.env= TRACENV
+        if _env:
+            self.env= _env
+        else:
+            self.env= TRACENV
 
     ##########################################################################
     def setup(self):
@@ -139,7 +143,7 @@ class DbLite(object):
 
             # constructs a statement of form "... VALUES (%s,%s,%s,%s)"
             # w/o autovalue tcid
-            stmt= "INSERT INTO testcases (%s) VALUES (%s)" % (
+            stmt= "INSERT INTO testcase (%s) VALUES (%s)" % (
                     string.join(TC_KEYS[1:], ',') , 
                     getInsertPlaceHolders(TC_KEYS[1:]))
             debug(stmt)
@@ -152,7 +156,7 @@ class DbLite(object):
                 for ad in actionDicts: ad['tcid']= tcid
 
                 # constructs a statement of form "... VALUES (%s,%s,%s,%s)"
-                stmt= "INSERT INTO testactions (%s) VALUES (%s)" % (
+                stmt= "INSERT INTO testaction (%s) VALUES (%s)" % (
                     string.join(TA_KEYS[1:], ',') , 
                     getInsertPlaceHolders(TA_KEYS[1:]))
                 debug(stmt)
@@ -185,10 +189,10 @@ class DbLite(object):
             filters= []
             fvalues= []
             if tcid: 
-                filters.append( 'tcid=%d' )
+                filters.append( 'tcid=%s' )
                 fvalues.append( tcid )
             if testrun: 
-                filters.append( 'testrun=%d' )
+                filters.append( 'testrun=%s' )
                 fvalues.append( testrun )
             if tester: 
                 filters.append( 'tester=%s' )
@@ -198,10 +202,12 @@ class DbLite(object):
                 fvalues.append( status )
 
             # build statement
-            stmt= "SELECT * FROM testcases"
+            stmt= "SELECT * FROM testcase"
             if filters:
                  stmt= stmt + ' WHERE ' + string.join( filters, ' AND ')
             
+            debug( filters )
+            debug( fvalues )
             debug( stmt )
             c.execute( stmt, fvalues )
             rows= c.fetchall()
@@ -230,23 +236,25 @@ class DbLite(object):
             filters= []
             fvalues= []
             if id: 
-                filters.append( 'id=%d' )
+                filters.append( 'id=%s' )
                 fvalues.append( id )
             if tcid: 
-                filters.append( 'tcid=%d' )
+                filters.append( 'tcid=%s' )
                 fvalues.append( tcid )
             if testrun: 
-                filters.append( 'testrun=%d' )
+                filters.append( 'testrun=%s' )
                 fvalues.append( testrun )
             if status: 
                 filters.append( 'status=%s' )
                 fvalues.append( status )
 
             # build statement
-            stmt= "SELECT * FROM testactions"
+            stmt= "SELECT * FROM testaction"
             if filters:
                  stmt= stmt + ' WHERE ' + string.join( filters, ' AND ' )
             
+            debug( filters )
+            debug( fvalues )
             debug( stmt )
             c.execute( stmt, fvalues )
             rows= c.fetchall()
