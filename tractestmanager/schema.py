@@ -4,19 +4,6 @@
 #
 # Copyright (c) InQuant GmbH
 #
-#  This program is free software; you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation; either version 2 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program; if not, write to the Free Software
-#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 __author__ = 'Rainer Hihn <rainer.hihn@inquant.de>'
 __docformat__ = 'plaintext'
@@ -31,22 +18,26 @@ class TestManagerModelProvider(Component):
 
     SCHEMA = [
           Table('testaction', key = ('id'))[
-            Column('id'),
-            Column('testcase'),
-            Column('status'),
+            Column('id', type= 'int', auto_increment= True),
+            Column('tcid', type= 'int'),
+            Column('testrun', type= 'int'),
+            Column('title'),
             Column('description'),
             Column('expected_result'),
-            Index(['id'])],
-          Table('testcase', key = ('id'))[
-            Column('id'),
+            Column('status'),
+            Column('comment'),
+            Index(['id', 'title'])],
+
+          Table('testcase', key = ('tcid'))[
+            Column('tcid', type= 'int', auto_increment= True),
             Column('wiki'),
             Column('title'),
+            Column('description'),
             Column('revision'),
             Column('tester'),
-            Column('testrun'),
+            Column('testrun', type= 'ini' ),
             Column('status'),
-            Column('actions'),
-            Index(['id'])]
+            Index(['tcid', 'wiki', 'title', 'testrun'])],
         ]
 
     # IEnvironmentSetupParticipant methods
