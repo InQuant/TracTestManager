@@ -43,7 +43,7 @@ class TestcaseParser(object):
         tree = Tree.fromstring(self.xml)
         # initial iteration
         # it is a Testcase
-        case = TestCase()
+        case = TestCase(self.env)
         case.version = version
         try:
             case.wiki = self.pagename
@@ -66,7 +66,7 @@ class TestcaseParser(object):
                 for child in node.getchildren():
                     # every child has two children "term" and "definition"
                     # they are called action
-                    ac = TestAction()
+                    ac = TestAction(self.env)
                     for action in child.getchildren():
                         if action.tag == 'definition':
                             # we have two paragraphs - action description and expected result

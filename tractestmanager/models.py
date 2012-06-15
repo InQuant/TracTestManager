@@ -10,20 +10,26 @@ __docformat__ = 'plaintext'
 
 from trac.ticket.query import Query as TicketQuery
 from trac.ticket.model import Ticket
-import db_models
 from db_models import NOT_TESTED, PASSED, FAILED, PASSED_COMMENT
 from trac.wiki import WikiPage
 from trac.core import TracError
+
+import db_models
 from macros import TestPlanMacro
+from TestcaseParser import TestcaseParser
+
+SUMMARY = 'summary'
+OWNER   = 'owner'
+STATUS  = 'status'
 
 class TestCase(object):
-    """ Testcase model
+    """ Testcase with attributes and and a list of actions.
     """
 
-    def __init__(self, **kwargs):
-        db= db_models.DbLite()
+    def __init__(self, env, **kwargs):
+        self.db= db_models.DbLite(env)
         self.actions = []
-        self.errors = {}
+
         for key in db_models.TC_KEYS: setattr(self, key, None)
 
         if kwargs:
@@ -31,32 +37,28 @@ class TestCase(object):
                 setattr(self, key, value)
 
     def getattrs( self ):
-        return map( lambda x: getattr( self, x), db_models.TC_KEYS )
+        """ Returns a list of tuples.
+        
+        e.g.  [('wiki', 'DocTest'), ('description', 'bla'), ...]
+        """
+        return zip( db_models.TC_KEYS, 
+                map( lambda x: getattr( self, x), db_models.TC_KEYS ))
 
     def insert(self):
-        # TODO: should save testcase and actions into database
+        """Saves the testcase and its actions into the database.
+        """
 
         # build a list of action dicts
         actionsattrs= list()
-        for action in self.actions: actionsattrs.append( action.getattrs() )
+        for action in self.actions: actionsattrs.append( dict(action.getattrs()))
 
-        self.db.insertTestCase( self.getattrs(), actionsattrs )
+        self.db.insertTestCase( dict(self.getattrs()), actionsattrs )
 
 class TestAction(object):
-    """ Testaction model
-        an action is part of a testcase
+    """ Testaction with attributes as part of a testcase.
     """
 
-    #testcase        = None
-    #comment         = None
-    #status          = None
-    #description     = None
-    #expected_result = None
-    broken           = None
-
-    def __init__(self, **kwargs):
-        self.broken = False
-
+    def __init__(self, env, **kwargs):
         for key in db_models.TA_KEYS: setattr(self, key, None)
 
         if kwargs:
@@ -64,7 +66,12 @@ class TestAction(object):
                 setattr(self, key, value)
 
     def getattrs( self ):
-        return map( lambda x: getattr( self, x), db_models.TA_KEYS )
+        """ Returns a list of tuples.
+        
+        e.g.  [('title', 'Create WS'), ('description', 'bla'), ...]
+        """
+        return zip(db_models.TA_KEYS, 
+                map( lambda x: getattr( self, x), db_models.TA_KEYS ))
 
     def set_status(self, status, comment=None):
         """
@@ -72,112 +79,148 @@ class TestAction(object):
         >>> testaction.set_status(status="OK", comment="Hello World")
         """
         pass
-
+ 
 class TestRun(object):
-    """ TestRun model
-        This is a ticket
+    """ TestRun based on a trac ticket of type testrun it contains a list of
+    testcases with their testactions.
+
+    properties:
+        env        -> the trac env
+        runid      -> the testrun aka ticket id
+        ticket     -> the trac ticket of type testrun
+        wikiplan   -> the trac Wikipage with the testplan macro (which
+                       contains the testcases)
+        owner      -> the testrun aka ticket owner
+        summary    -> the testrun aka ticket summary
+        testcases  -> the list of validated TestCase instances of the testrun
     """
+    exists = property(lambda self: self.runid is not None)
 
-    # TODO: refactor to deliver a list of testruns
-    def query(self, env, **kwargs):
-        """ query testruns through trac query
-            testruns = TestRun().query(env, status=new)
-            testrun returns a list of tickets with type=testrun and status=new
-            returns a list of tickets
+    @property
+    def id(self): return runid
+
+    @property
+    def summary(self): return self.ticket[SUMMARY]
+    @summary.setter
+    def summary(self, value): self.ticket[SUMMARY] = value
+
+    @property
+    def owner(self): return self.ticket[OWNER]
+    @owner.setter
+    def owner(self, value): self.ticket[OWNER] = value
+
+    def __init__(self, env, runid= None):
+        self.env= env
+        self.testcases= list()
+
+        # get the testrun based ticket ...
+        if runid is not None: 
+            self.runid= int(runid)
+            self.ticket = Ticket(self.env, self.runid)
+
+            self.wikiplan= WikiPage(self.env, self.ticket[SUMMARY])
+
+        # ... or init a new (empty) one.
+        else:
+            self.ticket = Ticket(env)
+
+    def setup(self, pagename, manager):
+        """ Sets up a new testrun and inserts a new  trac ticket of type
+        testrun into the database.
         """
-        tickets = list()
-        testruns = list()
-        if kwargs:
-            querystring = 'type=testrun'
-            for key, value in kwargs.iteritems():
-                querystring += '&%s=%s' % (key, value)
-            self.query = TicketQuery.from_string(env, querystring)
-        else:
-            # query * testrun tickets
-            self.query = TicketQuery.from_string(env, 'type=testrun')
-        ticket_dicts = self.query.execute()
-        for t in ticket_dicts:
-            tickets.append(Ticket(env, tkt_id=t['id']))
 
-        for ticket in tickets:
-            tc = {}
-            tc['id']      = ticket.id
-            tc['summary'] = ticket.values['summary']
-            tc['created'] = ticket.time_created.ctime()
-            tc['status']  = ticket.values['status']
-            testruns.append(tc)
-        return testruns
+        self.wikiplan = WikiPage(self.env, pagename)
 
-    def setup(self, env, pagename, manager, runid=None):
-        self.wikiplan = WikiPage(env, pagename)
-        # now we reuse the macro to get the things done
-        # we get two variables - testcases as a dict: {'Testcases/UC011':'johndoe'}
-        try:
-            attributes, testcases = TestPlanMacro(env).parse_config(self.wikiplan.text)
-        except TracError:
-            raise TracError("No testplan found on %s" % pagename)
-        self.attributes = attributes
-        self.testcases = testcases
         # add new testrun ticket
-        if not runid:
-            try:
-                self._init_ticket(env, manager)
-            except TracError:
-                raise "TestRun could not be initiated"
-        else:
-            ticket = Ticket(env, runid)
-            self.tid = ticket.id
+        data = {
+            OWNER          : manager,
+            'reporter'     : manager,
+            SUMMARY        : self.wikiplan.name,
+            'description'  : self.wikiplan.text,
+            'type'         : 'testrun',
+        }
+        try:
+            self.ticket.populate(data)
+            self.runid = self.ticket.insert()
+        except TracError, e:
+            raise TracError( "TestRun ticket could not be created: %s" %
+                    e.message )
 
-        from TestcaseParser import TestcaseParser
-        parser = TestcaseParser(env)
-        # TODO: verify that testcases are valid
-        self.errors = dict()
-        for pagename, user in self.testcases.iteritems():
+        return self.runid
+
+    def validate(self):
+        """validates the testrun: parse the testplan macro for testcase names and
+        testers, and parse those testcases (wiki pages) to get and validate the
+        actions and expected results.
+        
+        A test plan macrco looks like this:
+        #! TestPlan 
+        Id: TA14
+        Testart: UsecaseTest 
+        Build: DC-3.1.1
+        Konfiguration: IE7-Win, FF-LUX
+        Usecases: BaugruppenVerwalten, ObjekteSuchen
+
+        Testcases/SaveAsEinerBaugruppe mmuster
+        TcErzeugenEinerBaugruppe lmende, mmuster
+        """
+
+        try:
+            attributes, tc_tester_tups = TestPlanMacro(self.env).parse_config(
+                    self.wikiplan.text)
+        except TracError, e:
+            raise TracError( "No testplan found on, parser error on %s, %s" %
+                    (self.wikiplan.name, e.message))
+
+        # TODO: verify that tc_tester_tups are valid
+
+        # now parse (get) all testcases from tc_tester_tups
+        parser = TestcaseParser(self.env)
+        errors = dict()
+        self.testcases= list()
+
+        for pagename, tester in self.tc_tester_tups.iteritems():
             try:
-                testcase = parser.parseTestcase(pagename=pagename)
-                testcase.tester = user
-                testcase.testrun = self.tid
-                testcase.status = NOT_TESTED
-                # XXX: this is gaylord - we have to set a testrun,
-                # status to a testaction - not needed (foreign key)
-                for testaction in testcase.actions:
-                    #testaction.kwargs['testrun'] = testrun.id
-                    testaction.testrun = self.tid
-                    testaction.status = NOT_TESTED
+                tc = parser.parseTestcase(pagename= pagename)
+                tc.tester = tester
+                tc.testrun = self.runid
+                tc.status = NOT_TESTED
+
+                for ta in tc.actions:
+                    ta.testrun = self.runid
+                    ta.status = NOT_TESTED
             except TracError, e:
-                self.errors[pagename] = e.message
+                errors[pagename] = e.message
                 continue
-        if self.errors:
-            self._set_defect(env, self.errors)
-            raise TracError("Testplan could not be started, for more information review the testplan page '%s' and restart the testplan" % self.wikiplan.name)
-        if runid:
-            self._set_accepted(env)
-        #else save :)
+            self.testcases.append(tc)
 
-    def _init_ticket(self, env, user):
-        data = dict()
-        data['owner'] = user
-        data['reporter'] = user
-        data['summary'] = self.wikiplan.name
-        data['description'] = self.wikiplan.text
-        data['keywords'] = self.attributes['id']
-        data['type'] = 'testrun'
-        data['status'] = 'accepted'
-        t = Ticket(env)
-        t.populate(data)
-        self.tid = t.insert()
+        if errors:
+            self._set_defect(self.env, errors)
+            raise TracError( 
+                "Testplan could not be started, for more information "\ 
+                "review the testplan page '%s' and restart the testplan" % 
+                self.wikiplan.name)
 
-    def _set_defect(self, env, error_messages):
-        t = Ticket(env, self.tid)
-        t['status'] = 'new'
-        #for error in error_messages:
+    def start(self):
+        """
+        inserts all testcases and their actions to the database and sets the
+        testrun based ticket status to 'accepted'.
+        """
+        self.validate()
+        for tc in self.testcases:
+            self.testcases.insert()
+        self._set_accepted()
+        return 
+
+    def _set_defect(self, errors):
+        self.ticket[STATUS] = 'new'
+        # TODO: for error in error_messages:
             #t['description'] += error
-        return t.save_changes()
+        return self.ticket.save_changes()
 
     def _set_accepted(self, env):
-        t = Ticket(env, self.tid)
-        t['status'] = 'accepted'
-        return t.save_changes()
+        self.ticket[STATUS] = 'accepted'
+        return self.ticket.save_changes()
 
 class TestCaseFilter(object):
     """
@@ -207,5 +250,36 @@ class TestActionFilter(object):
     """
     def get(self, **kwargs):
         return [TestAction(id=1, testrun="1", tcid="1", description="create a document in the workspace", title="set doRunRun True", expected_result="run forever", status=NOT_TESTED, comment=None)]
+
+
+class TestRunQuery(object):
+    """ query testruns through trac query
+        testruns = TestRun().query(env, status=new)
+        testrun returns a list of tickets with type=testrun and status=new
+    """
+
+    def __init__(self, env, **kwargs):
+        self.env= env
+        if kwargs:
+            querystring = 'type=testrun'
+            for key, value in kwargs.iteritems():
+                querystring += '&%s=%s' % (key, value)
+            self.query = TicketQuery.from_string(env, querystring)
+        else:
+            # query * testrun tickets
+            self.query = TicketQuery.from_string(env, 'type=testrun')
+
+
+    def execute(self):
+        """Executes the trac ticket query and returns a list of TestRun instances.
+        
+            returns a list of tickets.
+        """
+        testruns = list()
+
+        ticket_dicts = self.query.execute()
+        for t in ticket_dicts:
+            testruns.append(TestRun( self.env, t['id']))
+        return testruns
 
 # vim: set ft=python ts=4 sw=4 expandtab :

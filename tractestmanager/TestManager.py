@@ -52,7 +52,6 @@ from trac.resource import Resource
 from interfaces import ITestManagerPanelProvider
 from config import MANAGER_PERMISSION, TESTER_PERMISSION
 
-import db_models
 import models
 
 class TestManagerPlugin(Component):
@@ -65,7 +64,6 @@ class TestManagerPlugin(Component):
 
     def __init__(self):
         Component.__init__(self)
-        #db_models.initenv(self.env)
 
     # INavigationContributor methods
     def get_active_navigation_item(self, req):
@@ -190,7 +188,6 @@ class HomePanel(Component):
     implements(ITestManagerPanelProvider)
     def __init__(self):
         Component.__init__(self)
-        #db_models.initenv(self.env)
 
     def get_admin_panels(self, req):
         """ returns the Section and the Name for the Navigation
@@ -222,7 +219,6 @@ class TestPlanPanel(Component):
     implements(ITestManagerPanelProvider)
     def __init__(self):
         Component.__init__(self)
-        db_models.TRACENV= self.env
 
     def get_admin_panels(self, req):
         """ returns the Section and the Name for the Navigation
@@ -245,31 +241,34 @@ class TestPlanPanel(Component):
         data["page"] = 'TestManager_base.html'
 
         if 'start_plan' in req.args:
-            # TODO: start testplan in sep. funktion auslagern
+            # setup and start a new testrun
             pagename = req.args['start_plan']
             self.log.debug("trying to start testplan " + pagename)
-            new_run = models.TestRun()
+            testrun = models.TestRun()
             try:
-                new_run.setup(self.env, pagename, req.authname)
+                testrun.setup(self.env, pagename, req.authname)
+                testrun.start()
             except TracError, e:
                 data["error"] = e.message
+
         elif 'testplan_to_restart' in req.args:
             # we have a defect testrun to be restarted
             runid = req.args['testplan_to_restart']
             self.log.debug("trying to restart testplan " + runid)
-            runticket = models.TestRun().query(self.env, id=runid)
-            old_run = models.TestRun()
+            testrun = models.TestRun(runid)
             try:
-                old_run.setup(self.env, runticket[0]['summary'], req.authname, runid=runid)
+                testrun.start()
             except TracError, e:
                 data["error"] = e.message
 
-        # render plans
-        runs = models.TestRun().query(self.env, status='accepted')
+        # query and render accepted testruns
+        runs = models.TestRunQuery(self.env, status='accepted').execute()
+
         # TODO: populate with TestRun model
         for run in runs:
             from genshi.builder import tag
             run['ref'] = tag.a('#', run['id'], ' ', run['summary'], href=req.href.ticket(run['id']))
+
         testplans = list()
         for testplan in WikiSystem(self.env).get_pages('Testplan'):
             testplans.append(testplan)
@@ -277,13 +276,15 @@ class TestPlanPanel(Component):
             data["info"] = 'There are no testplans'
         if len(runs) < 1:
             data["info"] = 'There are no running testplans'
+
         # get active and valid testruns
         data["testruns"] = runs
         data["testplans"] = testplans
         # TODO: to be implemented in order to populate an already startet but brick testrun
         data["defect_runs"] = models.TestRun().query(self.env, status='new')
         for defect_run in data["defect_runs"]:
-            defect_run['ref'] = tag.a('#', defect_run['id'], ' ', defect_run['summary'], href=req.href.ticket(defect_run['id']))
+            defect_run['ref'] = tag.a('#', defect_run['id'], ' ', 
+                    defect_run['summary'], href=req.href.ticket(defect_run['id']))
         data["title"] = 'TestPlans'
         return data['page'] , data
 

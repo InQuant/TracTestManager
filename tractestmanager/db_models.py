@@ -18,8 +18,6 @@ import string
 LOGGER="db_models"
 def debug(msg): logging.getLogger(LOGGER).debug(msg)
 
-TRACENV= None
-
 # modul exceptions
 class DbException(Exception):
     pass
@@ -109,12 +107,9 @@ class DbLite(object):
     """
 
     ##########################################################################
-    def __init__(self, _env= None):
+    def __init__(self, env):
         debug('DbLite.__init__()')
-        if _env:
-            self.env= _env
-        else:
-            self.env= TRACENV
+        self.env= env
 
     ##########################################################################
     def setup(self):
