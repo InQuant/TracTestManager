@@ -66,7 +66,8 @@ class TestCaseManipulator(Component):
                 # testaction failed
                 testrun = Ticket(self.env, tkt_id=req.args['testrun'])
                 # add comment to ticket with ta_id, comment and tcid
-                comment = 'FAILED %s - %s: %s' % (testaction.title, testaction.tcid, req.args['comment'])
+                testcase = models.TestCaseFilter().get()[0]
+                comment = 'FAILED \"%s\" in wiki:%s,  %s' % (testaction.title, testcase.wiki, req.args['comment'])
                 # TODO: dencode base64
                 testrun.modify_comment(datetime.now(utc), req.args['user'], comment)
                 # send ajax callback success
