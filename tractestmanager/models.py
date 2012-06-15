@@ -192,14 +192,14 @@ class TestCaseFilter(object):
             #testcases.append(TestCase(row))
 
         # return testcases
-        testactions = list()
+        actions = list()
         i = 5
         while i>0:
             i = i-1
             testaction = TestActionFilter().get()[0]
             testaction.id = i
-            testactions.append(testaction)
-        return [TestCase(id="1", wiki="TcDocCreate", description="create a document in the workspace", title="= TcDocCreate =", revision="3", tester="lmende", testrun="2", status=NOT_TESTED, testactions=testactions)]
+            actions.append(testaction)
+        return [TestCase(id="1", wiki="TcDocCreate", description="create a document in the workspace", title="= TcDocCreate =", revision="3", tester="lmende", testrun="2", status=NOT_TESTED, actions=actions)]
 
 class TestActionFilter(object):
     """
