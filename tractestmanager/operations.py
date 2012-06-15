@@ -33,6 +33,7 @@ from trac.web import IRequestHandler
 from datetime import datetime
 from trac.util.datefmt import utc
 
+#from genshi.builder import tag
 #from trac.util.compat import partial
 
 #from trac.perm import IPermissionRequestor
@@ -45,6 +46,12 @@ import json
 from trac.ticket.model import Ticket
 import models
 
+COMMENT_TEMPLATE = """
+FAILED "%(title)s" in [wiki:%(wiki)s?revision=%(revision)s]
+%(user)s said:
+%(comment)s
+"""
+
 class TestCaseManipulator(Component):
     """ Component that supports the Testcase Execution
     """
@@ -53,7 +60,7 @@ class TestCaseManipulator(Component):
     # XXX: This is a hack - refactor later
     #      every request with /json_testaction/? in it will match
     #      how a to define a valid operation:
-    #      http://localhorst:8000/trac/json_testaction?user=testuser&id=1&status=failed&foo=bar&comment=fooobar&testrun=1
+    #      http://localhorst:8000/trac/json_testaction?user=testuser&id=1&status=failed&comment=fooobar&testrun=1
     def match_request(self, req):
         return re.match(r'/json_testaction/?', req.path_info) is not None
 
@@ -67,8 +74,19 @@ class TestCaseManipulator(Component):
                 testrun = Ticket(self.env, tkt_id=req.args['testrun'])
                 # add comment to ticket with ta_id, comment and tcid
                 testcase = models.TestCaseFilter().get()[0]
-                comment = 'FAILED \"%s\" in wiki:%s,  %s' % (testaction.title, testcase.wiki, req.args['comment'])
-                # TODO: dencode base64
+                #from ipdb import set_trace; set_trace()
+                #tc_link = "wiki/%s?revision=%s" % (testcase.wiki, testcase.revision)
+                #tc_link = req.href() + tc_link
+                # TODO: check if testcase can be opened from a ticket
+                #tc_link = tag.a(testcase.wiki, href='#',
+                            #onclick='window.open("TestManager/general/testcase/%s", "Popupfenster", "width=400,height=400,resizable=yes");' % testcase.id)
+                comment_data = {"title": testaction.title, "wiki": testcase.wiki, "revision": testcase.revision, "user": req.args['user'], "comment": req.args['comment']}
+                comment = COMMENT_TEMPLATE % comment_data
+                #comment = """
+                          #FAILED \"%s\" in [wiki:%s?revision=%s]
+                          #%s
+                          #""" % (testaction.title, testcase.wiki, testcase.revision, req.args['comment'])
+                # TODO: decode base64
                 testrun.modify_comment(datetime.now(utc), req.args['user'], comment)
                 # send ajax callback success
                 req.send(json.dumps({"STATUS_UPDATE":"SUCCESS"}))
