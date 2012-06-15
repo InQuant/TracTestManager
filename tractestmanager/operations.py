@@ -30,6 +30,9 @@ from trac.core import TracError
 
 from trac.web import IRequestHandler
 
+from datetime import datetime
+from trac.util.datefmt import utc
+
 #from trac.util.compat import partial
 
 #from trac.perm import IPermissionRequestor
@@ -39,7 +42,7 @@ from trac.web import IRequestHandler
 #from config import MANAGER_PERMISSION, TESTER_PERMISSION
 
 import json
-#import db_models
+from trac.ticket.model import Ticket
 import models
 
 class TestCaseManipulator(Component):
@@ -48,17 +51,27 @@ class TestCaseManipulator(Component):
     implements(IRequestHandler)
 
     # XXX: This is a hack - refactor later
-    #      every request with /json_operate/? in it will match
+    #      every request with /json_testaction/? in it will match
+    #      how a to define a valid operation:
+    #      http://localhorst:8000/trac/json_testaction?id=1&status=failed&foo=bar&comment=fooobar&testrun=1
     def match_request(self, req):
         return re.match(r'/json_testaction/?', req.path_info) is not None
 
     def process_request(self, req):
         try:
             # mocking testaction set ok
-            testaction = models.TestActionFilter().get(ta_id=req.args['ta_id'])[0]
-            testaction.set_status(**req.args)
-            req.send(json.dumps({"STATUS_UPDATE":"SUCCESS"}))
-        except TracError, e:
-            raise TracError(e)
+            testaction = models.TestActionFilter().get(ta_id=req.args['id'])[0]
+            testaction.set_status(status=req.args['status'], comment=req.args['comment'])
+            if req.args['status'] == models.FAILED:
+                # testaction failed
+                testrun = Ticket(self.env, tkt_id=req.args['testrun'])
+                # add comment to ticket with ta_id, comment and tcid
+                comment = 'FAILED %s - %s: %s' % (testaction.title, testaction.tcid, req.args['comment'])
+                # TODO: dencode base64
+                testrun.modify_comment(datetime.now(utc), 'testuser', comment)
+                # send ajax callback success
+                req.send(json.dumps({"STATUS_UPDATE":"SUCCESS"}))
+        except TracError:
+                req.send(json.dumps({"STATUS_UPDATE":"FAILED"}))
 
 # vim: set ft=python ts=4 sw=4 expandtab :
