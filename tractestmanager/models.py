@@ -66,6 +66,13 @@ class TestAction(object):
     def getattrs( self ):
         return map( lambda x: getattr( self, x), db_models.TA_KEYS )
 
+    def set_status(self, **kwargs):
+        """
+        >>> testaction = TestActionFilter(taid=1)[0]
+        >>> testaction.set_status(status="OK", comment="Hello World")
+        """
+        pass
+
 class TestRun(object):
     """ TestRun model
         This is a ticket
