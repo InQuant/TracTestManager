@@ -11,30 +11,7 @@
     <title py:if="title">$title</title>
     <meta py:if="version or page.author == 'trac'" name="ROBOTS" content="NOINDEX, NOFOLLOW" />
     <script type="text/javascript" src="${href.chrome()}/common/js/jquery.js"></script>
-    <script type="text/javascript">
-    jQuery(document).ready(function($) {
-        // Accordion
-        $('.trigger').not('.trigger_active').next('.toggle_container').hide();
-        // show the first container - buggy!
-        // $("[class^=toggle_container]:first").show();
-        $('.trigger').click( function() {
-            var trig = $(this);
-            var duration = 100;
-            if ( trig.hasClass('trigger_active') ) {
-                trig.next('.toggle_container').slideToggle(duration);
-                trig.removeClass('trigger_active');
-                trig.css("background","white");                
-            } else {
-                $('.trigger_active').next('.toggle_container').slideToggle(duration);
-                $('.trigger_active').removeClass('trigger_active');                
-                trig.next('.toggle_container').slideToggle(duration);
-                trig.css("background","#eee");
-                trig.addClass('trigger_active');
-            };
-            return false;
-        });
-    });
-  </script>
+    <script type="text/javascript" src="${href.chrome()}/TestManager/js/accordion.js"></script>
   <style>
       .trigger {
           cursor:pointer;
@@ -44,19 +21,23 @@
 
   <body>  
     <div id="content">
-        <span py:for="action in TestCaseActions">                        
-            <h3 class="trigger">$action.title</h3>
-            <div class="toggle_container" style="background:#eee">
-                <p>$action.description</p>
-                <form method="post" action="">
-                    <input type="submit" name="ok" value="OK" />
-                    <input type="submit" name="failed" value="Failed" />
-                    <p>
-                    <textarea>$action.id</textarea>
-                    </p>
-                </form> 
+        <form method="get" action="">
+        <input type="hidden" id="authname" value="$authname" />
+        <span py:for="action in TestCaseActions">                                    
+            <h3 class="trigger">$action.title ($action.id)</h3>            
+            <div class="toggle_container" style="background:#eee" id="$action.id">
+                <input type="hidden" name="testrun" class="testrun" value="$action.testrun" />
+                <p>$action.description</p>                
+                <p><strong>Expected result:</strong> $action.expected_result</p>
+                <p>
+                <textarea></textarea>
+                </p>                
+                <input type="submit" value="OK" name="ok" />                    
+                <input type="submit" value="Failed" name="failed" />                
             </div>            
-        </span>           
+        </span>
+        </form>            
+        <div id="messages"></div>           
     </div>
     <div id="content" class="wiki teamchillhome">
       <div class="wikipage searchable">
