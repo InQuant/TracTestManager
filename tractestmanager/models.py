@@ -66,7 +66,7 @@ class TestAction(object):
     def getattrs( self ):
         return map( lambda x: getattr( self, x), db_models.TA_KEYS )
 
-    def set_status(self, **kwargs):
+    def set_status(self, status, comment=None):
         """
         >>> testaction = TestActionFilter(taid=1)[0]
         >>> testaction.set_status(status="OK", comment="Hello World")
@@ -192,7 +192,14 @@ class TestCaseFilter(object):
             #testcases.append(TestCase(row))
 
         # return testcases
-        return [TestCase(id="1", wiki="TcDocCreate", description="create a document in the workspace", title="= TcDocCreate =", revision="3", tester="lmende", testrun="2", status=NOT_TESTED)]
+        testactions = list()
+        i = 5
+        while i>0:
+            i = i-1
+            testaction = TestActionFilter().get()
+            testaction.id = i
+            testactions.append(testaction)
+        return [TestCase(id="1", wiki="TcDocCreate", description="create a document in the workspace", title="= TcDocCreate =", revision="3", tester="lmende", testrun="2", status=NOT_TESTED, testactions=testactions)]
 
 class TestActionFilter(object):
     """
