@@ -350,26 +350,29 @@ class TestCasePanel(Component):
         """
         from TestcaseParser import TestcaseParser
         if TESTER_PERMISSION in req.perm:
-            data = dict() #template data
+            data = dict() #template data            
             data["info"] = req.args.get("info", "")
             data["warning"] = req.args.get("warning", "")
             data["error"] = req.args.get("error", "")
-            data["id"] = req.args.get("id", "")
+            # data["id"] = req.args.get("id", "")
+            data["id"] = req.args.get("path_info", None)
             data["page"] = 'TestManager_accordion.html'
+            data["authname"] = req.authname
             # TODO: get the testcase
 
             tcp = TestcaseParser(self.env)
             tco = tcp.parseTestcase("Testcases/UC013")
-            data["TestCaseActions"] = tco.actions
+            #data["TestCaseActions"] = tco.actions        
             if data["id"]:
-                import models
-
-                testcase = models.TestCaseFilter(id=data['id'])
+                import models                
+                # testcase = models.TestCaseFilter(id=data['id'])                                    
+                testcase = models.TestCaseFilter().get()[0]
+                data["TestCaseActions"] = testcase.actions
                 if not testcase:
                     # not found
                     data["error"] = 'the requested testcase could not be found or has been erased'
                 else:
-                    if req.authuser != testcase.tester:
+                    if req.authname != testcase.tester:
                         # assigned to someone else - but can be done by mr urlaubsvertretung
                         data["warning"] = 'this testcase has been assigned to %s' % testcase.tester
                     # TODO: datenbank auslesen usw usf                    
