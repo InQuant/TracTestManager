@@ -53,7 +53,7 @@ class TestCaseManipulator(Component):
     # XXX: This is a hack - refactor later
     #      every request with /json_testaction/? in it will match
     #      how a to define a valid operation:
-    #      http://localhorst:8000/trac/json_testaction?id=1&status=failed&foo=bar&comment=fooobar&testrun=1
+    #      http://localhorst:8000/trac/json_testaction?user=testuser&id=1&status=failed&foo=bar&comment=fooobar&testrun=1
     def match_request(self, req):
         return re.match(r'/json_testaction/?', req.path_info) is not None
 
@@ -68,7 +68,7 @@ class TestCaseManipulator(Component):
                 # add comment to ticket with ta_id, comment and tcid
                 comment = 'FAILED %s - %s: %s' % (testaction.title, testaction.tcid, req.args['comment'])
                 # TODO: dencode base64
-                testrun.modify_comment(datetime.now(utc), 'testuser', comment)
+                testrun.modify_comment(datetime.now(utc), req.args['user'], comment)
                 # send ajax callback success
                 req.send(json.dumps({"STATUS_UPDATE":"SUCCESS"}))
         except TracError:
