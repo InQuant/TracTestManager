@@ -108,15 +108,16 @@ class DbLite(object):
 
     ##########################################################################
     def __init__(self, env):
-        debug('DbLite.__init__()')
         self.env= env
+        self.dbg= self.env.log.debug
+        self.dbg('DbLite.__init__()')
 
     ##########################################################################
     def setup(self):
         """
         Sets up the two additional testman tables
         """
-        debug('DbLite.setup()')
+        self.dbg('DbLite.setup()')
 
 
     ##########################################################################
@@ -130,7 +131,7 @@ class DbLite(object):
 
         returns new testcase id
         """
-        debug('DbLite.insertTestCase()')
+        self.dbg('DbLite.insertTestCase()')
         
         @with_transaction(self.env)
         def _insertTestCase(db):
@@ -141,11 +142,11 @@ class DbLite(object):
             stmt= "INSERT INTO testcase (%s) VALUES (%s)" % (
                     string.join(TC_KEYS[1:], ',') , 
                     getInsertPlaceHolders(TC_KEYS[1:]))
-            debug(stmt)
+            self.dbg(stmt)
             
             c.execute(stmt, orderedValues(TC_KEYS[1:], tcDict))
             tcid= c.lastrowid
-            debug("tcid= %d" % tcid)
+            self.dbg("tcid= %d" % tcid)
 
             if (actionDicts):
                 for ad in actionDicts: ad['tcid']= tcid
@@ -154,7 +155,7 @@ class DbLite(object):
                 stmt= "INSERT INTO testaction (%s) VALUES (%s)" % (
                     string.join(TA_KEYS[1:], ',') , 
                     getInsertPlaceHolders(TA_KEYS[1:]))
-                debug(stmt)
+                self.dbg(stmt)
                 
                 # build list from action value lists
                 actions= []
@@ -173,7 +174,7 @@ class DbLite(object):
         """
         selects all testcases of a given testrun with a given status.
         """
-        debug('DbLite.getTestCases()')
+        self.dbg('DbLite.getTestCases()')
         rows= []
 
         @with_transaction(self.env)
@@ -201,12 +202,12 @@ class DbLite(object):
             if filters:
                  stmt= stmt + ' WHERE ' + string.join( filters, ' AND ')
             
-            debug( filters )
-            debug( fvalues )
-            debug( stmt )
+            self.dbg( filters )
+            self.dbg( fvalues )
+            self.dbg( stmt )
             c.execute( stmt, fvalues )
             rows= c.fetchall()
-            debug(rows)
+            self.dbg(rows)
             return rows
         return rows
 
@@ -220,7 +221,7 @@ class DbLite(object):
         Selects all testactions of a given testrun and testcase id with a given
         status.
         """
-        debug('DbLite.getTestActions()')
+        self.dbg('DbLite.getTestActions()')
         rows= []
 
         @with_transaction(self.env)
@@ -248,12 +249,12 @@ class DbLite(object):
             if filters:
                  stmt= stmt + ' WHERE ' + string.join( filters, ' AND ' )
             
-            debug( filters )
-            debug( fvalues )
-            debug( stmt )
+            self.dbg( filters )
+            self.dbg( fvalues )
+            self.dbg( stmt )
             c.execute( stmt, fvalues )
             rows= c.fetchall()
-            debug(rows)
+            self.dbg(rows)
             return rows
         return rows
 

@@ -10,13 +10,12 @@ __docformat__ = 'plaintext'
 
 from trac.ticket.query import Query as TicketQuery
 from trac.ticket.model import Ticket
-from db_models import NOT_TESTED, PASSED, FAILED, PASSED_COMMENT
 from trac.wiki import WikiPage
 from trac.core import TracError
 
 import db_models
+from db_models import NOT_TESTED, PASSED, FAILED, PASSED_COMMENT
 from macros import TestPlanMacro
-from TestcaseParser import TestcaseParser
 
 SUMMARY = 'summary'
 OWNER   = 'owner'
@@ -94,10 +93,9 @@ class TestRun(object):
         summary    -> the testrun aka ticket summary
         testcases  -> the list of validated TestCase instances of the testrun
     """
-    exists = property(lambda self: self.runid is not None)
 
     @property
-    def id(self): return runid
+    def id(self): return self.runid
 
     @property
     def summary(self): return self.ticket[SUMMARY]
@@ -109,8 +107,25 @@ class TestRun(object):
     @owner.setter
     def owner(self, value): self.ticket[OWNER] = value
 
+    @property
+    def created(self): return self.ticket['time']
+
+    exists = property(lambda self: self.runid is not None)
+
+    @property
+    def status(self): return self.ticket['status']
+
+    def __getitem__(self, name):
+        return getattr( self, name)
+
+    def __setitem__(self, name, value):
+        setattr(self, name, value)
+
     def __init__(self, env, runid= None):
         self.env= env
+        self.dbg= env.log.debug
+        self.dbg('TestRun( runid= %s )' % str(runid))
+
         self.testcases= list()
 
         # get the testrun based ticket ...
@@ -128,6 +143,7 @@ class TestRun(object):
         """ Sets up a new testrun and inserts a new  trac ticket of type
         testrun into the database.
         """
+        self.dbg('TestRun.setup( %s, %s )' % (str(pagename), str(manager)))
 
         self.wikiplan = WikiPage(self.env, pagename)
 
@@ -139,6 +155,8 @@ class TestRun(object):
             'description'  : self.wikiplan.text,
             'type'         : 'testrun',
         }
+        self.dbg('tickte data: %s' % data)
+
         try:
             self.ticket.populate(data)
             self.runid = self.ticket.insert()
@@ -146,6 +164,7 @@ class TestRun(object):
             raise TracError( "TestRun ticket could not be created: %s" %
                     e.message )
 
+        self.dbg('runid =  %d' % self.runid)
         return self.runid
 
     def validate(self):
@@ -164,6 +183,7 @@ class TestRun(object):
         Testcases/SaveAsEinerBaugruppe mmuster
         TcErzeugenEinerBaugruppe lmende, mmuster
         """
+        self.dbg('TestRun.validate()')
 
         try:
             attributes, tc_tester_tups = TestPlanMacro(self.env).parse_config(
@@ -175,11 +195,12 @@ class TestRun(object):
         # TODO: verify that tc_tester_tups are valid
 
         # now parse (get) all testcases from tc_tester_tups
+        from TestcaseParser import TestcaseParser
         parser = TestcaseParser(self.env)
         errors = dict()
         self.testcases= list()
 
-        for pagename, tester in self.tc_tester_tups.iteritems():
+        for pagename, tester in tc_tester_tups.iteritems():
             try:
                 tc = parser.parseTestcase(pagename= pagename)
                 tc.tester = tester
@@ -197,7 +218,7 @@ class TestRun(object):
         if errors:
             self._set_defect(self.env, errors)
             raise TracError( 
-                "Testplan could not be started, for more information "\ 
+                "Testplan could not be started, for more information "\
                 "review the testplan page '%s' and restart the testplan" % 
                 self.wikiplan.name)
 
@@ -206,19 +227,22 @@ class TestRun(object):
         inserts all testcases and their actions to the database and sets the
         testrun based ticket status to 'accepted'.
         """
+        self.dbg('TestRun.start()')
         self.validate()
         for tc in self.testcases:
-            self.testcases.insert()
+            tc.insert()
         self._set_accepted()
         return 
 
-    def _set_defect(self, errors):
+    def _set_defect(self, errors= None):
+        self.dbg('TestRun._set_defect()')
         self.ticket[STATUS] = 'new'
         # TODO: for error in error_messages:
             #t['description'] += error
         return self.ticket.save_changes()
 
-    def _set_accepted(self, env):
+    def _set_accepted(self):
+        self.dbg('TestRun._set_accepted()')
         self.ticket[STATUS] = 'accepted'
         return self.ticket.save_changes()
 
@@ -226,6 +250,9 @@ class TestCaseFilter(object):
     """
     filters testcases from db.
     """
+    def __init__(self, env):
+        self.env= env
+
     def get(self, **kwargs):
         #dbtcs     = db_models.DbTestCases()
         #tcrows    = dbtcs.get(kwargs)
@@ -239,17 +266,23 @@ class TestCaseFilter(object):
         i = 5
         while i>0:
             i = i-1
-            testaction = TestActionFilter().get()[0]
+            testaction = TestActionFilter(self.env).get()[0]
             testaction.id = i
             actions.append(testaction)
-        return [TestCase(id="1", wiki="TcDocCreate", description="create a document in the workspace", title="= TcDocCreate =", revision="3", tester="lmende", testrun="2", status=NOT_TESTED, actions=actions)]
+        return [TestCase(self.env, id="1", wiki="TcDocCreate", description="create a document in the workspace", title="= TcDocCreate =", revision="3", tester="lmende", testrun="2", status=NOT_TESTED, actions=actions)]
 
 class TestActionFilter(object):
     """
     filters testactions from db.
     """
+    def __init__(self, env):
+        self.env= env
+
     def get(self, **kwargs):
-        return [TestAction(id=1, testrun="1", tcid="1", description="create a document in the workspace", title="set doRunRun True", expected_result="run forever", status=NOT_TESTED, comment=None)]
+        return [TestAction(self.env, id=1, testrun="1", tcid="1", 
+            description="create a document in the workspace", 
+            title="set doRunRun True", expected_result="run forever", 
+            status=NOT_TESTED, comment=None)]
 
 
 class TestRunQuery(object):
@@ -260,6 +293,7 @@ class TestRunQuery(object):
 
     def __init__(self, env, **kwargs):
         self.env= env
+
         if kwargs:
             querystring = 'type=testrun'
             for key, value in kwargs.iteritems():

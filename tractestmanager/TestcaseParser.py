@@ -37,7 +37,7 @@ class TestcaseParser(object):
         #setup_all(True)
         #create_all()
 
-    def _parse_xml(self, version=None):
+    def _parse_xml(self, pagename, version=None):
         # TODO: refactore the parsing of nodes...
 
         tree = Tree.fromstring(self.xml)
@@ -46,7 +46,7 @@ class TestcaseParser(object):
         case = TestCase(self.env)
         case.version = version
         try:
-            case.wiki = self.pagename
+            case.wiki = pagename
         except Exception:
             ("This is only a dryrun")
         # we now have paragraph, paragraph and definition list
@@ -106,7 +106,7 @@ class TestcaseParser(object):
             # get the xml representation of a testcase
             self.xml = publish_parts(wikipage.text,writer_name = 'xml')['whole']
             try:
-                case = self._parse_xml(wikipage.version)
+                case = self._parse_xml(pagename, wikipage.version)
             except TracError, e:
                 raise e
             return case

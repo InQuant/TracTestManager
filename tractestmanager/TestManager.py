@@ -244,9 +244,9 @@ class TestPlanPanel(Component):
             # setup and start a new testrun
             pagename = req.args['start_plan']
             self.log.debug("trying to start testplan " + pagename)
-            testrun = models.TestRun()
+            testrun = models.TestRun(self.env)
             try:
-                testrun.setup(self.env, pagename, req.authname)
+                testrun.setup(pagename, req.authname)
                 testrun.start()
             except TracError, e:
                 data["error"] = e.message
@@ -255,7 +255,7 @@ class TestPlanPanel(Component):
             # we have a defect testrun to be restarted
             runid = req.args['testplan_to_restart']
             self.log.debug("trying to restart testplan " + runid)
-            testrun = models.TestRun(runid)
+            testrun = models.TestRun(self.env, runid)
             try:
                 testrun.start()
             except TracError, e:
@@ -267,7 +267,8 @@ class TestPlanPanel(Component):
         # TODO: populate with TestRun model
         for run in runs:
             from genshi.builder import tag
-            run['ref'] = tag.a('#', run['id'], ' ', run['summary'], href=req.href.ticket(run['id']))
+            #run['ref'] = tag.a('#', run['id'], ' ', run['summary'], href=req.href.ticket(run['id']))
+            run['ref'] = tag.a('#', run.id, ' ', run.summary, href=req.href.ticket(run.id))
 
         testplans = list()
         for testplan in WikiSystem(self.env).get_pages('Testplan'):
@@ -281,10 +282,10 @@ class TestPlanPanel(Component):
         data["testruns"] = runs
         data["testplans"] = testplans
         # TODO: to be implemented in order to populate an already startet but brick testrun
-        data["defect_runs"] = models.TestRun().query(self.env, status='new')
+        data["defect_runs"] = models.TestRunQuery(self.env, status='new').execute()
         for defect_run in data["defect_runs"]:
-            defect_run['ref'] = tag.a('#', defect_run['id'], ' ', 
-                    defect_run['summary'], href=req.href.ticket(defect_run['id']))
+            defect_run['ref'] = tag.a('#', defect_run.id, ' ', 
+                    defect_run.summary, href=req.href.ticket(defect_run.id))
         data["title"] = 'TestPlans'
         return data['page'] , data
 
@@ -311,7 +312,7 @@ class TestCasesPanel(Component):
             data["error"] = req.args.get("error", "")
             # get all TestCases assigned to the user and have status "not tested"
 
-            tcs = models.TestCaseFilter()
+            tcs = models.TestCaseFilter(self.env)
             tc_list = tcs.get(user= req.authname, status= models.NOT_TESTED)
             if not tc_list:
                 data["info"] = 'no testcases available'
@@ -367,7 +368,7 @@ class TestCasePanel(Component):
             if data["id"]:
                 import models                
                 # testcase = models.TestCaseFilter(id=data['id'])                                    
-                testcase = models.TestCaseFilter().get()[0]
+                testcase = models.TestCaseFilter(self.env).get()[0]
                 data["TestCaseActions"] = testcase.actions
                 if not testcase:
                     # not found
