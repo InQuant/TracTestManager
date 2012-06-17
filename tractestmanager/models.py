@@ -8,6 +8,7 @@
 __author__ = 'Otto Hockel <otto.hockel@inquant.de>'
 __docformat__ = 'plaintext'
 
+import string
 from trac.ticket.query import Query as TicketQuery
 from trac.ticket.model import Ticket
 from trac.wiki import WikiPage
@@ -25,14 +26,14 @@ class TestCase(object):
     """ Testcase with attributes and and a list of actions.
     """
 
-    def __init__(self, env, **kwargs):
+    def __init__(self, env, attributes={}):
         self.db= db_models.DbLite(env)
         self.actions = []
 
         for key in db_models.TC_KEYS: setattr(self, key, None)
 
-        if kwargs:
-            for key, value in kwargs.iteritems():
+        if attributes:
+            for key, value in attributes.iteritems():
                 setattr(self, key, value)
 
     def getattrs( self ):
@@ -57,11 +58,11 @@ class TestAction(object):
     """ Testaction with attributes as part of a testcase.
     """
 
-    def __init__(self, env, **kwargs):
+    def __init__(self, env, attributes={}):
         for key in db_models.TA_KEYS: setattr(self, key, None)
 
-        if kwargs:
-            for key, value in kwargs.iteritems():
+        if attributes:
+            for key, value in attributes.iteritems():
                 setattr(self, key, value)
 
     def getattrs( self ):
@@ -246,44 +247,61 @@ class TestRun(object):
         self.ticket[STATUS] = 'accepted'
         return self.ticket.save_changes()
 
-class TestCaseFilter(object):
+class TestQuery(object):
+    """ core query class.
     """
-    filters testcases from db.
-    """
-    def __init__(self, env):
+
+    def __init__(self, env, **kwargs):
         self.env= env
+        self.db= db_models.DbLite(env)
+        self.query= None
+        self.values= []
 
-    def get(self, **kwargs):
-        #dbtcs     = db_models.DbTestCases()
-        #tcrows    = dbtcs.get(kwargs)
-        #testcases = list()
+        if kwargs:
+            # build filter
+            self.query= string.join(
+                [k + '=%s' for k in kwargs.keys()], ' AND ')
+            self.values= kwargs.values()
 
-        #for row in tcrows:
-            #testcases.append(TestCase(row))
-
-        # return testcases
-        actions = list()
-        i = 5
-        while i>0:
-            i = i-1
-            testaction = TestActionFilter(self.env).get()[0]
-            testaction.id = i
-            actions.append(testaction)
-        return [TestCase(self.env, id="1", wiki="TcDocCreate", description="create a document in the workspace", title="= TcDocCreate =", revision="3", tester="lmende", testrun="2", status=NOT_TESTED, actions=actions)]
-
-class TestActionFilter(object):
+class TestCaseQuery(TestQuery):
+    """ query testcases from db.
     """
-    filters testactions from db.
+
+    def __init__(self, env, **kwargs):
+        TestQuery.__init__(self, env, **kwargs)
+
+    def execute(self):
+        """Executes the db test case query and returns a list of TestCase instances.
+        
+        """
+        testcases = list()
+        
+        rows= self.db.getTestCases( self.query, self. values )
+
+        for row in rows:
+            testcases.append( 
+                TestCase(self.env, dict(zip(db_models.TC_KEYS, row))))
+        return testcases
+
+class TestActionQuery(TestQuery):
+    """ query testactions from db.
     """
-    def __init__(self, env):
-        self.env= env
 
-    def get(self, **kwargs):
-        return [TestAction(self.env, id=1, testrun="1", tcid="1", 
-            description="create a document in the workspace", 
-            title="set doRunRun True", expected_result="run forever", 
-            status=NOT_TESTED, comment=None)]
+    def __init__(self, env, **kwargs):
+        TestQuery.__init__(self, env, **kwargs)
 
+    def execute(self):
+        """Executes the db test action query and returns a list of TestAction instances.
+        
+        """
+        testactions = list()
+        
+        rows= self.db.getTestActions( self.query, self. values )
+
+        for row in rows:
+            testactions.append( 
+                TestAction(self.env, dict(zip(db_models.TA_KEYS, row))))
+        return testactions
 
 class TestRunQuery(object):
     """ query testruns through trac query

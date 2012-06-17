@@ -67,13 +67,13 @@ class TestCaseManipulator(Component):
     def process_request(self, req):
         try:
             # mocking testaction set ok
-            testaction = models.TestActionFilter().get(ta_id=req.args['id'])[0]
+            testaction = models.TestActionQuery(self.env, id=req.args['id']).get()[0]
             testaction.set_status(status=req.args['status'], comment=req.args['comment'])
             if req.args['status'] == models.FAILED:
                 # testaction failed
                 testrun = Ticket(self.env, tkt_id=req.args['testrun'])
                 # add comment to ticket with ta_id, comment and tcid
-                testcase = models.TestCaseFilter().get()[0]
+                testcase = models.TestCaseQuery(self.env).execute()[0]
                 #from ipdb import set_trace; set_trace()
                 #tc_link = "wiki/%s?revision=%s" % (testcase.wiki, testcase.revision)
                 #tc_link = req.href() + tc_link

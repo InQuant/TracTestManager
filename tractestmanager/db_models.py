@@ -101,7 +101,7 @@ class DbLite(object):
     [...]
 
     Get filtered actions
-    >>> db.getTestActions(testrun= 3, status= NOT_TESTED)
+    >>> db.getTestActions('testrun=%s AND status=%s', [3, NOT_TESTED])
     [...]
 
     """
@@ -170,93 +170,58 @@ class DbLite(object):
         return TC_KEYS
 
     ##########################################################################
-    def getTestCases(self, tcid= None, testrun= None, tester= None, status= None):
+    def getTestCases(self, querystring= None, values= []):
         """
         selects all testcases of a given testrun with a given status.
         """
         self.dbg('DbLite.getTestCases()')
-        rows= []
+        dbs= [[],]
 
         @with_transaction(self.env)
         def _getTestCases(db):
             c= db.cursor()
             
-            # build filter
-            filters= []
-            fvalues= []
-            if tcid: 
-                filters.append( 'tcid=%s' )
-                fvalues.append( tcid )
-            if testrun: 
-                filters.append( 'testrun=%s' )
-                fvalues.append( testrun )
-            if tester: 
-                filters.append( 'tester=%s' )
-                fvalues.append( tester )
-            if status: 
-                filters.append( 'status=%s' )
-                fvalues.append( status )
-
             # build statement
             stmt= "SELECT * FROM testcase"
-            if filters:
-                 stmt= stmt + ' WHERE ' + string.join( filters, ' AND ')
+            if querystring:
+                 stmt= stmt + ' WHERE ' + querystring
             
-            self.dbg( filters )
-            self.dbg( fvalues )
             self.dbg( stmt )
-            c.execute( stmt, fvalues )
-            rows= c.fetchall()
-            self.dbg(rows)
-            return rows
-        return rows
+            c.execute( stmt, values )
+            dbs[0]= c.fetchall()
+            self.dbg(dbs[0])
+        return dbs[0]
 
     ##########################################################################
     def getTestActionCollumns(self):
-        return TC_ACTIONS
+        return TA_KEYS
 
     ##########################################################################
-    def getTestActions(self, id= None, tcid= None, testrun= None, status= None):
+    def getTestActions(self, querystring= None, values= []):
         """
-        Selects all testactions of a given testrun and testcase id with a given
-        status.
+        Selects all testactions matching the given query string.
+
+        e.g. getTestActions( 'testrun=%s AND status=%s', [3, FAILED] )
         """
         self.dbg('DbLite.getTestActions()')
-        rows= []
-
+        dbs= [[],]
+        
         @with_transaction(self.env)
         def _getTestActions(db):
+            global rows
             c= db.cursor()
             
-            # build filter
-            filters= []
-            fvalues= []
-            if id: 
-                filters.append( 'id=%s' )
-                fvalues.append( id )
-            if tcid: 
-                filters.append( 'tcid=%s' )
-                fvalues.append( tcid )
-            if testrun: 
-                filters.append( 'testrun=%s' )
-                fvalues.append( testrun )
-            if status: 
-                filters.append( 'status=%s' )
-                fvalues.append( status )
-
             # build statement
             stmt= "SELECT * FROM testaction"
-            if filters:
-                 stmt= stmt + ' WHERE ' + string.join( filters, ' AND ' )
+            if querystring:
+                 stmt= stmt + ' WHERE ' + querystring
             
-            self.dbg( filters )
-            self.dbg( fvalues )
             self.dbg( stmt )
-            c.execute( stmt, fvalues )
-            rows= c.fetchall()
-            self.dbg(rows)
-            return rows
-        return rows
+            c.execute( stmt, values )
+            dbs[0]= c.fetchall()
+            self.dbg(dbs[0])
+
+        return dbs[0]
 
 ##############################################################################
 if __name__ == "__main__":

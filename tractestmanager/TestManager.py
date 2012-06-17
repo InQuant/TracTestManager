@@ -312,19 +312,21 @@ class TestCasesPanel(Component):
             data["error"] = req.args.get("error", "")
             # get all TestCases assigned to the user and have status "not tested"
 
-            tcs = models.TestCaseFilter(self.env)
-            tc_list = tcs.get(user= req.authname, status= models.NOT_TESTED)
-            if not tc_list:
+            tcs = models.TestCaseQuery(self.env, 
+                    tester= req.authname, 
+                    status= models.NOT_TESTED).execute()
+            if not tcs:
                 data["info"] = 'no testcases available'
             else:
                 # build link with genshi
-                for tc in tc_list:
+                for tc in tcs:
                     # refer to the testaction module to load the testcase execution
                     # tc.ref = tag.a(tc.wiki, href=req.href.testaction(tc.id))
                     # url = self.env.abs_href("/TestManager/general/testcase/"+tc.id ) 
                     tc.ref = tag.a(tc.wiki, href='#',
-                            onclick='window.open("testcase/%s", "Popupfenster", "width=400,height=400,resizable=yes");' % tc.id)
-                data["testcases"] = tc_list
+                            onclick='window.open("testcase/%s", "Popupfenster",'\
+                            '"width=400,height=400,resizable=yes");' % tc.tcid)
+                data["testcases"] = tcs
             # The template to be rendered
             data["page"] = 'TestManager_base.html'
             data["title"] = 'TestCases'
@@ -366,9 +368,8 @@ class TestCasePanel(Component):
             tco = tcp.parseTestcase("Testcases/UC013")
             #data["TestCaseActions"] = tco.actions        
             if data["id"]:
-                import models                
-                # testcase = models.TestCaseFilter(id=data['id'])                                    
-                testcase = models.TestCaseFilter(self.env).get()[0]
+                testcase = models.TestCaseQuery(self.env, 
+                        tcid=data['id']).execute()[0]
                 data["TestCaseActions"] = testcase.actions
                 if not testcase:
                     # not found
