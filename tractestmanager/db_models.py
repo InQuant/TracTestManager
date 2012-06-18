@@ -39,7 +39,7 @@ TA_KEYS= [ 'id', 'tcid', 'testrun', 'title', 'description', 'expected_result', '
 def orderedValues(keys, adict):
     """
     Constructs the value list for insert operations in the right order.
-    
+
     >>> keys= ['a', 'b', 'c']
     >>> adict= {'c':3, 'a':1, 'b':2}
     >>> orderedValues(keys, adict)
@@ -51,7 +51,7 @@ def orderedValues(keys, adict):
 ##############################################################################
 def getInsertPlaceHolders(keys):
     """
-    Builds the tracdb required '%s' place holder list, 
+    Builds the tracdb required '%s' place holder list,
     e.g.: the '%s, %s, %s, %s' string for 4 keys
 
     >>> keys= ['a', 'b', 'c']
@@ -132,7 +132,7 @@ class DbLite(object):
         returns new testcase id
         """
         self.dbg('DbLite.insertTestCase()')
-        
+
         @with_transaction(self.env)
         def _insertTestCase(db):
             c= db.cursor()
@@ -140,10 +140,10 @@ class DbLite(object):
             # constructs a statement of form "... VALUES (%s,%s,%s,%s)"
             # w/o autovalue tcid
             stmt= "INSERT INTO testcase (%s) VALUES (%s)" % (
-                    string.join(TC_KEYS[1:], ',') , 
+                    string.join(TC_KEYS[1:], ',') ,
                     getInsertPlaceHolders(TC_KEYS[1:]))
             self.dbg(stmt)
-            
+
             c.execute(stmt, orderedValues(TC_KEYS[1:], tcDict))
             tcid= c.lastrowid
             self.dbg("tcid= %d" % tcid)
@@ -153,10 +153,9 @@ class DbLite(object):
 
                 # constructs a statement of form "... VALUES (%s,%s,%s,%s)"
                 stmt= "INSERT INTO testaction (%s) VALUES (%s)" % (
-                    string.join(TA_KEYS[1:], ',') , 
+                    string.join(TA_KEYS[1:], ',') ,
                     getInsertPlaceHolders(TA_KEYS[1:]))
                 self.dbg(stmt)
-                
                 # build list from action value lists
                 actions= []
                 for d in actionDicts:
@@ -180,12 +179,12 @@ class DbLite(object):
         @with_transaction(self.env)
         def _getTestCases(db):
             c= db.cursor()
-            
+
             # build statement
             stmt= "SELECT * FROM testcase"
             if querystring:
                  stmt= stmt + ' WHERE ' + querystring
-            
+
             self.dbg( stmt )
             c.execute( stmt, values )
             dbs[0]= c.fetchall()
@@ -205,17 +204,17 @@ class DbLite(object):
         """
         self.dbg('DbLite.getTestActions()')
         dbs= [[],]
-        
+
         @with_transaction(self.env)
         def _getTestActions(db):
             global rows
             c= db.cursor()
-            
+
             # build statement
             stmt= "SELECT * FROM testaction"
             if querystring:
                  stmt= stmt + ' WHERE ' + querystring
-            
+
             self.dbg( stmt )
             c.execute( stmt, values )
             dbs[0]= c.fetchall()
@@ -226,7 +225,7 @@ class DbLite(object):
 ##############################################################################
 if __name__ == "__main__":
     logging.basicConfig(
-            level= logging.DEBUG, 
+            level= logging.DEBUG,
             #level= logging.INFO, 
             #format= "%(asctime)s %(levelname)s %(name)s %(message)s",
             #format= "%(asctime)s %(levelname)s %(name)s %(message)s",
