@@ -84,16 +84,16 @@ class TestCaseManipulator(Component):
                 comment_data = {"title": testaction.title,
                         "wiki": testcase.wiki,
                         "revision": testcase.revision,
-                        "user": req.authuser,
+                        "user": req.authname,
                         "comment": comment}
                 comment = COMMENT_TEMPLATE % comment_data
                 # TODO: decode base64
                 testrun.modify_comment(datetime.now(utc), req.authname, comment)
                 # send ajax callback success
-                req.send(json.dumps({"STATUS_UPDATE":"SUCCESS"}))
+                req.send(json.dumps({"update":"success", "status":models.PASSED}))
             else:
-                req.send(json.dumps({"STATUS_UPDATE":"SUCCESS"}))
+                req.send(json.dumps({"update":"success", "status":models.FAILED}))
         except TracError:
-                req.send(json.dumps({"STATUS_UPDATE":"FAILED"}))
+                req.send(json.dumps({"update":"failed"}))
 
 # vim: set ft=python ts=4 sw=4 expandtab :

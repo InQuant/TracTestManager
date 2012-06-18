@@ -40,7 +40,9 @@ jQuery(document).ready(function($) {
         });
         values['comment'] = $('#'+values['id']).find('textarea').val();
         url = getBaseURL()+'trac/json_testaction';
-        $.post(url, values, function(data){});
+        $.post(url, values, function(data){
+            console.log(data)
+        });
         return false;
     });
 
