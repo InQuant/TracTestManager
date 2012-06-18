@@ -27,14 +27,25 @@ class TestCase(object):
     """
 
     def __init__(self, env, attributes={}):
+        self.env= env
         self.db= db_models.DbLite(env)
-        self.actions = []
+        self._actions = None
 
         for key in db_models.TC_KEYS: setattr(self, key, None)
 
         if attributes:
             for key, value in attributes.iteritems():
                 setattr(self, key, value)
+    @property
+    def actions(self):
+        id= getattr(self, 'tcid', None)
+        if self._actions: 
+            return self._actions
+        elif id is not None:
+            self._actions= TestActionQuery(self.env, tcid= self.tcid).execute()
+            return self._actions
+        else:
+            return []
 
     def getattrs( self ):
         """ Returns a list of tuples.
@@ -43,6 +54,10 @@ class TestCase(object):
         """
         return zip( db_models.TC_KEYS,
                 map( lambda x: getattr( self, x), db_models.TC_KEYS ))
+
+    def _loadActions(self):
+        """ Loads the actions from db.
+        """
 
     def insert(self):
         """Saves the testcase and its actions into the database.
