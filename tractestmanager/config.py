@@ -21,5 +21,5 @@
 __author__ = 'Rainer Hihn <rainer.hihn@inquant.de>'
 __docformat__ = 'plaintext'
 
-MANAGER_PERMISSION = 'TM_TESTMANAGER' 
+MANAGER_PERMISSION = 'TM_TESTMANAGER'
 TESTER_PERMISSION = 'TM_TESTER'

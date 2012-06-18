@@ -43,7 +43,7 @@ class TestManagerModelProvider(Component):
     # IEnvironmentSetupParticipant methods
     def environment_created(self):
         self._upgrade_db(self.env.get_db_cnx())
-        
+
     def environment_needs_upgrade(self, db):
         if self._need_migration(db):
             return True
