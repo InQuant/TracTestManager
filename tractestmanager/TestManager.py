@@ -283,7 +283,6 @@ class TestPlanPanel(Component):
         data["testplans"] = testplans
         # TODO: to be implemented in order to populate an already startet but brick testrun
         data["defect_runs"] = models.TestRunQuery(self.env, status='new').execute()
-        #import ipdb; ipdb.set_trace()
         for defect_run in data["defect_runs"]:
             defect_run['ref'] = tag.a('#', defect_run.id, ' ',
                     defect_run.summary, href=req.href.ticket(defect_run.id))
@@ -363,6 +362,8 @@ class TestCasePanel(Component):
             data["id"] = req.args.get("path_info", None)
             data["page"] = 'TestManager_accordion.html'
             data["authname"] = req.authname
+            data["url"] = req.abs_href + req.path_info
+            data["operations"] = "%s/json_operations" % req.abs_href
             # TODO: get the testcase
 
             if data["id"]:
