@@ -13,7 +13,7 @@ jQuery(document).ready(function($) {
         var _authname = $('#'+_id).parent().parent().find('#authname').val();
         var _form_token = $('[name=__FORM_TOKEN]')[0].value;
         
-        url = getBaseURL()+'/trac/json_testaction';
+        url = getBaseURL()+'trac/json_testaction';
 
         $.post(url, { 
             id: _id, 
