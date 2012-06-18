@@ -266,7 +266,7 @@ class TestPlanPanel(Component):
 
         # TODO: populate with TestRun model
         for run in runs:
-            from genshi.builder import tag
+            # from genshi.builder import tag
             #run['ref'] = tag.a('#', run['id'], ' ', run['summary'], href=req.href.ticket(run['id']))
             run['ref'] = tag.a('#', run.id, ' ', run.summary, href=req.href.ticket(run.id))
 
@@ -283,6 +283,7 @@ class TestPlanPanel(Component):
         data["testplans"] = testplans
         # TODO: to be implemented in order to populate an already startet but brick testrun
         data["defect_runs"] = models.TestRunQuery(self.env, status='new').execute()
+        #import ipdb; ipdb.set_trace()
         for defect_run in data["defect_runs"]:
             defect_run['ref'] = tag.a('#', defect_run.id, ' ',
                     defect_run.summary, href=req.href.ticket(defect_run.id))
