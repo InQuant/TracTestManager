@@ -232,7 +232,7 @@ class TestRun(object):
             self.testcases.append(tc)
 
         if errors:
-            self._set_defect(self.env, errors)
+            self._set_defect(errors)
             raise TracError(
                 "Testplan could not be started, for more information "\
                 "review the testplan page '%s' and restart the testplan" %
