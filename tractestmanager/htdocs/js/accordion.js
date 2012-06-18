@@ -1,32 +1,37 @@
 jQuery(document).ready(function($) {
     
-    var btn_name;
-    var btn_obj;
+    var _btn_name;
+    var _btn_obj;
     
     $("form").submit(function() {
         // Call an URL when the form is submitted
         // 
         // json_testaction?user=testuser&id=1&status=failed&foo=bar&comment=fooobar&testrun=1        
-        var id = btn_obj.parent().get(0).id;
-        var txtarea = $('#'+id).find('textarea').val();
-        var testrun = $('#'+id).find('.testrun').val();
-        var authname = $('#'+id).parent().parent().find('#authname').val();
+        var _id = _btn_obj.parent().get(0).id;
+        var _txtarea = $('#'+_id).find('textarea').val();
+        var _testrun = $('#'+_id).find('.testrun').val();
+        var _authname = $('#'+_id).parent().parent().find('#authname').val();
+        var _form_token = $('[name=__FORM_TOKEN]')[0].value;
         
-        url = getBaseURL()+'/trac/json_testaction?';
-        url += 'user=' + authname;
-        url += '&id=' + id;
-        url += '&status=' + btn_name;
-        url += '&comment=' + txtarea;
-        url += '&testrun=' + testrun;
-        
-        $.get(url);
-        
+        url = getBaseURL()+'/trac/json_testaction';
+
+        $.post(url, { 
+            id: _id, 
+            txtarea: _txtarea,
+            testrun: _testrun,
+            authname: _authname,
+            __FORM_TOKEN: _form_token
+            },
+            function(data) {
+                // insert result-handling-code here
+        });
+
         return false;
     });
 
     $('input[type=submit]').click(function(){            
-        btn_name = $(this).attr('name');
-        btn_obj = $(this); 
+        _btn_name = $(this).attr('name');
+        _btn_obj = $(this); 
     })
 
     // Accordion
