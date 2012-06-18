@@ -101,28 +101,28 @@ class TestManagerPlugin(Component):
             add_stylesheet(req, 'common/css/admin.css')
             # custom css
             add_stylesheet(req, 'TestManager/css/testmanager.css')
-    
+
             # get the panels and their providers
             panels, providers = self._get_panels(req)
             if not panels:
                 # no providers found
                 raise HTTPNotFound(_('No TestManager panels available'))
-    
+
             # Navigation tree
             cat_id    = req.args.get('cat_id') or panels[0][0]
             panel_id  = req.args.get('panel_id')
             path_info = req.args.get('path_info')
             if not panel_id:
                 panel_id = filter(lambda panel: panel[0] == cat_id, panels)[0][2]
-    
+
             provider = providers.get((cat_id, panel_id), None)
             if not provider:
                 raise HTTPNotFound(_('Unknown TestManager panel'))
-    
+
             data = dict()
             if hasattr(provider, 'render_admin_panel'):
                 template, data = provider.render_admin_panel(req, cat_id, panel_id, path_info)
-    
+
             data.update({
                 'active_cat': cat_id,
                 'active_panel': panel_id,
@@ -132,7 +132,7 @@ class TestManagerPlugin(Component):
                     'panel': {'id': panel[2], 'label': panel[3]}
                 } for panel in panels]
             })
-    
+
             return template, data, None
 
     # ITemplateProvider methods
@@ -203,16 +203,16 @@ class HomePanel(Component):
             data["info"] = req.args.get("info", "")
             data["warning"] = req.args.get("warning", "")
             data["error"] = req.args.get("error", "")
-    
+
             pagename = "TestManagerHome"
             data["pagename"] = pagename
             data['page'] = wiki_to_html(WikiPage(self.env, pagename).text, self.env, req)
             add_stylesheet(req, 'common/css/wiki.css')
             add_stylesheet(req, 'TestManager/css/testmanager.css')
             data["title"] = 'Testmanager Home'
-    
+
             return 'TestManager_base.html' , data
-    
+
 class TestPlanPanel(Component):
     """ Link to available TestPlans
     """
@@ -284,7 +284,7 @@ class TestPlanPanel(Component):
         # TODO: to be implemented in order to populate an already startet but brick testrun
         data["defect_runs"] = models.TestRunQuery(self.env, status='new').execute()
         for defect_run in data["defect_runs"]:
-            defect_run['ref'] = tag.a('#', defect_run.id, ' ', 
+            defect_run['ref'] = tag.a('#', defect_run.id, ' ',
                     defect_run.summary, href=req.href.ticket(defect_run.id))
         data["title"] = 'TestPlans'
         return data['page'] , data
@@ -312,8 +312,8 @@ class TestCasesPanel(Component):
             data["error"] = req.args.get("error", "")
             # get all TestCases assigned to the user and have status "not tested"
 
-            tcs = models.TestCaseQuery(self.env, 
-                    tester= req.authname, 
+            tcs = models.TestCaseQuery(self.env,
+                    tester= req.authname,
                     status= models.NOT_TESTED).execute()
             if not tcs:
                 data["info"] = 'no testcases available'
@@ -368,7 +368,7 @@ class TestCasePanel(Component):
             tco = tcp.parseTestcase("Testcases/UC013")
             #data["TestCaseActions"] = tco.actions        
             if data["id"]:
-                testcase = models.TestCaseQuery(self.env, 
+                testcase = models.TestCaseQuery(self.env,
                         tcid=data['id']).execute()[0]
                 data["TestCaseActions"] = testcase.actions
                 if not testcase:
