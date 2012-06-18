@@ -1,38 +1,48 @@
 jQuery(document).ready(function($) {
     
-    var _btn_name;
-    var _btn_obj;
+    //var _btn_name;
+    //var _btn_obj;
     
-    $("form").submit(function() {
-        // Call an URL when the form is submitted
-        // 
-        // json_testaction?user=testuser&id=1&status=failed&foo=bar&comment=fooobar&testrun=1        
-        var _id = _btn_obj.parent().get(0).id;
-        var _txtarea = $('#'+_id).find('textarea').val();
-        var _testrun = $('#'+_id).find('.testrun').val();
-        var _authname = $('#'+_id).parent().parent().find('#authname').val();
-        var _form_token = $('[name=__FORM_TOKEN]')[0].value;
+    //$("form").submit(function() {
+        //// Call an URL when the form is submitted
+        //// 
+        //var _id = _btn_obj.parent().get(0).id;
+        //var _txtarea = $('#'+_id).find('textarea').val();
+        //var _testrun = $('#'+_id).find('.testrun').val();
+        //var _authname = $('#'+_id).parent().parent().find('#authname').val();
+        //var _form_token = $('[name=__FORM_TOKEN]')[0].value;
         
-        url = getBaseURL()+'trac/json_testaction';
 
-        $.post(url, { 
-            id: _id, 
-            txtarea: _txtarea,
-            testrun: _testrun,
-            authname: _authname,
-            __FORM_TOKEN: _form_token
-            },
-            function(data) {
-                // insert result-handling-code here
+        //$.post(url, { 
+            //id: _id, 
+            //txtarea: _txtarea,
+            //testrun: _testrun,
+            //authname: _authname,
+            //__FORM_TOKEN: _form_token
+            //},
+            //function(data) {
+                //// insert result-handling-code here
+        //});
+
+        //return false;
+    //});
+
+    //$('input[type=submit]').click(function(){            
+        //_btn_name = $(this).attr('name');
+        //_btn_obj = $(this); 
+    //})
+    
+    $('form').submit(function(){
+        var inputs = $("#" + this.id + ' :input');
+        var values = {};
+        inputs.each(function(){
+            values[this.name] = $(this).val();
         });
-
+        values['comment'] = $('#'+values['id']).find('textarea').val();
+        url = getBaseURL()+'trac/json_testaction';
+        $.post(url, values, function(data){});
         return false;
     });
-
-    $('input[type=submit]').click(function(){            
-        _btn_name = $(this).attr('name');
-        _btn_obj = $(this); 
-    })
 
     // Accordion
     
