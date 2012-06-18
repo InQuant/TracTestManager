@@ -83,7 +83,7 @@ class TestcaseParser(object):
                             # append actiontitle to action
                             ac.title  = action.text
                             line +=1
-                    case.actions.append(ac)
+                    case.add_action(ac)
         return case
 
     def _build_markup(self, node):
