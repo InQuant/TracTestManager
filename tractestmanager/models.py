@@ -38,10 +38,10 @@ class TestCase(object):
 
     def getattrs( self ):
         """ Returns a list of tuples.
-        
+
         e.g.  [('wiki', 'DocTest'), ('description', 'bla'), ...]
         """
-        return zip( db_models.TC_KEYS, 
+        return zip( db_models.TC_KEYS,
                 map( lambda x: getattr( self, x), db_models.TC_KEYS ))
 
     def insert(self):
@@ -67,10 +67,10 @@ class TestAction(object):
 
     def getattrs( self ):
         """ Returns a list of tuples.
-        
+
         e.g.  [('title', 'Create WS'), ('description', 'bla'), ...]
         """
-        return zip(db_models.TA_KEYS, 
+        return zip(db_models.TA_KEYS,
                 map( lambda x: getattr( self, x), db_models.TA_KEYS ))
 
     def set_status(self, status, comment=None):
@@ -79,7 +79,7 @@ class TestAction(object):
         >>> testaction.set_status(status="OK", comment="Hello World")
         """
         pass
- 
+
 class TestRun(object):
     """ TestRun based on a trac ticket of type testrun it contains a list of
     testcases with their testactions.
@@ -130,7 +130,7 @@ class TestRun(object):
         self.testcases= list()
 
         # get the testrun based ticket ...
-        if runid is not None: 
+        if runid is not None:
             self.runid= int(runid)
             self.ticket = Ticket(self.env, self.runid)
 
@@ -172,11 +172,11 @@ class TestRun(object):
         """validates the testrun: parse the testplan macro for testcase names and
         testers, and parse those testcases (wiki pages) to get and validate the
         actions and expected results.
-        
+
         A test plan macrco looks like this:
-        #! TestPlan 
+        #! TestPlan
         Id: TA14
-        Testart: UsecaseTest 
+        Testart: UsecaseTest
         Build: DC-3.1.1
         Konfiguration: IE7-Win, FF-LUX
         Usecases: BaugruppenVerwalten, ObjekteSuchen
@@ -218,9 +218,9 @@ class TestRun(object):
 
         if errors:
             self._set_defect(self.env, errors)
-            raise TracError( 
+            raise TracError(
                 "Testplan could not be started, for more information "\
-                "review the testplan page '%s' and restart the testplan" % 
+                "review the testplan page '%s' and restart the testplan" %
                 self.wikiplan.name)
 
     def start(self):
@@ -233,7 +233,7 @@ class TestRun(object):
         for tc in self.testcases:
             tc.insert()
         self._set_accepted()
-        return 
+        return
 
     def _set_defect(self, errors= None):
         self.dbg('TestRun._set_defect()')
@@ -272,14 +272,14 @@ class TestCaseQuery(TestQuery):
 
     def execute(self):
         """Executes the db test case query and returns a list of TestCase instances.
-        
+
         """
         testcases = list()
-        
+
         rows= self.db.getTestCases( self.query, self. values )
 
         for row in rows:
-            testcases.append( 
+            testcases.append(
                 TestCase(self.env, dict(zip(db_models.TC_KEYS, row))))
         return testcases
 
@@ -292,14 +292,12 @@ class TestActionQuery(TestQuery):
 
     def execute(self):
         """Executes the db test action query and returns a list of TestAction instances.
-        
         """
         testactions = list()
-        
         rows= self.db.getTestActions( self.query, self. values )
 
         for row in rows:
-            testactions.append( 
+            testactions.append(
                 TestAction(self.env, dict(zip(db_models.TA_KEYS, row))))
         return testactions
 
@@ -324,7 +322,7 @@ class TestRunQuery(object):
 
     def execute(self):
         """Executes the trac ticket query and returns a list of TestRun instances.
-        
+
             returns a list of tickets.
         """
         testruns = list()
