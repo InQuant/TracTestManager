@@ -312,9 +312,8 @@ class TestCasesPanel(Component):
             data["error"] = req.args.get("error", "")
             # get all TestCases assigned to the user and have status "not tested"
 
-            tcs = models.TestCaseQuery(self.env,
-                    tester= req.authname,
-                    status= models.NOT_TESTED).execute()
+            tcs = models.TestCaseQuery(self.env).execute() #req.authname,
+                    #status= models.NOT_TESTED).execute()
             if not tcs:
                 data["info"] = 'no testcases available'
             else:
@@ -352,7 +351,6 @@ class TestCasePanel(Component):
     def render_admin_panel(self, req, cat, page, path_info):
         """ main request handler
         """
-        from TestcaseParser import TestcaseParser
         if TESTER_PERMISSION in req.perm:
             data = dict() #template data            
             data["info"] = req.args.get("info", "")
@@ -364,9 +362,6 @@ class TestCasePanel(Component):
             data["authname"] = req.authname
             # TODO: get the testcase
 
-            tcp = TestcaseParser(self.env)
-            tco = tcp.parseTestcase("Testcases/UC013")
-            #data["TestCaseActions"] = tco.actions        
             if data["id"]:
                 testcase = models.TestCaseQuery(self.env,
                         tcid=data['id']).execute()[0]
@@ -380,7 +375,7 @@ class TestCasePanel(Component):
                         data["warning"] = 'this testcase has been assigned to %s' % testcase.tester
                     # TODO: datenbank auslesen usw usf                    
                     data["execute"] = testcase
-                    data["title"] = 'TestCase %s' % testcase.id
+                    data["title"] = 'TestCase %s' % testcase.tcid
             return data["page"] , data
 
 class TestManagerPermissions(Component):
