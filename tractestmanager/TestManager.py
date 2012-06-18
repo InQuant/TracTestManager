@@ -312,9 +312,10 @@ class TestCasesPanel(Component):
             data["error"] = req.args.get("error", "")
             # get all TestCases assigned to the user and have status "not tested"
 
-            tcs = models.TestCaseQuery(self.env,
-                    tester= req.authname,
-                    status= models.NOT_TESTED).execute()
+            #tcs = models.TestCaseQuery(self.env,
+            #        tester= req.authname,
+            #        status= models.NOT_TESTED).execute()
+            tcs = models.TestCaseQuery(self.env).execute()         
             if not tcs:
                 data["info"] = 'no testcases available'
             else:
