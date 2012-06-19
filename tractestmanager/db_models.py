@@ -132,6 +132,7 @@ class DbLite(object):
         returns new testcase id
         """
         self.dbg('DbLite.insertTestCase()')
+        dbs= [[],]
 
         @with_transaction(self.env)
         def _insertTestCase(db):
@@ -145,11 +146,11 @@ class DbLite(object):
             self.dbg(stmt)
 
             c.execute(stmt, orderedValues(TC_KEYS[1:], tcDict))
-            tcid= c.lastrowid
-            self.dbg("tcid= %d" % tcid)
+            dbs[0]= c.lastrowid
+            self.dbg("tcid= %d" % dbs[0])
 
             if (actionDicts):
-                for ad in actionDicts: ad['tcid']= tcid
+                for ad in actionDicts: ad['tcid']= dbs[0]
 
                 # constructs a statement of form "... VALUES (%s,%s,%s,%s)"
                 stmt= "INSERT INTO testaction (%s) VALUES (%s)" % (
@@ -163,6 +164,7 @@ class DbLite(object):
 
                 # insert all actions in one step
                 c.executemany(stmt, actions)
+        return dbs[0]
 
     ##########################################################################
     def getTestCaseCollumns(self):
@@ -219,6 +221,29 @@ class DbLite(object):
             c.execute( stmt, values )
             dbs[0]= c.fetchall()
             self.dbg(dbs[0])
+
+        return dbs[0]
+
+    ##########################################################################
+    def updateTestAction(self, id, value_stmt, values):
+        """Updates the TestAction of the given id.
+
+        e.g. 
+        value_stmt= "status=%s, comment=%s"
+        values    = [PASSED, 'was too slow']
+        """
+        self.dbg('DbLite.updateTestAction(%s)' % str(id))
+        dbs= [[],]
+
+        @with_transaction(self.env)
+        def _updateTestAction(db):
+            c= db.cursor()
+
+            # constructs a statement of form "... SET a=%s, b=%s"
+            stmt= "UPDATE testaction SET " + value_stmt + " WHERE id=%s"
+            self.dbg(stmt)
+            self.dbg(values + [id])
+            dbs[0]= c.execute(stmt, values + [id])
 
         return dbs[0]
 

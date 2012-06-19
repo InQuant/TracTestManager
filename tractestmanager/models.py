@@ -107,7 +107,7 @@ class TestAction(object):
         self.dbg('TestAction.save_changes()')
         stmt= string.join( [k + '=%s' for k in self._update.keys()], ', ')
         self.dbg(stmt)
-        self.db.updateTestAction( stmt, self._update.values() )
+        self.db.updateTestAction( self.id, stmt, self._update.values() )
 
     def set_status(self, status, comment=None):
         """ sets the status and comment of an test action.
