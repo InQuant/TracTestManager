@@ -266,7 +266,7 @@ class TestPlanPanel(Component):
 
         # TODO: populate with TestRun model
         for run in runs:
-            from genshi.builder import tag
+            # from genshi.builder import tag
             #run['ref'] = tag.a('#', run['id'], ' ', run['summary'], href=req.href.ticket(run['id']))
             run['ref'] = tag.a('#', run.id, ' ', run.summary, href=req.href.ticket(run.id))
 
@@ -362,6 +362,8 @@ class TestCasePanel(Component):
             data["id"] = req.args.get("path_info", None)
             data["page"] = 'TestManager_accordion.html'
             data["authname"] = req.authname
+            data["url"] = req.abs_href + req.path_info
+            data["operations"] = "%s/json_operations" % req.abs_href
             # TODO: get the testcase
 
             if data["id"]:

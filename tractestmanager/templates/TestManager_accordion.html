@@ -21,28 +21,20 @@
 
   <body>  
     <div id="content">
-        <form method="get" action="">
-        <input type="hidden" id="authname" value="$authname" />
         <span py:for="action in TestCaseActions">                                    
+          <form method="POST" id="accordion$action.id">
             <h3 class="trigger">$action.title ($action.id)</h3>            
             <div class="toggle_container" style="background:#eee" id="$action.id">
-                <input type="hidden" name="testrun" class="testrun" value="$action.testrun" />
-                <p>$action.description</p>                
-                <p><strong>Expected result:</strong> $action.expected_result</p>
-                <p>
-                <textarea></textarea>
-                </p>                
-                <input type="submit" value="OK" name="ok" />                    
-                <input type="submit" value="Failed" name="failed" />                
+                <input type="hidden" name="testrun" value="$action.testrun" />
+                <input type="hidden" name="action" value="$action.id" />
+                $action.description<br /><br />
+                $action.expected_result<br /><br />
+                <textarea></textarea><br /><br />
+                <input type="submit" value="OK" name="status" />                    
+                <input type="submit" value="failed" name="status" />                
             </div>            
+          </form>            
         </span>
-        </form>            
-        <div id="messages"></div>           
-    </div>
-    <div id="content" class="wiki teamchillhome">
-      <div class="wikipage searchable">
-          <div py:content="wiki_to_html(context, page.text)" />
-      </div>
     </div>
   </body>
 
