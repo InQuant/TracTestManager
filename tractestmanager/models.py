@@ -55,10 +55,6 @@ class TestCase(object):
         return zip( db_models.TC_KEYS,
                 map( lambda x: getattr( self, x), db_models.TC_KEYS ))
 
-    def _loadActions(self):
-        """ Loads the actions from db.
-        """
-
     def insert(self):
         """Saves the testcase and its actions into the database.
         """
@@ -74,13 +70,22 @@ class TestAction(object):
     """
 
     def __init__(self, env, attributes={}):
+        self.env= env
+        self.db= db_models.DbLite(env)
+        self._update= {}
+        self.dbg= env.log.debug
+        self.dbg('TestAction( %s )' % attributes)
+
         for key in db_models.TA_KEYS: setattr(self, key, None)
 
         if attributes:
             for key, value in attributes.iteritems():
                 setattr(self, key, value)
 
-    def getattrs( self ):
+    def __getitem__(self, name):
+        return getattr( self, name)
+
+    def getattrs(self):
         """ Returns a list of tuples.
 
         e.g.  [('title', 'Create WS'), ('description', 'bla'), ...]
@@ -88,12 +93,34 @@ class TestAction(object):
         return zip(db_models.TA_KEYS,
                 map( lambda x: getattr( self, x), db_models.TA_KEYS ))
 
-    def set_status(self, status, comment=None):
+    def _prepare_for_update(self, **kwargs):
+        """ pushs the attributes to be updated on the _update stack.
         """
-        >>> testaction = TestActionFilter(taid=1)[0]
+        if kwargs: self._update.update(kwargs)
+
+    def save_changes(self):
+        """ saves the changed attributes which exist on the _updated stack to db.
+        """
+        self.dbg('TestAction.save_changes()')
+        stmt= string.join( [k + '=%s' for k in self._update.keys()], ', ')
+        self.dbg(stmt)
+        self.db.updateTestAction( stmt, self._update.values() )
+
+    def set_status(self, status, comment=None):
+        """ sets the status and comment of an test action.
+
         >>> testaction.set_status(status="OK", comment="Hello World")
         """
-        pass
+        self.dbg('TestAction.set_status( %s, %s)' % (str(status), str(comment)))
+
+        setattr(self, 'status', status)
+        self._prepare_for_update( status= status )
+
+        if comment:
+            setattr(self, 'comment', comment)
+            self._prepare_for_update( comment= comment )
+
+        self.save_changes()
 
 class TestRun(object):
     """ TestRun based on a trac ticket of type testrun it contains a list of
