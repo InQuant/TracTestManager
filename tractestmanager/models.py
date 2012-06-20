@@ -15,6 +15,7 @@ from trac.wiki import WikiPage
 from trac.core import TracError
 
 import db_models
+from db_models import TA_TABLE, TA_KEYS, TC_TABLE, TC_KEYS
 from db_models import NOT_TESTED, PASSED, FAILED, PASSED_COMMENT
 from macros import TestPlanMacro
 
@@ -22,20 +23,62 @@ SUMMARY = 'summary'
 OWNER   = 'owner'
 STATUS  = 'status'
 
-class TestCase(object):
-    """ Testcase with attributes and and a list of actions.
+class TestItem(object):
+    """ Core class for test cases and test actions.
     """
+    def __init__(self, env, dbtable, keys, attributes={}):
+        env.log.debug('TestItem( %s )' % attributes)
+        self.dbg= env.log.debug
 
-    def __init__(self, env, attributes={}):
         self.env= env
         self.db= db_models.DbLite(env)
-        self._actions = list()
+        self.dbtable= dbtable
 
-        for key in db_models.TC_KEYS: setattr(self, key, None)
+        self._update= {}
+        self.keys= keys
+
+        for key in keys: setattr(self, key, None)
 
         if attributes:
             for key, value in attributes.iteritems():
                 setattr(self, key, value)
+
+    def __getitem__(self, name):
+        return getattr( self, name)
+
+    def getattrs( self ):
+        """ Returns a list of tuples.
+
+        e.g.  [('wiki', 'DocTest'), ('description', 'bla'), ...]
+        """
+        return zip( self.keys,
+                map( lambda x: getattr( self, x, None), self.keys ))
+
+    def _prepare_for_update(self, **kwargs):
+        """ pushs the attributes to be updated on the _update stack.
+        """
+        if kwargs: self._update.update(kwargs)
+
+    def save_changes(self):
+        """ saves the changed attributes which exist on the _updated stack to db.
+        """
+        self.dbg('%s.save_changes()')
+        self.dbg(self._update)
+        stmt= string.join( [k + '=%s' for k in self._update.keys()], ', ')
+        self.dbg(stmt)
+        self.db.updateTestItem( self.dbtable, self.id, stmt, self._update.values() )
+
+
+class TestCase(TestItem):
+    """ Testcase with attributes and and a list of actions.
+    """
+
+    def __init__(self, env, attributes={}):
+        env.log.debug('TestCase( %s )' % attributes)
+        TestItem.__init__(self, env, TC_TABLE, TC_KEYS, attributes)
+
+        self._actions = list()
+
     @property
     def actions(self):
         id= getattr(self, 'tcid', None)
@@ -47,16 +90,11 @@ class TestCase(object):
         else:
             return []
 
+    @property
+    def id(self): return getattr( self, 'tcid', None )
+
     def add_action(self, action):
         self._actions.append(action)
-
-    def getattrs( self ):
-        """ Returns a list of tuples.
-
-        e.g.  [('wiki', 'DocTest'), ('description', 'bla'), ...]
-        """
-        return zip( db_models.TC_KEYS,
-                map( lambda x: getattr( self, x), db_models.TC_KEYS ))
 
     def insert(self):
         """Saves the testcase and its actions into the database.
@@ -66,53 +104,28 @@ class TestCase(object):
         actionsattrs= list()
         for action in self.actions: actionsattrs.append( dict(action.getattrs()))
 
-        self.db.insertTestCase( dict(self.getattrs()), actionsattrs )
+        return self.db.insertTestCase( dict(self.getattrs()), actionsattrs )
 
-class TestAction(object):
+    def set_status(self, status):
+        """ sets the status of an test case.
+        """
+        self.dbg('TestCase.set_status( %s )' % str(status))
+
+        setattr(self, 'status', status)
+        self._prepare_for_update( status= status )
+
+        self.save_changes()
+
+class TestAction(TestItem):
     """ Testaction with attributes as part of a testcase.
     """
 
     def __init__(self, env, attributes={}):
-        self.env= env
-        self.db= db_models.DbLite(env)
-        self._update= {}
-        self.dbg= env.log.debug
-        self.dbg('TestAction( %s )' % attributes)
-
-        for key in db_models.TA_KEYS: setattr(self, key, None)
-
-        if attributes:
-            for key, value in attributes.iteritems():
-                setattr(self, key, value)
-
-    def __getitem__(self, name):
-        return getattr( self, name)
-
-    def getattrs(self):
-        """ Returns a list of tuples.
-
-        e.g.  [('title', 'Create WS'), ('description', 'bla'), ...]
-        """
-        return zip(db_models.TA_KEYS,
-                map( lambda x: getattr( self, x), db_models.TA_KEYS ))
-
-    def _prepare_for_update(self, **kwargs):
-        """ pushs the attributes to be updated on the _update stack.
-        """
-        if kwargs: self._update.update(kwargs)
-
-    def save_changes(self):
-        """ saves the changed attributes which exist on the _updated stack to db.
-        """
-        self.dbg('TestAction.save_changes()')
-        stmt= string.join( [k + '=%s' for k in self._update.keys()], ', ')
-        self.dbg(stmt)
-        self.db.updateTestAction( self.id, stmt, self._update.values() )
+        env.log.debug('TestAction( %s )' % attributes)
+        TestItem.__init__(self, env, TA_TABLE, TA_KEYS, attributes)
 
     def set_status(self, status, comment=None):
         """ sets the status and comment of an test action.
-
-        >>> testaction.set_status(status="OK", comment="Hello World")
         """
         self.dbg('TestAction.set_status( %s, %s)' % (str(status), str(comment)))
 
@@ -292,7 +305,7 @@ class TestRun(object):
         self.ticket[STATUS] = 'accepted'
         return self.ticket.save_changes()
 
-class TestQuery(object):
+class TestItemQuery(object):
     """ core query class.
     """
 
@@ -308,12 +321,12 @@ class TestQuery(object):
                 [k + '=%s' for k in kwargs.keys()], ' AND ')
             self.values= kwargs.values()
 
-class TestCaseQuery(TestQuery):
+class TestCaseQuery(TestItemQuery):
     """ query testcases from db.
     """
 
     def __init__(self, env, **kwargs):
-        TestQuery.__init__(self, env, **kwargs)
+        TestItemQuery.__init__(self, env, **kwargs)
 
     def execute(self):
         """Executes the db test case query and returns a list of TestCase instances.
@@ -328,12 +341,12 @@ class TestCaseQuery(TestQuery):
                 TestCase(self.env, dict(zip(db_models.TC_KEYS, row))))
         return testcases
 
-class TestActionQuery(TestQuery):
+class TestActionQuery(TestItemQuery):
     """ query testactions from db.
     """
 
     def __init__(self, env, **kwargs):
-        TestQuery.__init__(self, env, **kwargs)
+        TestItemQuery.__init__(self, env, **kwargs)
 
     def execute(self):
         """Executes the db test action query and returns a list of TestAction instances.

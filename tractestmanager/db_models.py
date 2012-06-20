@@ -10,6 +10,7 @@ __docformat__ = 'plaintext'
 
 from trac.env import Environment
 from trac.db import with_transaction
+from trac.core import TracError
 import trac.db
 
 import logging
@@ -31,8 +32,10 @@ PASSED_COMMENT= 'passed with comment'
 FAILED= 'failed'
 
 # TestCase collumns
+TC_TABLE= 'testcase'
 TC_KEYS= [ 'tcid', 'wiki', 'title', 'description', 'revision', 'tester', 'testrun', 'status']
 # TestAction collumns
+TA_TABLE= 'testaction'
 TA_KEYS= [ 'id', 'tcid', 'testrun', 'title', 'description', 'expected_result', 'status', 'comment']
 
 ##############################################################################
@@ -86,22 +89,33 @@ class DbLite(object):
     
     4. Insert the test case and actions.
 
-    >>> db.insertTestCase( dict(zip(TC_KEYS[1:], tcvals)), actions )
+    >>> tcid= db.insertTestCase( dict(zip(TC_KEYS[1:], tcvals)), actions )
 
     Get all testcases
     >>> db.getTestCases()
     [...]
 
     Get filtered testcases
-    >>> db.getTestCases(status= NOT_TESTED)
+    >>> db.getTestCases( 'status=%s', [NOT_TESTED,])
     [...]
 
     Get all actions
     >>> db.getTestActions()
     [...]
 
-    Get filtered actions
-    >>> db.getTestActions('testrun=%s AND status=%s', [3, NOT_TESTED])
+    Get not tested actions
+    >>> acs= db.getTestActions('testrun=%s AND status=%s', [3, NOT_TESTED])
+
+    Update action 0
+    >>> db.updateTestItem(TA_TABLE, acs[0][0], 'status=%s, comment=%s', [FAILED, 'das war wohl nix!'])
+
+    Get failed actions
+    >>> acs= db.getTestActions('testrun=%s AND status=%s', [3, FAILED])
+
+    Update test case 
+    >>> db.updateTestItem(TC_TABLE, tcid, 'status=%s',[FAILED,])
+
+    >>> db.getTestCases( 'status=%s', [FAILED,])
     [...]
 
     """
@@ -225,27 +239,32 @@ class DbLite(object):
         return dbs[0]
 
     ##########################################################################
-    def updateTestAction(self, id, value_stmt, values):
-        """Updates the TestAction of the given id.
+    def updateTestItem(self, table, id, value_stmt, values):
+        """Updates a test action or test case of the given id.
 
         e.g. 
         value_stmt= "status=%s, comment=%s"
         values    = [PASSED, 'was too slow']
         """
-        self.dbg('DbLite.updateTestAction(%s)' % str(id))
+        self.dbg('DbLite.updateTestAction(%s, %s)' % (table, str(id)))
         dbs= [[],]
 
+        if table not in [TC_TABLE, TA_TABLE]:
+            raise TracError( "Can't update, method is valid for tables: '%s' "\
+                    "and '%s' only!  : %s" % (TC_TABLE, TA_TABLE))
+
         @with_transaction(self.env)
-        def _updateTestAction(db):
+        def _updateTestItem(db):
             c= db.cursor()
 
             # constructs a statement of form "... SET a=%s, b=%s"
-            stmt= "UPDATE testaction SET " + value_stmt + " WHERE id=%s"
+            if table == TA_TABLE:
+                stmt= ("UPDATE %s SET " % table) + value_stmt + " WHERE id=%s"
+            else:
+                stmt= ("UPDATE %s SET " % table) + value_stmt + " WHERE tcid=%s"
             self.dbg(stmt)
             self.dbg(values + [id])
-            dbs[0]= c.execute(stmt, values + [id])
-
-        return dbs[0]
+            c.execute(stmt, values + [id])
 
 ##############################################################################
 if __name__ == "__main__":
