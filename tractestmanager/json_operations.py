@@ -47,8 +47,8 @@ from trac.ticket.model import Ticket
 import models
 
 COMMENT_TEMPLATE = """
-FAILED "%(title)s" in [wiki:%(wiki)s?revision=%(revision)s]
-%(user)s said:
+%(status)s "%(title)s" in [wiki:%(wiki)s?revision=%(revision)s]
+
 %(comment)s
 """
 
@@ -73,26 +73,24 @@ class TestCaseManipulator(Component):
             # mocking testaction set ok
             testaction = models.TestActionQuery(self.env, id=id).execute()[0]
             testaction.set_status(status=status, comment=comment)
-            if status == models.FAILED:
+            from ipdb import set_trace; set_trace()
+            if comment:
                 # testaction failed
                 testrun = Ticket(self.env, tkt_id=runid)
                 # add comment to ticket with ta_id, comment and tcid
                 testcase = models.TestCaseQuery(self.env).execute()[0]
                 # TODO: check if testcase can be opened from a ticket
-                #tc_link = tag.a(testcase.wiki, href='#',
-                            #onclick='window.open("TestManager/general/testcase/%s", "Popupfenster", "width=400,height=400,resizable=yes");' % testcase.id)
+                #tc_link = req.abs_href
                 comment_data = {"title": testaction.title,
+                        "status" : status,
                         "wiki": testcase.wiki,
                         "revision": testcase.revision,
-                        "user": req.authname,
                         "comment": comment}
                 comment = COMMENT_TEMPLATE % comment_data
                 # TODO: decode base64
-                testrun.modify_comment(datetime.now(utc), req.authname, comment)
-                # send ajax callback success
-                req.send(json.dumps({"update":"success", "status":models.PASSED}))
-            else:
-                req.send(json.dumps({"update":"success", "status":models.FAILED}))
+                testrun.save_changes(author=req.authname, comment=comment)
+            # send ajax callback success
+            req.send(json.dumps({"update":"success", "status":models.PASSED}))
         except TracError:
                 req.send(json.dumps({"update":"failed"}))
 

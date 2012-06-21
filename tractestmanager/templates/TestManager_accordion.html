@@ -22,16 +22,16 @@
   <body>  
     <div id="content">
         <span py:for="action in TestCaseActions">                                    
-          <form method="POST" id="accordion$action.id">
+          <form py:if="action" method="POST" id="accordion$action.id">
             <h3 class="trigger">$action.title ($action.id)</h3>            
             <div class="toggle_container" style="background:#eee" id="$action.id">
                 <input type="hidden" name="testrun" value="$action.testrun" />
                 <input type="hidden" name="action" value="$action.id" />
                 $action.description<br /><br />
                 $action.expected_result<br /><br />
-                <textarea></textarea><br /><br />
-                <input type="submit" value="OK" name="status" />                    
-                <input type="submit" value="failed" name="status" />                
+                <textarea name="comment"></textarea><br /><br />
+                <input type="button" onclick="set_status($action.id, '$status.OK')" value="OK" name="status" />                    
+                <input type="button" onclick="set_status($action.id, '$status.FAILED')" value="failed" name="status" />                
             </div>            
           </form>            
         </span>

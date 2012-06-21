@@ -1,53 +1,6 @@
 jQuery(document).ready(function($) {
-    
-    //var _btn_name;
-    //var _btn_obj;
-    
-    //$("form").submit(function() {
-        //// Call an URL when the form is submitted
-        //// 
-        //var _id = _btn_obj.parent().get(0).id;
-        //var _txtarea = $('#'+_id).find('textarea').val();
-        //var _testrun = $('#'+_id).find('.testrun').val();
-        //var _authname = $('#'+_id).parent().parent().find('#authname').val();
-        //var _form_token = $('[name=__FORM_TOKEN]')[0].value;
-        
-
-        //$.post(url, { 
-            //id: _id, 
-            //txtarea: _txtarea,
-            //testrun: _testrun,
-            //authname: _authname,
-            //__FORM_TOKEN: _form_token
-            //},
-            //function(data) {
-                //// insert result-handling-code here
-        //});
-
-        //return false;
-    //});
-
-    //$('input[type=submit]').click(function(){            
-        //_btn_name = $(this).attr('name');
-        //_btn_obj = $(this); 
-    //})
-    
-    $('form').submit(function(){
-        var inputs = $("#" + this.id + ' :input');
-        var values = {};
-        inputs.each(function(){
-            values[this.name] = $(this).val();
-        });
-        values['comment'] = $('#'+values['id']).find('textarea').val();
-        url = getBaseURL()+'trac/json_testaction';
-        $.post(url, values, function(data){
-            console.log(data)
-        });
-        return false;
-    });
 
     // Accordion
-    
     $('.trigger').not('.trigger_active').next('.toggle_container').hide();
     // show the first container - buggy!
     // $("[class^=toggle_container]:first").show();
@@ -91,3 +44,21 @@ function getBaseURL() {
     }
 
 }
+
+var set_status = function($id, $value){
+    var inputs = $("#accordion" + $id + ' :input');
+    var values = {};
+    inputs.each(function(){
+        values[this.name] = $(this).val();
+    });
+    t_area            = $('#accordion'+values['action']).find('textarea')[0];
+    if(t_area.value){
+        values['comment'] = t_area.value;
+    }
+    values['status']  = $value;
+    url               = getBaseURL()+'trac/json_testaction';
+    // do the post request
+    $.post(url, values, function(data){
+        console.log(data)
+    });
+};

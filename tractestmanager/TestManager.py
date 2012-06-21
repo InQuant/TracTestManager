@@ -358,28 +358,26 @@ class TestCasePanel(Component):
             data["info"] = req.args.get("info", "")
             data["warning"] = req.args.get("warning", "")
             data["error"] = req.args.get("error", "")
-            # data["id"] = req.args.get("id", "")
+            data["status"] = {"OK" : models.PASSED, "FAILED" : models.FAILED}
             data["id"] = req.args.get("path_info", None)
             data["page"] = 'TestManager_accordion.html'
-            data["authname"] = req.authname
             data["url"] = req.abs_href + req.path_info
-            data["operations"] = "%s/json_operations" % req.abs_href
-            # TODO: get the testcase
+            # get the testcase
 
             if data["id"]:
-                testcase = models.TestCaseQuery(self.env,
-                        tcid=data['id']).execute()[0]
-                data["TestCaseActions"] = testcase.actions
-                if not testcase:
-                    # not found
-                    data["error"] = 'the requested testcase could not be found or has been erased'
-                else:
+                try:
+                    testcase = models.TestCaseQuery(self.env,
+                            tcid=data['id']).execute()[0]
+                    data["TestCaseActions"] = testcase.actions
+                    #data["execute"] = testcase
+                    data["revision"] = testcase.revision
+                    data["title"] = 'TestCase %s' % testcase.tcid
                     if req.authname != testcase.tester:
                         # assigned to someone else - but can be done by mr urlaubsvertretung
                         data["warning"] = 'this testcase has been assigned to %s' % testcase.tester
-                    # TODO: datenbank auslesen usw usf                    
-                    data["execute"] = testcase
-                    data["title"] = 'TestCase %s' % testcase.tcid
+                except:
+                    # not found
+                    data["error"] = 'the requested testcase could not be found or has been erased'
             return data["page"] , data
 
 class TestManagerPermissions(Component):
