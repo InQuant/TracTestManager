@@ -47,7 +47,7 @@ from trac.ticket.model import Ticket
 import models
 
 COMMENT_TEMPLATE = """
-%(status)s "%(title)s" in [wiki:%(wiki)s?revision=%(revision)s]
+%(status)s "%(title)s" in %(tc_link)s for [wiki:%(wiki)s?revision=%(revision)s]
 
 %(comment)s
 """
@@ -73,18 +73,18 @@ class TestCaseManipulator(Component):
             # mocking testaction set ok
             testaction = models.TestActionQuery(self.env, id=id).execute()[0]
             testaction.set_status(status=status, comment=comment)
-            from ipdb import set_trace; set_trace()
             if comment:
                 # testaction failed
                 testrun = Ticket(self.env, tkt_id=runid)
                 # add comment to ticket with ta_id, comment and tcid
                 testcase = models.TestCaseQuery(self.env).execute()[0]
                 # TODO: check if testcase can be opened from a ticket
-                #tc_link = req.abs_href
+                tc_link = "[%s/TestManager/general/testcase/%s TestCase #%s]" % (req.abs_href(), testaction.tcid, testaction.tcid)
                 comment_data = {"title": testaction.title,
                         "status" : status,
                         "wiki": testcase.wiki,
                         "revision": testcase.revision,
+                        "tc_link": tc_link,
                         "comment": comment}
                 comment = COMMENT_TEMPLATE % comment_data
                 # TODO: decode base64
