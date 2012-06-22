@@ -90,7 +90,7 @@ class TestCaseManipulator(Component):
                 # TODO: decode base64
                 testrun.save_changes(author=req.authname, comment=comment)
             # send ajax callback success
-            req.send(json.dumps({"update":"success", "status":models.PASSED}))
+            req.send(json.dumps({"update":"success", "status":status}))
         except TracError:
                 req.send(json.dumps({"update":"failed"}))
 
