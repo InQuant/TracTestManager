@@ -16,7 +16,7 @@ from trac.core import TracError
 
 import db_models
 from db_models import TA_TABLE, TA_KEYS, TC_TABLE, TC_KEYS
-from db_models import NOT_TESTED, PASSED, FAILED, PASSED_COMMENT
+from db_models import SKIPPED, NOT_TESTED, PASSED, FAILED, PASSED_COMMENT
 from macros import TestPlanMacro
 
 SUMMARY = 'summary'
