@@ -30,6 +30,7 @@ NOT_TESTED= 'not tested'
 PASSED= 'passed'
 PASSED_COMMENT= 'passed with comment'
 FAILED= 'failed'
+SKIPPED= 'skipped'
 
 # TestCase collumns
 TC_TABLE= 'testcase'
