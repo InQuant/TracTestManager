@@ -358,7 +358,11 @@ class TestCasePanel(Component):
             data["info"] = req.args.get("info", "")
             data["warning"] = req.args.get("warning", "")
             data["error"] = req.args.get("error", "")
-            data["status"] = {"OK" : models.PASSED, "FAILED" : models.FAILED}
+            data["status"] = {"passed" : models.PASSED,
+                    "failed" : models.FAILED,
+                    "passed_comment" : models.PASSED_COMMENT,
+                    "not_tested" : models.NOT_TESTED,
+                    "skipped" : models.SKIPPED}
             data["id"] = req.args.get("path_info", None)
             data["page"] = 'TestManager_accordion.html'
             data["url"] = req.abs_href + req.path_info
@@ -368,8 +372,19 @@ class TestCasePanel(Component):
                 try:
                     testcase = models.TestCaseQuery(self.env,
                             tcid=data['id']).execute()[0]
+                    for action in testcase.actions:
+                        #XXX: This is not very nice
+                        if action.status == models.PASSED:
+                            action.color = {"style" : "background:#66FF00"}
+                        elif action.status == models.PASSED_COMMENT:
+                            action.color = {"style" : "background:#FFFF00"}
+                        elif action.status == models.FAILED:
+                            action.color = {"style" : "background:#FF0033"}
+                        elif action.status == models.SKIPPED:
+                            action.color = {"style" : "background:#FF3333"}
+                        else:
+                            action.color = {"style" : "background:#FFFFFF"}
                     data["TestCaseActions"] = testcase.actions
-                    #data["execute"] = testcase
                     data["revision"] = testcase.revision
                     data["title"] = 'TestCase %s' % testcase.tcid
                     if req.authname != testcase.tester:
