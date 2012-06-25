@@ -373,17 +373,8 @@ class TestCasePanel(Component):
                     testcase = models.TestCaseQuery(self.env,
                             tcid=data['id']).execute()[0]
                     for action in testcase.actions:
-                        #XXX: This is not very nice
-                        if action.status == models.PASSED:
-                            action.color = {"style" : "background:#66FF00"}
-                        elif action.status == models.PASSED_COMMENT:
-                            action.color = {"style" : "background:#FFFF00"}
-                        elif action.status == models.FAILED:
-                            action.color = {"style" : "background:#FF0033"}
-                        elif action.status == models.SKIPPED:
-                            action.color = {"style" : "background:#AAAAAA"}
-                        else:
-                            action.color = {"style" : "background:#FFFFFF"}
+                        from TestManagerLib import get_status_color
+                        action.color = {"style" : ("background:%s" % get_status_color(action.status))}
                     data["TestCaseActions"] = testcase.actions
                     data["revision"] = testcase.revision
                     data["title"] = 'TestCase %s' % testcase.tcid

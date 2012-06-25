@@ -19,11 +19,25 @@
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 from trac.wiki import WikiSystem
+from models import PASSED, PASSED_COMMENT, FAILED, SKIPPED
 
 def _get_wiki_pages(self,prefix):
     """ wrap the wiki api
     """
     for page in WikiSystem(self.env).get_pages(prefix):
         yield page
+
+def get_status_color(status):
+    colors = {
+            PASSED : "#66FF00",
+            PASSED_COMMENT : "#FFFF00",
+            FAILED : "#FF0033",
+            SKIPPED : "#AAAAAA",
+            "default" : "#66FF00",
+            }
+    if status in colors:
+        return colors[status]
+    else:
+        return colors["default"]
 
 # vim: set ft=python ts=4 sw=4 expandtab :
