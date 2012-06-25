@@ -153,25 +153,14 @@ class TestAction(TestItem):
             self._prepare_for_update( comment= comment )
 
         self.save_changes()
-
+        stati = [NOT_TESTED, PASSED, PASSED_COMMENT, SKIPPED, FAILED]
         # check if testcase is fully tested
         testcase = TestCaseQuery(self.env, tcid=self.tcid).execute()[0]
-        testcase.status = NOT_TESTED
         for action in testcase.actions:
-            # if any action is not tested, break iteration an remain NOT_TESTED
-            if action.status == NOT_TESTED:
-                testcase.status = NOT_TESTED
-                break
-            # if status is FAILED - set FAILED and continue iteration - worst status wins :)
-            elif action.status == FAILED:
-                testcase.status = FAILED
-                continue
-            # if status is PASSED_COMMENT - set PASSED_COMMENT and continue iteration
-            elif action.status == PASSED_COMMENT and testcase.status != FAILED:
-                testcase.status = PASSED_COMMENT
-                continue
-            else:
-                testcase.status = PASSED
+            if action.status not in stati:
+                raise TracError("Wrong status has been set to a Testaction")
+            if stati.index(action.status) > stati.index(testcase.status):
+                testcase.status = action.status
         testcase.set_status(testcase.status)
 
     def _populate_action_comments(self):
