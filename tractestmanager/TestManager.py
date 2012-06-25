@@ -326,7 +326,7 @@ class TestCasesPanel(Component):
                     # url = self.env.abs_href("/TestManager/general/testcase/"+tc.id ) 
                     tc.ref = tag.a(tc.wiki, href='#',
                             onclick='window.open("testcase/%s", "Popupfenster",'\
-                            '"width=400,height=400,resizable=yes");' % tc.tcid)
+                            '"width=400,height=400,resizable=yes,scrollbars=yes");' % tc.tcid)
                 data["testcases"] = tcs
             # The template to be rendered
             data["page"] = 'TestManager_base.html'
