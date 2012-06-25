@@ -378,6 +378,10 @@ class TestCasePanel(Component):
                     data["TestCaseActions"] = testcase.actions
                     data["revision"] = testcase.revision
                     data["title"] = 'TestCase %s' % testcase.tcid
+                    # XXX: we have to fix this in 0.13 because wiki_to_html is deprecated
+                    for action in testcase.actions:
+                        for comment in action.comments:
+                            comment["text"] = wiki_to_html(comment["text"], self.env, req)
                     if req.authname != testcase.tester:
                         # assigned to someone else - but can be done by mr urlaubsvertretung
                         data["warning"] = 'this testcase has been assigned to %s' % testcase.tester
