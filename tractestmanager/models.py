@@ -14,6 +14,8 @@ from trac.ticket.model import Ticket
 from trac.wiki import WikiPage
 from trac.core import TracError
 
+import re
+
 import db_models
 from db_models import TA_TABLE, TA_KEYS, TC_TABLE, TC_KEYS
 from db_models import SKIPPED, NOT_TESTED, PASSED, FAILED, PASSED_COMMENT
@@ -123,6 +125,20 @@ class TestAction(TestItem):
     def __init__(self, env, attributes={}):
         env.log.debug('TestAction( %s )' % attributes)
         TestItem.__init__(self, env, TA_TABLE, TA_KEYS, attributes)
+        self.env= env
+        self._comments = list()
+
+    @property
+    def comments(self):
+        testrun= getattr(self, 'testrun', None)
+        if self._comments:
+            return self._comments
+        elif testrun is not None:
+            self._populate_action_comments()
+            return self._comments
+        else:
+            return []
+
 
     def set_status(self, status, comment=None):
         """ sets the status and comment of an test action.
@@ -137,6 +153,25 @@ class TestAction(TestItem):
             self._prepare_for_update( comment= comment )
 
         self.save_changes()
+
+    def _populate_action_comments(self):
+        t = Ticket(self.env, self.testrun)
+        history = t.get_changelog()
+        pat = re.compile(r"(\b(ta_id)=([0-9]+))")
+        for change in history:
+            # we get a list of change attributes [...,...,"user","comment",...]
+            # (datetime.datetime(2012, 6, 25, 7, 19, 7, 742580, tzinfo=<FixedOffset "UTC" 0:00:00>),
+            #  u'testadmin',
+            #  u'comment',
+            #  u'2', 
+            #  u'\npassed with comment "Check menu and toolbar" in 
+            #  [http://localhorst:8000/trac/TestManager/general/testcase/23 TestCase #23]
+            #  for [wiki:Testcases/UC012?revision=None]\n\ntoo slow\n', 1)
+            match = pat.search(change[4])
+            # if the ta_id is found, we have an association
+            if match and int(match.group(3)) == self.id:
+                self._comments.append({"user" : change[1], "text" : change[4]})
+
 
 class TestRun(object):
     """ TestRun based on a trac ticket of type testrun it contains a list of
