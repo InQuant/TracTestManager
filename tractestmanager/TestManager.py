@@ -381,7 +381,7 @@ class TestCasePanel(Component):
                         elif action.status == models.FAILED:
                             action.color = {"style" : "background:#FF0033"}
                         elif action.status == models.SKIPPED:
-                            action.color = {"style" : "background:#FF3333"}
+                            action.color = {"style" : "background:#AAAAAA"}
                         else:
                             action.color = {"style" : "background:#FFFFFF"}
                     data["TestCaseActions"] = testcase.actions
