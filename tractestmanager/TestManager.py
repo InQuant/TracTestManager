@@ -179,40 +179,6 @@ class TestManagerPlugin(Component):
 
         return panels, providers
 
-class HomePanel(Component):
-    """ start page of testmanager, renders the content of wiki page
-        TestManagerHome
-        this page is displayed by default when clicking the
-        testmanager tab (because section *general* comes before the other sections in alphabet)
-    """
-    implements(ITestManagerPanelProvider)
-    def __init__(self):
-        Component.__init__(self)
-
-    def get_admin_panels(self, req):
-        """ returns the Section and the Name for the Navigation
-        """
-        yield ('general', _('General'), 'home', _('Home'))
-
-
-    def render_admin_panel(self, req, cat, page, path_info):
-        """ main request handler
-        """
-        if TESTER_PERMISSION in req.perm:
-            data = dict() #template data
-            data["info"] = req.args.get("info", "")
-            data["warning"] = req.args.get("warning", "")
-            data["error"] = req.args.get("error", "")
-
-            pagename = "TestManagerHome"
-            data["pagename"] = pagename
-            data['page'] = wiki_to_html(WikiPage(self.env, pagename).text, self.env, req)
-            add_stylesheet(req, 'common/css/wiki.css')
-            add_stylesheet(req, 'TestManager/css/testmanager.css')
-            data["title"] = 'Testmanager Home'
-
-            return 'TestManager_base.html' , data
-
 class TestPlanPanel(Component):
     """ Link to available TestPlans
     """
