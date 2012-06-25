@@ -22,6 +22,9 @@
     </script>
     <script type="text/javascript" src="${href.chrome()}/TestManager/js/accordion.js"></script>
   <style>
+    * {
+        font-family: Verdana,Arial,Helvetica,sans-serif;
+    }
       .trigger {
           cursor:pointer;
       }
@@ -33,12 +36,15 @@
         <span py:for="action in TestCaseActions">                                    
           <form py:if="action" method="POST" id="accordion$action.id">
             <h3 py:attrs="action.color" class="trigger">$action.title ($action.id)</h3>            
-            <div class="toggle_container" id="$action.id">
+            <div class="toggle_container" id="$action.id" style="font: monospace; font-weight: normal;">
                 <input type="hidden" name="testrun" value="$action.testrun" />
                 <input type="hidden" name="action" value="$action.id" />
                 $action.description<br /><br />
                 $action.expected_result<br /><br />
-                <textarea name="comment">$action.comment</textarea><br /><br />
+                <p py:if="action.comments">
+                <p py:for="comment in action.comments">$comment.user said: $comment.text</p>
+                </p>
+                <textarea name="comment"></textarea><br /><br />
                 <input type="button" value="$status.skipped" name="status" />                    
                 <input type="button" value="$status.passed" name="status" />                    
                 <input type="button" value="$status.failed" name="status" />                
