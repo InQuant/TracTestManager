@@ -25,6 +25,9 @@
     * {
         font-family: Verdana,Arial,Helvetica,sans-serif;
     }
+    b {
+        font-weight: bold;
+    }
       .trigger {
           cursor:pointer;
       }
@@ -42,7 +45,7 @@
                 $action.description<br /><br />
                 $action.expected_result<br /><br />
                 <p py:if="action.comments">
-                <p py:for="comment in action.comments">$comment.user said: $comment.text</p>
+                <p py:for="comment in action.comments"><hr /><b>$comment.user said:</b>$comment.text</p>
                 </p>
                 <textarea name="comment"></textarea><br /><br />
                 <input type="button" value="$status.skipped" name="status" />                    
