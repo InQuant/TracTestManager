@@ -2,9 +2,9 @@ jQuery(document).ready(function($) {
 
 
     $('input:button').click(function(){
-        var actionid = parseInt(this.parentElement.id);
+        var actionid = parseInt(this.parentNode.id);
         set_status(actionid, this.value);
-        var trig = $(this.parentElement.previousElementSibling);
+        var trig = $(this.parentNode.previousElementSibling);
         var duration = 100;
         // close old container
         if ( trig.hasClass('trigger_active') ) {
@@ -13,8 +13,8 @@ jQuery(document).ready(function($) {
             $('.trigger_active').next('.toggle_container').slideToggle(duration);
             trig.next('.toggle_container').slideToggle(duration);
         };
-        if($(this.parentElement.parentElement.parentElement.nextElementSibling) != null){
-            var trig = $(this.parentElement.parentElement.parentElement.nextElementSibling.children[0].children[1]);
+        if($(this.parentNode.parentNode.parentNode.nextElementSibling) != null){
+            var trig = $(this.parentNode.parentNode.parentNode.nextElementSibling.children[0].children[1]);
             if (trig != null){
                 // the next one is opened, only close me
                 if ( trig.next('.toggle_container')[0].style.display != "block" ){

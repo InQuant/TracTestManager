@@ -47,7 +47,7 @@ from trac.ticket.model import Ticket
 import models
 
 COMMENT_TEMPLATE = """
-%(status)s "%(title)s" in %(tc_link)s for [wiki:%(wiki)s?revision=%(revision)s]
+%(status)s "%(title)s" in %(tc_link)s for [wiki:%(wiki)s?revision=%(revision)s&ta_id=%(ta_id)s]
 
 %(comment)s
 """
@@ -70,17 +70,16 @@ class TestCaseManipulator(Component):
         comment = req.args.get("comment", "")
         runid = req.args.get("testrun", None)
         try:
-            # mocking testaction set ok
             testaction = models.TestActionQuery(self.env, id=id).execute()[0]
-            testaction.set_status(status=status, comment=comment)
             if comment:
-                # testaction failed
+                testaction.set_status(status=status, comment=comment)
                 testrun = Ticket(self.env, tkt_id=runid)
                 # add comment to ticket with ta_id, comment and tcid
                 testcase = models.TestCaseQuery(self.env).execute()[0]
                 # TODO: check if testcase can be opened from a ticket
                 tc_link = "[%s/TestManager/general/testcase/%s TestCase #%s]" % (req.abs_href(), testaction.tcid, testaction.tcid)
                 comment_data = {"title": testaction.title,
+                        "ta_id" : id,
                         "status" : status,
                         "wiki": testcase.wiki,
                         "revision": testcase.revision,
@@ -90,6 +89,8 @@ class TestCaseManipulator(Component):
                 # TODO: decode base64
                 testrun.save_changes(author=req.authname, comment=comment)
             # send ajax callback success
+            else:
+                testaction.set_status(status=status, comment=None)
             req.send(json.dumps({"update":"success", "status":status}))
         except TracError:
                 req.send(json.dumps({"update":"failed"}))
