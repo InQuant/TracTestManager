@@ -278,22 +278,25 @@ class TestCasesPanel(Component):
             data["error"] = req.args.get("error", "")
             # get all TestCases assigned to the user and have status "not tested"
 
+            runs = models.TestRunQuery(self.env, status='accepted').execute()
             #tcs = models.TestCaseQuery(self.env,
             #        tester= req.authname,
             #        status= models.NOT_TESTED).execute()
-            tcs = models.TestCaseQuery(self.env).execute()
-            if not tcs:
+            #tcs = models.TestCaseQuery(self.env).execute()
+            if not runs:
                 data["info"] = 'no testcases available'
             else:
                 # build link with genshi
-                for tc in tcs:
-                    # refer to the testaction module to load the testcase execution
-                    # tc.ref = tag.a(tc.wiki, href=req.href.testaction(tc.id))
-                    # url = self.env.abs_href("/TestManager/general/testcase/"+tc.id ) 
-                    tc.ref = tag.a(tc.wiki, href='#',
-                            onclick='window.open("testcase/%s", "Popupfenster",'\
-                            '"width=400,height=400,resizable=yes,scrollbars=yes");' % tc.tcid)
-                data["testcases"] = tcs
+                for run in runs:
+                    run.testcases = models.TestCaseQuery(self.env, testrun=run.id).execute()
+                    for tc in run.testcases:
+                        # refer to the testaction module to load the testcase execution
+                        # tc.ref = tag.a(tc.wiki, href=req.href.testaction(tc.id))
+                        # url = self.env.abs_href("/TestManager/general/testcase/"+tc.id ) 
+                        tc.ref = tag.a(tc.wiki, href='#',
+                                onclick='window.open("testcase/%s", "Popupfenster",'\
+                                '"width=400,height=400,resizable=yes,scrollbars=yes");' % tc.tcid)
+                data["testcases"] = runs
             # The template to be rendered
             data["page"] = 'TestManager_base.html'
             data["title"] = 'TestCases'
