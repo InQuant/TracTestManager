@@ -23,6 +23,9 @@ SUMMARY = 'summary'
 OWNER   = 'owner'
 STATUS  = 'status'
 
+def test_status():
+    return [SKIPPED, NOT_TESTED, PASSED, FAILED, PASSED_COMMENT]
+
 class TestItem(object):
     """ Core class for test cases and test actions.
     """
@@ -115,6 +118,102 @@ class TestCase(TestItem):
         self._prepare_for_update( status= status )
 
         self.save_changes()
+ 
+
+class TestItemGroupStats(object):
+    """ Encapsulates statistics on a group of test items (actions or cases).
+
+    adapted from trac TicketGroupStats
+     [
+         interval{
+         'count': 1
+         'title': PASSED
+         'css_class': 'closed'
+         'percent': 7.0
+         'overall_completion': True
+         'qry_args': {'status': [PASSED]}
+         }
+
+         interval{
+         'count': 11
+         'title': SKIPPED
+         'css_class': 'open'
+         'percent': 93.0
+         'overall_completion': False
+         'qry_args': {'status': [SKIPPED, NOT_TESTED]}
+         }
+     ]
+    """
+
+    def __init__(self, title, unit):
+        """
+        :param title: the display name of this group of stats (e.g.
+                      ``'test action status'``)
+        :param unit: is the units for these stats in plural form,
+                     e.g. ``_('hours'``)
+        """
+        self.title = title
+        self.unit = unit
+        self.count = 0
+        self.qry_args = {}
+        self.intervals = []
+        self.done_percent = 0
+        self.done_count = 0
+
+    def add_interval(self, title, count, qry_args, css_class, 
+                     overall_completion=None):
+        """Adds a division to this stats' group's progress bar.
+
+        :param title: the display name (e.g. ``'closed'``, ``'spent
+                      effort'``) of this interval that will be
+                      displayed in front of the unit name
+        :param count: the number of units in the interval
+        :param qry_args: a dict of extra params that will yield the
+                         subset of tickets in this interval on a query.
+        :param css_class: is the css class that will be used to
+                          display the division
+        :param overall_completion: can be set to true to make this
+                                   interval count towards overall
+                                   completion of this group of
+                                   tickets.
+          
+        """
+        self.intervals.append({
+            'title': title,
+            'count': count,
+            'qry_args': qry_args,
+            'css_class': css_class,
+            'percent': None,
+            'overall_completion': overall_completion,
+        })
+        self.count = self.count + count
+
+    def refresh_calcs(self):
+        if self.count < 1:
+            return
+        total_percent = 0
+        self.done_percent = 0
+        self.done_count = 0
+        for interval in self.intervals:
+            interval['percent'] = round(float(interval['count'] / 
+                                        float(self.count) * 100))
+            total_percent = total_percent + interval['percent']
+            if interval['overall_completion']:
+                self.done_percent += interval['percent']
+                self.done_count += interval['count']
+
+        # We want the percentages to add up to 100%. To do that, we fudge one
+        # of the intervals. If we're <100%, we add to the smallest non-zero
+        # interval. If we're >100%, we subtract from the largest interval.
+        # The interval is adjusted by enough to make the intervals sum to 100%.
+        if self.done_count and total_percent != 100:
+            fudge_amt = 100 - total_percent
+            fudge_int = [i for i in sorted(self.intervals,
+                                           key=lambda k: k['percent'],
+                                           reverse=(fudge_amt < 0))
+                         if i['percent']][0]
+            fudge_int['percent'] += fudge_amt
+            self.done_percent += fudge_amt
 
 class TestAction(TestItem):
     """ Testaction with attributes as part of a testcase.

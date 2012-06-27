@@ -1,0 +1,11 @@
+<div
+  xmlns:py="http://genshi.edgewall.org/"
+  xmlns:xi="http://www.w3.org/2001/XInclude"
+  class="milestone">
+
+  <div class="info trac-progress">
+    <xi:include href="progress_bar.html"
+      py:with="stats = stats; interval_hrefs = interval_hrefs;
+               stats_href = stats_href" />
+  </div>
+</div>

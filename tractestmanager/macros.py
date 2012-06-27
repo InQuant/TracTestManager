@@ -28,7 +28,17 @@ from trac.wiki.formatter import system_message
 from trac.wiki.macros import WikiMacroBase
 from trac.wiki import Formatter
 from trac.wiki import WikiSystem
+
+from trac.config import ExtensionOption
+from trac.ticket.query import Query
+from trac.ticket.roadmap import ITicketGroupStatsProvider, \
+                                apply_ticket_permissions, get_ticket_stats
+from trac.core import *
+from trac.web.chrome import Chrome, ITemplateProvider, add_stylesheet
+from trac.wiki.api import IWikiMacroProvider, parse_args
+
 import StringIO
+
 
 class TestPlanMacro(WikiMacroBase):
     """Testplan macro.
@@ -189,5 +199,58 @@ class TestCaseMacro(WikiMacroBase):
                 #oneliner.system_message(action.expected_result, out)
                 print e
         return out
+
+def my_query_stats_data( req, stat, constraints ):
+    def query_href(extra_args):
+        args = {'group': 'status' }
+        args.update(constraints)
+        args.update(extra_args)
+        return req.href.query(args)
+    return {'stats': stat,
+            'stats_href': query_href(stat.qry_args),
+            'interval_hrefs': [query_href(interval['qry_args'])
+                            for interval in stat.intervals]}
+
+class TestEvaluateMacro(WikiMacroBase):
+    """Test query wiki macro plugin for Trac Testman
+
+    """
+    implements(ITemplateProvider)
+    
+    def _parse_macro_content(self, content, req):
+        args, kwargs = parse_args(content, strict=False)
+        assert not args and not ('status' in kwargs or 'format' in kwargs), \
+          "Invalid input!"
+
+        return kwargs
+
+    def expand_macro(self, formatter, name, content):
+        req = formatter.req
+        kwargs = self._parse_macro_content(content, req)
+        self.env.log.debug("Macro Args: %s" % kwargs)
+
+        # Create & execute the query string
+        from models import TestCaseQuery
+        tcs= TestCaseQuery( self.env, **kwargs ).execute()
+
+        # Calculate stats
+        from evaluate import TestCaseStatus
+        stats = TestCaseStatus(self.env).get_testcase_stats( tcs )
+        stats_data = my_query_stats_data(req, stats, kwargs)
+
+        # ... and finally display them
+        add_stylesheet(req, 'site/testmanager.css')
+        #add_stylesheet(req, 'common/css/roadmap.css')
+        chrome = Chrome(self.env)
+        return chrome.render_template(req, 'progressmeter.html', stats_data,
+                                      fragment=True)
+
+    ## ITemplateProvider methods
+    def get_htdocs_dirs(self):
+        return []
+
+    def get_templates_dirs(self):
+        from pkg_resources import resource_filename
+        return [resource_filename(__name__, 'templates')]
 
 # vim: set ft=python ts=4 sw=4 expandtab :
