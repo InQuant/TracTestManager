@@ -27,6 +27,7 @@ admin_perm = 'WIKI_ADMIN' in perm(page.resource)">
             <table class="listing reports"
             py:with="any_edit = any(can_edit for id, title, can_edit, can_delete in reports);
             any_delete = any(can_delete for id, title, can_edit, can_delete in reports)">
+            <!-- ############## TestPlanPanel ############## -->
                 <thead py:if="testruns">
                     <tr>
                         <th>TestRun</th>
@@ -41,15 +42,18 @@ admin_perm = 'WIKI_ADMIN' in perm(page.resource)">
                         <td class="action">$testrun.status</td>
                     </tr>
                 </tbody>
+            </table>
+            <table py:for="testrun in testcases" class="listing reports">
+            <!-- ############## TestCasesPanel ############## -->
                 <thead py:if="testcases">
                     <tr>
-                        <th>TestCase</th>
+                        <th>Testrun #$testrun.id</th>
                         <th>summary</th>
                         <th>status</th>
                     </tr>
                 </thead>
                 <tbody py:choose="testcases">
-                    <tr py:when="testcases" py:for="testcase in testcases">
+                    <tr py:when="testcases" py:for="testcase in testrun.testcases">
                         <td class="report">$testcase.ref</td>
                         <td class="title">$testcase.description</td>
                         <td class="action">$testcase.status</td>
@@ -89,13 +93,7 @@ admin_perm = 'WIKI_ADMIN' in perm(page.resource)">
                         </tr>
                     </tbody>
                 </table>
-                
-                <!--
-                <select py:when="defect_runs" name="restart_plan">
-                    <option py:for="option in defect_runs" value="$option.id">$option.id - $option.summary</option>
-                </select>
-                -->
-                <input py:if="defect_runs" type="submit" value="restart testplan" />                
+                <input py:if="defect_runs" type="submit" value="restart testplan" />
             </form>
         </div>
     </body>
