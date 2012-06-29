@@ -211,8 +211,11 @@ def my_query_stats_data( req, stat, constraints ):
             'interval_hrefs': [query_href(interval['qry_args'])
                             for interval in stat.intervals]}
 
-class TestEvaluateMacro(WikiMacroBase):
-    """Test query wiki macro plugin for Trac Testman
+class TestEvalMacro(WikiMacroBase):
+    """Test query wiki macro plugin for Trac Testman, evaluates the status of
+    testcases not testactions!
+
+    usage: TestEval(<kwargs>), e.g.: [[TestEval(testrun= 18, tester= testadmin)]]
 
     """
     implements(ITemplateProvider)
