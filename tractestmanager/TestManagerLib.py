@@ -33,7 +33,7 @@ def get_status_color(status):
             PASSED_COMMENT : "#FFFF00",
             FAILED : "#FF0033",
             SKIPPED : "#AAAAAA",
-            "default" : "#66FF00",
+            "default" : "#FFFFFF",
             }
     if status in colors:
         return colors[status]
