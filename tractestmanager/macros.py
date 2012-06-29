@@ -216,7 +216,7 @@ class TestEvaluateMacro(WikiMacroBase):
 
     """
     implements(ITemplateProvider)
-    
+
     def _parse_macro_content(self, content, req):
         args, kwargs = parse_args(content, strict=False)
         assert not args and not ('status' in kwargs or 'format' in kwargs), \
@@ -239,8 +239,7 @@ class TestEvaluateMacro(WikiMacroBase):
         stats_data = my_query_stats_data(req, stats, kwargs)
 
         # ... and finally display them
-        add_stylesheet(req, 'site/testmanager.css')
-        #add_stylesheet(req, 'common/css/roadmap.css')
+        add_stylesheet(req, 'TestManager/css/testmanager.css')
         chrome = Chrome(self.env)
         return chrome.render_template(req, 'progressmeter.html', stats_data,
                                       fragment=True)
