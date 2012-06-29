@@ -139,7 +139,7 @@ class TestPlanMacro(WikiMacroBase):
             text += '||%s||%s||\n' % (key, testcases[key])
         return text
 
-    def _build_configs_wiki(self,config):
+    def _build_configs_wiki(self, config):
         """ builds wiki formatting for the configuration table
         """
         text = "== Testparameter ==\n||'''Attribut'''||'''Wert'''||\n"
@@ -256,5 +256,55 @@ class TestEvalMacro(WikiMacroBase):
     def get_templates_dirs(self):
         from pkg_resources import resource_filename
         return [resource_filename(__name__, 'templates')]
+
+class TestRunMonitorMacro(WikiMacroBase):
+    """Test query macro for Testruns to display the overall-status
+
+    usage: e.g.: [[TestRunMonitor(testrun= 18)]]
+
+    """
+
+    def _parse_macro_content(self, content, req):
+        args, kwargs = parse_args(content, strict=False)
+        assert not args and not ('status' in kwargs or 'format' in kwargs), \
+          "Invalid input!"
+
+        return kwargs
+
+    def expand_macro(self, formatter, name, content):
+        req = formatter.req
+        kwargs = self._parse_macro_content(content, req)
+        self.env.log.debug("Macro Args: %s" % kwargs)
+        out = StringIO.StringIO()
+
+        self.components = self.compmgr.components
+        # get testrun
+        from models import TestCaseQuery
+        # TODO: get the config - we have to make the config persistent in some way
+        tcs = TestCaseQuery(self.env, testrun=kwargs['testrun']).execute()
+        text = "\n||'''Testcase'''||'''User'''||'''Status'''||\n"
+        from TestManagerLib import get_status_color
+        for tc in tcs:
+            tc.color = get_status_color(tc.status)
+            tc_data = {
+                    "testcase" : tc.wiki,
+                    "tester" : tc.tester,
+                    "status" : tc.status,
+                    "color" : tc.color
+                    }
+            text += """{{{#!td style="background: %(color)s"
+              %(testcase)s
+            }}}
+            {{{#!td style="background: %(color)s"
+              %(tester)s
+            }}}
+            {{{#!td style="background: %(color)s"
+              %(status)s
+            }}}
+            |----------------
+            """ % tc_data
+        # ... and finally display them
+        Formatter(self.env, formatter.context).format(text,out)
+        return Markup(out.getvalue())
 
 # vim: set ft=python ts=4 sw=4 expandtab :
