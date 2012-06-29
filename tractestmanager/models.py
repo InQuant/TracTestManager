@@ -178,7 +178,6 @@ class TestItemGroupStats(object):
                                    interval count towards overall
                                    completion of this group of
                                    tickets.
-          
         """
         self.intervals.append({
             'title': title,
@@ -197,7 +196,7 @@ class TestItemGroupStats(object):
         self.done_percent = 0
         self.done_count = 0
         for interval in self.intervals:
-            interval['percent'] = round(float(interval['count'] / 
+            interval['percent'] = round(float(interval['count'] /
                                         float(self.count) * 100))
             total_percent = total_percent + interval['percent']
             if interval['overall_completion']:
@@ -317,6 +316,22 @@ class TestRun(object):
     @property
     def status(self): return self.ticket['status']
 
+    @property
+    def description(self):
+        """ build the ticket desctiption
+        """
+        description_template = """
+        [[TestEval(testrun=%(testrun)s)]]
+        [[TestRunMonitor(testrun=%(testrun)s)]]
+        %(wikiplan)s
+        """
+        data = {
+                "testrun" : self.runid,
+                "wikiplan" : self.wikiplan.text
+                }
+        description =  description_template % data
+        return description
+
     def __getitem__(self, name):
         return getattr( self, name)
 
@@ -354,7 +369,6 @@ class TestRun(object):
             OWNER          : manager,
             'reporter'     : manager,
             SUMMARY        : self.wikiplan.name,
-            'description'  : self.wikiplan.text,
             'type'         : 'testrun',
         }
         self.dbg('tickte data: %s' % data)
@@ -362,6 +376,8 @@ class TestRun(object):
         try:
             self.ticket.populate(data)
             self.runid = self.ticket.insert()
+            self.ticket['description'] = self.description
+            self.ticket.save_changes()
         except TracError, e:
             raise TracError( "TestRun ticket could not be created: %s" %
                     e.message )
