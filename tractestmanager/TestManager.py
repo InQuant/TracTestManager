@@ -300,6 +300,13 @@ class TestCasesPanel(Component):
             # The template to be rendered
             data["page"] = 'TestManager_base.html'
             data["title"] = 'TestCases'
+            #import ipdb; ipdb.set_trace()
+            data["filter"] = {
+                      'testrun_status' : [ "Accepted", "Closed" ],
+                      'tester' : [ "All", "Closed"],
+                      'testcase_status' : [ "Failed", "Not Tested"],
+                      }
+            data["url"] = req.abs_href + req.path_info + "?" + req.query_string
             return 'TestManager_base.html' , data
 
 class TestCasePanel(Component):
