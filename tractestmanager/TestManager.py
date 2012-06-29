@@ -301,11 +301,16 @@ class TestCasesPanel(Component):
             data["page"] = 'TestManager_base.html'
             data["title"] = 'TestCases'
             #import ipdb; ipdb.set_trace()
+            data["filter_caption"] = { 
+                'testrun_status' : "Testrun Status: ", 
+                'tester': "Tester: ", 
+                'testcase_status' : "Testcase Status: " 
+            }
             data["filter"] = {
-                      'testrun_status' : [ "Accepted", "Closed" ],
-                      'tester' : [ "All", "Closed"],
-                      'testcase_status' : [ "Failed", "Not Tested"],
-                      }
+                'testrun_status' : [ "Accepted", "Closed" ],
+                'tester' : [ "Mine", "All"],
+                'testcase_status' : [ "Failed", "Not Tested", "Skipped", "Passed", "Passed with Comment"],
+            }
             data["url"] = req.abs_href + req.path_info + "?" + req.query_string
             return 'TestManager_base.html' , data
 

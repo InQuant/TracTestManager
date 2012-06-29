@@ -44,9 +44,10 @@ admin_perm = 'WIKI_ADMIN' in perm(page.resource)">
                 </tbody>
             </table>
             <!-- ############## TestCasesPanel ############## -->
-            <div id="filter">
+            <div id="filter" py:if="testcases">
                 <span py:for="row in filter">                                                 
                     <p>
+                        <strong>${filter_caption[row]}</strong>
                         <span py:for="key in filter[row]">
                             <a href="?row=${row}&amp;filter=${key}">${key}</a> /
                         </span>
