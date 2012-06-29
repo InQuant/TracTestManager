@@ -241,9 +241,11 @@ class TestEvalMacro(WikiMacroBase):
         stats = TestCaseStatus(self.env).get_testcase_stats( tcs )
         stats_data = my_query_stats_data(req, stats, kwargs)
 
+        self.components = self.compmgr.components
         # ... and finally display them
+        add_stylesheet(req, 'common/css/roadmap.css')
         add_stylesheet(req, 'TestManager/css/testmanager.css')
-        chrome = Chrome(self.env)
+        chrome = Chrome(self)
         return chrome.render_template(req, 'progressmeter.html', stats_data,
                                       fragment=True)
 
