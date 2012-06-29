@@ -44,16 +44,24 @@ admin_perm = 'WIKI_ADMIN' in perm(page.resource)">
                 </tbody>
             </table>
             <!-- ############## TestCasesPanel ############## -->
-            <div id="filter" py:if="testcases">
-                <span py:for="row in filter">                                                 
+            <form method="GET">
+            <div id="filter" py:if="testcases">       
+                $req.query_string         
+                <span py:for="row in filter">                                                                    
                     <p>
                         <strong>${filter_caption[row]}</strong>
                         <span py:for="key in filter[row]">
-                            <a href="?row=${row}&amp;filter=${key}">${key}</a> /
+                            <!-- <a href="$url&amp;${row}=${key}">${key}</a> / -->
+                            <label>
+                                <input type="radio" name="${row}" value="${key}" />${key}
+                            </label>
                         </span>
                     </p> 
-                </span>       
+                </span>
+                <button name="filter">Filter</button>       
             </div>
+            </form>
+            
             <table py:for="testrun in testcases" class="listing reports">
                 <thead py:if="testcases">
                     <tr>

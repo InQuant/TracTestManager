@@ -311,6 +311,7 @@ class TestCasesPanel(Component):
                 'tester' : [ "Mine", "All"],
                 'testcase_status' : [ "Failed", "Not Tested", "Skipped", "Passed", "Passed with Comment"],
             }
+            
             data["url"] = req.abs_href + req.path_info + "?" + req.query_string
             return 'TestManager_base.html' , data
 
