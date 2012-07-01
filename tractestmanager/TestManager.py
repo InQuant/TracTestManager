@@ -276,9 +276,19 @@ class TestCasesPanel(Component):
             data["info"] = req.args.get("info", "")
             data["warning"] = req.args.get("warning", "")
             data["error"] = req.args.get("error", "")
+            filters = {
+                    "testrun_status" : req.args.get("testrun_status", None),
+                    "testcase_status" : req.args.get("testcase_status", None),
+                    "tester" : req.args.get("tester", None)
+                    }
+            if filters["tester"] == "all":
+                filters["tester"] = None
             # get all TestCases assigned to the user and have status "not tested"
 
-            runs = models.TestRunQuery(self.env, status='accepted').execute()
+            if filters["testrun_status"]:
+                runs = models.TestRunQuery(self.env, status=filters["testrun_status"]).execute()
+            else:
+                runs = models.TestRunQuery(self.env, status='accepted').execute()
             #tcs = models.TestCaseQuery(self.env,
             #        tester= req.authname,
             #        status= models.NOT_TESTED).execute()
@@ -286,32 +296,51 @@ class TestCasesPanel(Component):
             if not runs:
                 data["info"] = 'no testcases available'
             else:
-                # build link with genshi
+                # TODO: review, this could be done better
                 for run in runs:
-                    run.testcases = models.TestCaseQuery(self.env, testrun=run.id).execute()
+                    if filters["testcase_status"] and filters["tester"]:
+                        run.testcases = models.TestCaseQuery(self.env,
+                                testrun=run.id,
+                                status=filters["testcase_status"],
+                                tester=filters["tester"]
+                                ).execute()
+                    elif req.args.get("testcase_status", None):
+                        run.testcases = models.TestCaseQuery(self.env,
+                                testrun=run.id,
+                                status=filters["testcase_status"],
+                                ).execute()
+                    elif req.args.get("tester", None):
+                        run.testcases = models.TestCaseQuery(self.env,
+                                testrun=run.id,
+                                tester=filters["tester"]
+                                ).execute()
+                    else:
+                        run.testcases = models.TestCaseQuery(self.env,
+                                testrun=run.id
+                                ).execute()
                     for tc in run.testcases:
-                        # refer to the testaction module to load the testcase execution
-                        # tc.ref = tag.a(tc.wiki, href=req.href.testaction(tc.id))
+                        # build link with genshi
                         # url = self.env.abs_href("/TestManager/general/testcase/"+tc.id ) 
                         tc.ref = tag.a(tc.wiki, href='#',
-                                onclick='window.open("testcase/%s", "Popupfenster",'\
-                                '"width=400,height=400,resizable=yes,scrollbars=yes");' % tc.tcid)
+                            onclick='window.open("testcase/%s", "Popupfenster",'\
+                            '"width=400,height=400,resizable=yes,scrollbars=yes");' % tc.tcid)
                 data["testcases"] = runs
             # The template to be rendered
             data["page"] = 'TestManager_base.html'
             data["title"] = 'TestCases'
-            #import ipdb; ipdb.set_trace()
-            data["filter_caption"] = { 
-                'testrun_status' : "Testrun Status: ", 
-                'tester': "Tester: ", 
-                'testcase_status' : "Testcase Status: " 
+            # TODO: review
+            # filter data
+            data["filter_caption"] = {
+                'testrun_status' : "Testrun Status: ",
+                'tester': "Tester: ",
+                'testcase_status' : "Testcase Status: "
             }
             data["filter"] = {
-                'testrun_status' : [ "Accepted", "Closed" ],
-                'tester' : [ "Mine", "All"],
-                'testcase_status' : [ "Failed", "Not Tested", "Skipped", "Passed", "Passed with Comment"],
+                'testrun_status' : [ "accepted", "closed" ],
+                'tester' : [ req.authname, "all"],
+                'testcase_status' : [ models.FAILED, models.NOT_TESTED, models.SKIPPED, models.PASSED, models.PASSED_COMMENT],
             }
-            
+
             data["url"] = req.abs_href + req.path_info + "?" + req.query_string
             return 'TestManager_base.html' , data
 

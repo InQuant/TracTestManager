@@ -46,7 +46,6 @@ admin_perm = 'WIKI_ADMIN' in perm(page.resource)">
             <!-- ############## TestCasesPanel ############## -->
             <form method="GET">
             <div id="filter" py:if="testcases">       
-                $req.query_string         
                 <span py:for="row in filter">                                                                    
                     <p>
                         <strong>${filter_caption[row]}</strong>
@@ -70,8 +69,8 @@ admin_perm = 'WIKI_ADMIN' in perm(page.resource)">
                         <th>status</th>
                     </tr>
                 </thead>
-                <tbody py:choose="testcases">
-                    <tr py:when="testcases" py:for="testcase in testrun.testcases">
+                <tbody py:choose="testrun.testcases">
+                    <tr py:when="testrun.testcases" py:for="testcase in testrun.testcases">
                         <td class="report">$testcase.ref</td>
                         <td class="title">$testcase.description</td>
                         <td class="action">$testcase.status</td>
