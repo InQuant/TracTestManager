@@ -22,6 +22,7 @@ __author__ = 'Otto Hockel <otto.hockel@inquant.de>'
 __docformat__ = 'plaintext'
 
 from genshi.core import Markup
+from genshi.builder import tag
 
 from trac.core import TracError
 from trac.wiki.formatter import system_message
@@ -287,7 +288,7 @@ class TestRunMonitorMacro(WikiMacroBase):
         for tc in tcs:
             tc.color = get_status_color(tc.status)
             tc_data = {
-                    "testcase" : tc.wiki,
+                    "testcase" : "[%s/TestManager/general/testcase/%s TestCase #%s]" % (req.abs_href(), tc.id, tc.id),
                     "tester" : tc.tester,
                     "status" : tc.status,
                     "color" : tc.color
