@@ -1,0 +1,17 @@
+= Beispiel TestCase zur Veranschaulichung der Syntax =
+
+Hier kommt die Zusammenfassende Beschreibung des Testcases hin, sie sollte das
+Ziel der Durchführung dieses Tests zusammenfassen.
+
+Überschrift Schritt 1
+  Anweisung zum Durchführen von Schritt 1
+
+  Erwartetes Ergebnis von Schritt 1
+
+Überschrift Schritt 2
+  Anweisung zum Durchführen 
+  von Schritt 2 (kann auch mehrueilig sein)
+
+  Erwartetes Ergebnis von Schritt 2
+  (kann auch mehrzeilig sein)
+

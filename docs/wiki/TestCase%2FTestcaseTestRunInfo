@@ -1,0 +1,20 @@
+= TestCase TestRunInfo =
+
+UseCase: UcTestRunInfo
+Testmanager möchte Informationen über den aktuellen Zustand eines TestRun erhalten, um zu sehen wie erfolgreich dieser ist.
+
+Testmanager wechselt in den Testbereich
+  Klick auf tab [/TestManager TestManager], Navigationsitem [/TestManager/general/testplans TestPlans].
+
+  Er erhält eine Übersicht der aktiven TestRun(s).
+
+Der Testmanager wählt einen TestRun aus der Liste
+  Auswählen des laufenden auszuwertenden TestRuns, durch klick auf dessen Name in TestRuns Tabelle.
+
+  Eine Übersicht aller Testcases des TestRun(s) wird angezeigt. Zu jedem TestCase wird der aktuelle Status gelistet.
+
+Der Testmanager wählt einen Testcase aus der Liste
+  Duch Klick auf den Testcasenamen
+  
+  Es erscheint eine Übersicht aller Aktionen mit dem aktuellen Status und dem erwarteten
+  Ergebnis der Aktion und dem eventuell vorhandenem Tester-Kommentar.

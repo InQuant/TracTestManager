@@ -1,0 +1,34 @@
+= TestCase TestRunEvaluate =
+
+Der Testmanager beendet den TestRun und 
+wertet ihn über den Status der TestCase(s) und TestAktion(en) grafisch aus.
+
+Testmanager wechselt zur Übersicht der aktiven TestRun(s)
+  Klick auf tab [/TestManager TestManager], Navigationsitem [/TestManager/general/testplans TestPlans].
+  Auswählen des laufenden auszuwertenden TestRuns, durch klick auf dessen Name in TestRuns Tabelle.
+  Beenden des TestRuns durch setzten des Ticket Status auf Closed. (siehe auch UcTestRunInfo)
+
+  TestRun wird nicht mehr in Übersicht der aktiven TestRun(s) angezeigt
+
+Das TestManPlugin evaluiert den Status des TestRun(s) 
+  Im Ticket sind alle Infos zur Auswertung enthalten (Balkengrafik)
+
+  Infos werden auf Ticketseite dargestellt
+ 
+Testmanager wechselt zur Wikiseite des TestPlan(s)
+  aus dem der TestRun erzeugt wurde und erzeugt ein Kapitel Auswertung, in das
+  er Kommentare zum Ablauf und Ergebnis des Tests in Wikinotation formuliert.
+
+  WikiSeite enthält zusätlichen Freitext
+
+Testmanager bettet grafische testauswertung ein
+  Die Auswertung kann er als Makro einbetten (testrun=TicketId des TestRuns) z.B.
+  {{{ [[TestEval(testrun=3)]] }}}
+
+  Wikiseite enthält Balkengrafik die Auswertung des Testruns zeigt.
+
+Testmanager benutzt das Ticket:: 
+  um alle im Zusammenhang mit der Durchführung der
+  TestAktion(en) erstellten Kommentare zu listen.
+
+  Ticket des Testruns wird angezeigt, es befinden sich Kommetare der Tester, samt Status am Ticket. 
