@@ -249,7 +249,10 @@ class TestAction(TestItem):
         self.dbg('TestAction.set_status( %s, %s)' % (str(status), str(comment)))
 
         if status not in STATUSES:
-            raise TracError("Wrong status for a Testaction")
+            raise TracError("Wrong status for a test action")
+
+        if status == FAILED and comment == None:
+            raise TracError("This status must be commented.")
 
         setattr(self, 'status', status)
         self._prepare_for_update( status= status )
