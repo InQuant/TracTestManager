@@ -255,6 +255,63 @@ class TestPlanPanel(Component):
         data["title"] = 'TestPlans'
         return data['page'] , data
 
+def build_testcase_link( tc ):
+    # build link with genshi
+    # url = self.env.abs_href("/TestManager/general/testcase/"+tc.id ) 
+    return tag.a(tc.wiki, href='#',
+        onclick='window.open("testcase/%s", "Popupfenster",'\
+        '"width=400,height=400,resizable=yes,scrollbars=yes");' % tc.tcid)
+
+class TestQueryPanel(Component):
+    """ Queries testcases via url handler
+    """
+    implements(ITestManagerPanelProvider)
+    # XXX: this is not very cool
+    def __init__(self):
+        Component.__init__(self)
+
+    def get_admin_panels(self, req):
+        """ returns the Section and the Name for the Navigation
+        """
+        yield ( 'general', _('General'), 'testquery', None )
+
+    def render_admin_panel(self, req, cat, page, path_info):
+        """ main request handler
+        """
+        if TESTER_PERMISSION in req.perm:
+            data = dict() #template data
+            data["info"] = req.args.get("info", "")
+            data["warning"] = req.args.get("warning", "")
+            data["error"] = req.args.get("error", "")
+            
+            # get the testcase filter args
+            filters= dict()
+            for arg in req.args:
+                if arg in models.TC_KEYS:
+                    filters[arg]= req.args.get(arg, "")
+
+            runs= list()
+            if filters.get('testrun', None) is None:
+                runs = models.TestRunQuery(self.env, status='accepted').execute()
+            else:
+                runs.append( models.TestRun(self.env,
+                    int(req.args.get('testrun', None))))
+            
+            for run in runs:
+                run.testcases = models.TestCaseQuery(self.env, **filters).execute()
+
+                # build link with genshi
+                for tc in run.testcases: tc.ref= build_testcase_link( tc )
+
+            # The template to be rendered
+            data["filter"]= {}
+            data["testcases"]= runs
+            data["page"] = 'TestManager_base.html'
+            data["title"] = 'TestCases'
+
+            data["url"] = req.abs_href + req.path_info + "?" + req.query_string
+            return 'TestManager_base.html' , data
+
 class TestCasesPanel(Component):
     """ Link to available TestPlans
     """
@@ -318,12 +375,10 @@ class TestCasesPanel(Component):
                         run.testcases = models.TestCaseQuery(self.env,
                                 testrun=run.id
                                 ).execute()
+                    # build link with genshi
                     for tc in run.testcases:
-                        # build link with genshi
-                        # url = self.env.abs_href("/TestManager/general/testcase/"+tc.id ) 
-                        tc.ref = tag.a(tc.wiki, href='#',
-                            onclick='window.open("testcase/%s", "Popupfenster",'\
-                            '"width=400,height=400,resizable=yes,scrollbars=yes");' % tc.tcid)
+                        tc.ref= build_testcase_link( tc )
+
                 data["testcases"] = runs
             # The template to be rendered
             data["page"] = 'TestManager_base.html'
