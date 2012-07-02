@@ -322,8 +322,8 @@ class TestRun(object):
         """
         description_template = """
         = %(wikiplan)s =
-        [[TestRunMonitor(testrun=%(testrun)s)]]
         [[TestEval(testrun=%(testrun)s)]]
+        [[TestRunMonitor(testrun=%(testrun)s)]]
         """
         data = {
                 "testrun" : self.runid,

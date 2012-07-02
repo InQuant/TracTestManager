@@ -278,52 +278,52 @@ class TestQueryPanel(Component):
     def render_admin_panel(self, req, cat, page, path_info):
         """ main request handler
         """
-        if TESTER_PERMISSION in req.perm:
-            data = dict() #template data
-            data["info"] = req.args.get("info", "")
-            data["warning"] = req.args.get("warning", "")
-            data["error"] = req.args.get("error", "")
-            # get the testcase filter args
-            filters= dict()
-            for arg in req.args:
-                if arg in models.TC_KEYS:
-                    filters[arg]= req.args.get(arg, "")
+        if not TESTER_PERMISSION in req.perm:
+            return
 
-            runs= list()
-            if filters.get('tester') == 'all':
-                filters.pop('tester')
-            if filters.get('testrun', None) is None:
-                runs = models.TestRunQuery(self.env, status='accepted').execute()
-            else:
-                runs.append( models.TestRun(self.env,
-                    int(req.args.get('testrun', None))))
+        data = dict() #template data
+        data["info"] = req.args.get("info", "")
+        data["warning"] = req.args.get("warning", "")
+        data["error"] = req.args.get("error", "")
+        # get the testcase filter args
+        filters= dict()
+        for arg in req.args:
+            if arg in models.TC_KEYS:
+                filters[arg]= req.args.get(arg, "")
 
-            for run in runs:
-                if filters.get('testrun'):
-                    # drop testrun filter
-                    filters.pop('testrun')
-                else:
-                    run.testcases = models.TestCaseQuery(self.env, testrun=run.id, **filters).execute()
+        runs= list()
+        if filters.get('tester') == 'all':
+            filters.pop('tester')
+        if filters.get('testrun', None) is None:
+            runs = models.TestRunQuery(self.env, status='accepted').execute()
+        else:
+            runs.append( models.TestRun(self.env,
+                int(req.args.get('testrun', None))))
+            # drop testrun filter
+            filters.pop('testrun')
 
-                # build link with genshi
-                for tc in run.testcases: tc.ref= build_testcase_link( tc )
+        for run in runs:
+            run.testcases = models.TestCaseQuery(self.env, testrun=run.id, **filters).execute()
 
-            # The template to be rendered
-            data["filter"]= {}
-            data["testcases"]= runs
-            data["page"] = 'TestManager_base.html'
-            data["title"] = 'TestCases'
+            # build link with genshi
+            for tc in run.testcases: tc.ref= build_testcase_link( tc )
 
-            data["url"] = req.abs_href + req.path_info + "?" + req.query_string
-            data["filter_caption"] = {
-                'tester': "Tester: ",
-                'status' : "Testcase Status: "
-            }
-            data["filter"] = {
-                'tester' : [ req.authname, "all"],
-                'status' : [ models.FAILED, models.NOT_TESTED, models.SKIPPED, models.PASSED, models.PASSED_COMMENT],
-            }
-            return 'TestManager_base.html' , data
+        # The template to be rendered
+        data["filter"]= {}
+        data["testcases"]= runs
+        data["page"] = 'TestManager_base.html'
+        data["title"] = 'TestCases'
+
+        data["url"] = req.abs_href + req.path_info + "?" + req.query_string
+        data["filter_caption"] = {
+            'tester': "Tester: ",
+            'status' : "Testcase Status: "
+        }
+        data["filter"] = {
+            'tester' : [ req.authname, "all"],
+            'status' : [ models.FAILED, models.NOT_TESTED, models.SKIPPED, models.PASSED, models.PASSED_COMMENT],
+        }
+        return 'TestManager_base.html' , data
 
 class TestCasePanel(Component):
     """ a panel to fit requests for executing testcases
