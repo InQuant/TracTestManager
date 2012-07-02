@@ -474,11 +474,25 @@ class TestItemQuery(object):
         self.query= None
         self.values= []
 
+        filter_keys= list()
+        filter_vals= list()
         if kwargs:
             # build filter
-            self.query= string.join(
-                [k + '=%s' for k in kwargs.keys()], ' AND ')
-            self.values= kwargs.values()
+            # e.g. 'testrun=%s AND (status=%s OR status=%s)
+            # e.g. 'testrun=19 AND (status=not tested OR status=skipped)
+            for key, val in kwargs.items():
+                if type(val) == list:
+                    # construct OR clause
+                    newkey= "(" + string.join(
+                        ['%s=%%s' % key for i in range(len(val))], ' OR ') + ")"
+                    filter_keys.append(newkey)
+                    filter_vals.extend(val)
+                else:
+                    filter_keys.append("%s=%%s" % key)
+                    filter_vals.append(val)
+                    
+            self.query= string.join(filter_keys, ' AND ')
+            self.values= filter_vals
 
 class TestCaseQuery(TestItemQuery):
     """ query testcases from db.
