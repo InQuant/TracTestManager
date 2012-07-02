@@ -203,10 +203,11 @@ class TestCaseMacro(WikiMacroBase):
 
 def my_query_stats_data( req, stat, constraints ):
     def query_href(extra_args):
-        args = {'group': 'status' }
+        #args = {'group': 'status' }
+        args = { }
         args.update(constraints)
         args.update(extra_args)
-        return req.href.query(args)
+        return req.href("TestManager/general/testquery", args)
     return {'stats': stat,
             'stats_href': query_href(stat.qry_args),
             'interval_hrefs': [query_href(interval['qry_args'])
