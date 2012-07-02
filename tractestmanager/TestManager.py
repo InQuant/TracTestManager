@@ -304,12 +304,12 @@ class TestCasesPanel(Component):
                                 status=filters["testcase_status"],
                                 tester=filters["tester"]
                                 ).execute()
-                    elif req.args.get("testcase_status", None):
+                    elif filters["testcase_status"]:
                         run.testcases = models.TestCaseQuery(self.env,
                                 testrun=run.id,
                                 status=filters["testcase_status"],
                                 ).execute()
-                    elif req.args.get("tester", None):
+                    elif filters["tester"]:
                         run.testcases = models.TestCaseQuery(self.env,
                                 testrun=run.id,
                                 tester=filters["tester"]
