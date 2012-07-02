@@ -361,12 +361,12 @@ class TestCasesPanel(Component):
                                 status=filters["testcase_status"],
                                 tester=filters["tester"]
                                 ).execute()
-                    elif req.args.get("testcase_status", None):
+                    elif filters["testcase_status"]:
                         run.testcases = models.TestCaseQuery(self.env,
                                 testrun=run.id,
                                 status=filters["testcase_status"],
                                 ).execute()
-                    elif req.args.get("tester", None):
+                    elif filters["tester"]:
                         run.testcases = models.TestCaseQuery(self.env,
                                 testrun=run.id,
                                 tester=filters["tester"]
@@ -386,12 +386,10 @@ class TestCasesPanel(Component):
             # TODO: review
             # filter data
             data["filter_caption"] = {
-                'testrun_status' : "Testrun Status: ",
                 'tester': "Tester: ",
                 'testcase_status' : "Testcase Status: "
             }
             data["filter"] = {
-                'testrun_status' : [ "accepted", "closed" ],
                 'tester' : [ req.authname, "all"],
                 'testcase_status' : [ models.FAILED, models.NOT_TESTED, models.SKIPPED, models.PASSED, models.PASSED_COMMENT],
             }

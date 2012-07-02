@@ -321,13 +321,13 @@ class TestRun(object):
         """ build the ticket desctiption
         """
         description_template = """
-        [[TestEval(testrun=%(testrun)s)]]
+        = %(wikiplan)s =
         [[TestRunMonitor(testrun=%(testrun)s)]]
-        %(wikiplan)s
+        [[TestEval(testrun=%(testrun)s)]]
         """
         data = {
                 "testrun" : self.runid,
-                "wikiplan" : self.wikiplan.text
+                "wikiplan" : self.wikiplan.name
                 }
         description =  description_template % data
         return description
