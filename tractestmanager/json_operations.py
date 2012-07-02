@@ -93,6 +93,7 @@ class TestCaseManipulator(Component):
                 testaction.set_status(status=status, comment=None)
             req.send(json.dumps({"update":"success", "status":status}))
         except TracError:
+                # TODO: use callback to render errors
                 req.send(json.dumps({"update":"failed"}))
 
 # vim: set ft=python ts=4 sw=4 expandtab :
