@@ -1,11 +1,8 @@
 Changelog
 =========
 
-0.1 (2012-04-16)
+0.1 (2012-07-02)
 ----------------
 
-  - updated macro to parse specified syntax
-  - only showing existing Testcases
-  - initial release
-    built base plugin and base macro
+  - first and initial release
     [otto]
