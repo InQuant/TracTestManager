@@ -258,7 +258,7 @@ class TestPlanPanel(Component):
 def build_testcase_link( tc ):
     # build link with genshi
     # url = self.env.abs_href("/TestManager/general/testcase/"+tc.id ) 
-    return tag.a(tc.wiki, href='#',
+    return tag.a(tc.wiki, href="#",
         onclick='window.open("testcase/%s", "Popupfenster",'\
         '"width=400,height=400,resizable=yes,scrollbars=yes");' % tc.tcid)
 
@@ -273,59 +273,7 @@ class TestQueryPanel(Component):
     def get_admin_panels(self, req):
         """ returns the Section and the Name for the Navigation
         """
-        yield ( 'general', _('General'), 'testquery', None )
-
-    def render_admin_panel(self, req, cat, page, path_info):
-        """ main request handler
-        """
-        if not TESTER_PERMISSION in req.perm: return
-
-        data = dict() #template data
-        data["info"] = req.args.get("info", "")
-        data["warning"] = req.args.get("warning", "")
-        data["error"] = req.args.get("error", "")
-        
-        # get the testcase filter args
-        filters= dict()
-        for arg in req.args:
-            if arg in models.TC_KEYS:
-                filters[arg]= req.args.get(arg, "")
-        self.env.log.debug( "filters= %s" % filters )
-
-        runs= list()
-        if filters.get('testrun', None) is None:
-            runs = models.TestRunQuery(self.env, status='accepted').execute()
-        else:
-            runs.append( models.TestRun(self.env,
-                int(req.args.get('testrun', None))))
-        
-        for run in runs:
-            run.testcases = models.TestCaseQuery(self.env, **filters).execute()
-
-            # build link with genshi
-            for tc in run.testcases: tc.ref= build_testcase_link( tc )
-
-        # The template to be rendered
-        data["filter"]= {}
-        data["testcases"]= runs
-        data["page"] = 'TestManager_base.html'
-        data["title"] = 'TestCases'
-
-        data["url"] = req.abs_href + req.path_info + "?" + req.query_string
-        return 'TestManager_base.html' , data
-
-class TestCasesPanel(Component):
-    """ Link to available TestPlans
-    """
-    implements(ITestManagerPanelProvider)
-    # XXX: this is not very cool
-    def __init__(self):
-        Component.__init__(self)
-
-    def get_admin_panels(self, req):
-        """ returns the Section and the Name for the Navigation
-        """
-        yield ('general', _('General'), 'testcases', _('TestCases'))
+        yield ( 'general', _('General'), 'testquery', _("TestCases") )
 
     def render_admin_panel(self, req, cat, page, path_info):
         """ main request handler
@@ -335,68 +283,46 @@ class TestCasesPanel(Component):
             data["info"] = req.args.get("info", "")
             data["warning"] = req.args.get("warning", "")
             data["error"] = req.args.get("error", "")
-            filters = {
-                    "testrun_status" : req.args.get("testrun_status", None),
-                    "testcase_status" : req.args.get("testcase_status", None),
-                    "tester" : req.args.get("tester", None)
-                    }
-            if filters["tester"] == "all":
-                filters["tester"] = None
-            # get all TestCases assigned to the user and have status "not tested"
+            # get the testcase filter args
+            filters= dict()
+            for arg in req.args:
+                if arg in models.TC_KEYS:
+                    filters[arg]= req.args.get(arg, "")
 
-            if filters["testrun_status"]:
-                runs = models.TestRunQuery(self.env, status=filters["testrun_status"]).execute()
-            else:
+            runs= list()
+            if filters.get('tester') == 'all':
+                filters.pop('tester')
+            if filters.get('testrun', None) is None:
                 runs = models.TestRunQuery(self.env, status='accepted').execute()
-            #tcs = models.TestCaseQuery(self.env,
-            #        tester= req.authname,
-            #        status= models.NOT_TESTED).execute()
-            #tcs = models.TestCaseQuery(self.env).execute()
-            if not runs:
-                data["info"] = 'no testcases available'
             else:
-                # TODO: review, this could be done better
-                for run in runs:
-                    if filters["testcase_status"] and filters["tester"]:
-                        run.testcases = models.TestCaseQuery(self.env,
-                                testrun=run.id,
-                                status=filters["testcase_status"],
-                                tester=filters["tester"]
-                                ).execute()
-                    elif filters["testcase_status"]:
-                        run.testcases = models.TestCaseQuery(self.env,
-                                testrun=run.id,
-                                status=filters["testcase_status"],
-                                ).execute()
-                    elif filters["tester"]:
-                        run.testcases = models.TestCaseQuery(self.env,
-                                testrun=run.id,
-                                tester=filters["tester"]
-                                ).execute()
-                    else:
-                        run.testcases = models.TestCaseQuery(self.env,
-                                testrun=run.id
-                                ).execute()
-                    # build link with genshi
-                    for tc in run.testcases:
-                        tc.ref= build_testcase_link( tc )
+                runs.append( models.TestRun(self.env,
+                    int(req.args.get('testrun', None))))
 
-                data["testcases"] = runs
+            for run in runs:
+                if filters.get('testrun'):
+                    # drop testrun filter
+                    filters.pop('testrun')
+                else:
+                    run.testcases = models.TestCaseQuery(self.env, testrun=run.id, **filters).execute()
+
+                # build link with genshi
+                for tc in run.testcases: tc.ref= build_testcase_link( tc )
+
             # The template to be rendered
+            data["filter"]= {}
+            data["testcases"]= runs
             data["page"] = 'TestManager_base.html'
             data["title"] = 'TestCases'
-            # TODO: review
-            # filter data
+
+            data["url"] = req.abs_href + req.path_info + "?" + req.query_string
             data["filter_caption"] = {
                 'tester': "Tester: ",
-                'testcase_status' : "Testcase Status: "
+                'status' : "Testcase Status: "
             }
             data["filter"] = {
                 'tester' : [ req.authname, "all"],
-                'testcase_status' : [ models.FAILED, models.NOT_TESTED, models.SKIPPED, models.PASSED, models.PASSED_COMMENT],
+                'status' : [ models.FAILED, models.NOT_TESTED, models.SKIPPED, models.PASSED, models.PASSED_COMMENT],
             }
-
-            data["url"] = req.abs_href + req.path_info + "?" + req.query_string
             return 'TestManager_base.html' , data
 
 class TestCasePanel(Component):
