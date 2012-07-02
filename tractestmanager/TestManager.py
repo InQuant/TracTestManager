@@ -81,8 +81,9 @@ class TestManagerPlugin(Component):
         to add, each being a tuple in the form (category, name, text).
         """
         if TESTER_PERMISSION in req.perm:
-            yield 'mainnav', 'TestManager', tag.a(_('TestManager'), href=req.href.TestManager(),
-                                            title=_('TestManager'))
+            yield 'mainnav', 'TestManager', tag.a(_('TestManager'),
+                    href=req.href.TestManager(),
+                    title=_('TestManager'))
     # IRequestHandler methods
     def match_request(self, req):
         match = re.match('/TestManager(?:/([^/]+))?(?:/([^/]+))?(?:/(.*)$)?',
@@ -205,6 +206,7 @@ class TestPlanPanel(Component):
         data["error"] = req.args.get("error", "")
         # The template to be rendered
         data["page"] = 'TestManager_base.html'
+        data["testplanlink"] = req.base_url + req.path_info
 
         if 'start_plan' in req.args:
             # setup and start a new testrun

@@ -81,7 +81,7 @@ admin_perm = 'WIKI_ADMIN' in perm(page.resource)">
             <br />
             <b py:if="testplans">Available Testplans</b>
             <br />
-            <form py:choose="testplans" action="testplans" method="POST">
+            <form py:choose="testplans" action="$testplanlink" method="POST">
                 <select py:when="testplans" name="start_plan">
                     <option py:for="option in testplans" value="$option">$option</option>
                 </select>
@@ -91,7 +91,7 @@ admin_perm = 'WIKI_ADMIN' in perm(page.resource)">
             <br />
             <b py:if="defect_runs">Defect Testplans</b>
             <br />
-            <form py:choose="defect_runs" action="testplans" method="POST"  py:if="defect_runs">
+            <form py:choose="defect_runs" action="$testplanlink" method="POST"  py:if="defect_runs">
                 <table class="listing reports">
                     <thead>
                         <tr>
