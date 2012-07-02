@@ -106,6 +106,7 @@ class TestPlanMacro(WikiMacroBase):
                 x = x.lower()
                 attributes[x] = y
             # and this a testcase markup
+            # TODO: parser kaputt wenn testcases z.B. TestCaseXXX heissen und nicht in einem Unterordner liegen
             if '/' in line:
                 testcasepath, user = line.split()
                 caselines[testcasepath] = user
