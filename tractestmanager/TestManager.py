@@ -331,12 +331,10 @@ class TestCasesPanel(Component):
             # TODO: review
             # filter data
             data["filter_caption"] = {
-                'testrun_status' : "Testrun Status: ",
                 'tester': "Tester: ",
                 'testcase_status' : "Testcase Status: "
             }
             data["filter"] = {
-                'testrun_status' : [ "accepted", "closed" ],
                 'tester' : [ req.authname, "all"],
                 'testcase_status' : [ models.FAILED, models.NOT_TESTED, models.SKIPPED, models.PASSED, models.PASSED_COMMENT],
             }
