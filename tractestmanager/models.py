@@ -24,6 +24,7 @@ from macros import TestPlanMacro
 SUMMARY = 'summary'
 OWNER   = 'owner'
 STATUS  = 'status'
+STATUSES = [NOT_TESTED, PASSED, PASSED_COMMENT, SKIPPED , FAILED]
 
 def test_status():
     return [SKIPPED, NOT_TESTED, PASSED, FAILED, PASSED_COMMENT]
@@ -111,14 +112,18 @@ class TestCase(TestItem):
 
         return self.db.insertTestCase( dict(self.getattrs()), actionsattrs )
 
-    def set_status(self, status):
-        """ sets the status of an test case.
+    def set_status(self):
+        """ sets the status of an test case, the worst status wins.
         """
-        self.dbg('TestCase.set_status( %s )' % str(status))
+        self.dbg('TestCase.set_status()')
 
-        setattr(self, 'status', status)
-        self._prepare_for_update( status= status )
+        new_status= NOT_TESTED
+        for action in self.actions:
+            if STATUSES.index(action.status) > STATUSES.index(new_status):
+                new_status = action.status
 
+        setattr(self, 'status', new_status)
+        self._prepare_for_update( status= new_status )
         self.save_changes()
  
 
@@ -243,6 +248,9 @@ class TestAction(TestItem):
         """
         self.dbg('TestAction.set_status( %s, %s)' % (str(status), str(comment)))
 
+        if status not in STATUSES:
+            raise TracError("Wrong status for a Testaction")
+
         setattr(self, 'status', status)
         self._prepare_for_update( status= status )
 
@@ -251,15 +259,9 @@ class TestAction(TestItem):
             self._prepare_for_update( comment= comment )
 
         self.save_changes()
-        stati = [NOT_TESTED, PASSED, PASSED_COMMENT, SKIPPED, FAILED]
+
         # check if testcase is fully tested
-        testcase = TestCaseQuery(self.env, tcid=self.tcid).execute()[0]
-        for action in testcase.actions:
-            if action.status not in stati:
-                raise TracError("Wrong status has been set to a Testaction")
-            if stati.index(action.status) > stati.index(testcase.status):
-                testcase.status = action.status
-        testcase.set_status(testcase.status)
+        TestCase(self.env, {'tcid': self.tcid}).set_status()
 
     def _populate_action_comments(self):
         t = Ticket(self.env, self.testrun)
