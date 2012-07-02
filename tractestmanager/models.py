@@ -125,7 +125,6 @@ class TestCase(TestItem):
         setattr(self, 'status', new_status)
         self._prepare_for_update( status= new_status )
         self.save_changes()
- 
 
 class TestItemGroupStats(object):
     """ Encapsulates statistics on a group of test items (actions or cases).
@@ -326,7 +325,7 @@ class TestRun(object):
         """ build the ticket desctiption
         """
         description_template = """
-        = %(wikiplan)s =
+        = [wiki:%(wikiplan)s] =
         [[TestEval(testrun=%(testrun)s)]]
         [[TestRunMonitor(testrun=%(testrun)s)]]
         """
