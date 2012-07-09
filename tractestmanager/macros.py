@@ -39,6 +39,7 @@ from trac.web.chrome import Chrome, ITemplateProvider, add_stylesheet
 from trac.wiki.api import IWikiMacroProvider, parse_args
 
 import StringIO
+import string
 
 
 class TestPlanMacro(WikiMacroBase):
@@ -55,8 +56,8 @@ class TestPlanMacro(WikiMacroBase):
            Usecases: BaugruppenVerwalten, ObjekteSuchen
 
            Testcases/SaveAsEinerBaugruppe lmende
-           Testcases/ErzeugenEinerBaugruppe lmende
-           Testcases/Suchen/* mmuster
+           ErzeugenEinerBaugruppe lmende, mmuster
+           Suchen/* mmuster
            }}}
     """
 
@@ -66,24 +67,37 @@ class TestPlanMacro(WikiMacroBase):
     def expand_macro(self, formatter, name, text, args):
         """Execute the macro
         """
+        self.env.log.debug("TestPlanMacro.expand_macro()")
+
         from TestcaseParser import TestcaseParser
         parser = TestcaseParser(self.env)
+
+        self.env.log.debug( "name: %s", str(name))
+        self.env.log.debug( "args: %s", str(args))
+        self.env.log.debug( "text: %s", str(text))
+
         errors = list()
-        #wikipage = case.parseTestcase("Testcases/UC011")
         # Parse config and testcases
-        conf, testcases = self.parse_config(text)
-        for key in testcases:
+        attrs, tcnames_and_users = self.parse_config(text)
+        self.log.debug("attrs: %s" % attrs)
+
+        # syntax check the testcases
+        for tcname in tcnames_and_users:
             try:
-                parser.parseTestcase(key)
+                parser.parseTestcase(tcname)
             except TracError, e:
-                error_message = "Parsing error in Testcase %s:" % key
+                error_message = "Parsing error in Testcase %s:" % tcname
                 errors.append(system_message(error_message, text=e.message))
+
         # Build config params in wiki syntax
-        text = self._build_configs_wiki(conf)
-        # Build testcases in wiki syntax
-        testcases = self._build_testcases_wiki(testcases)
+        text = self._build_configs_wiki(attrs)
+        self.log.debug(text)
+        
+        # Build testcase section in wiki syntax as a table
+        testcases = self._build_testcases_wiki(tcnames_and_users)
         text += testcases
         out = StringIO.StringIO()
+
         # TODO: Escape wiki markup for text
         Formatter(self.env, formatter.context).format(text,out)
         for e in errors:
@@ -94,24 +108,40 @@ class TestPlanMacro(WikiMacroBase):
         """Parses the macro configuration parameters
            returns a dictionary of attributes
         """
+        self.log.debug( 'TestPlanMacro.parse_config' )
         attributes = dict()
-        caselines  = dict()
+        tcpats_and_users = list()
         lines = text.splitlines()
         # parse attributes
         for line in lines:
+            line= line.strip()
+
+            # skip empty lines
+            if not line: continue
+
             # this is a test parameter
             if ':' in line:
-                line.replace(' ','')
                 x,y = line.split(':')
-                x = x.lower()
-                attributes[x] = y
-            # and this a testcase markup
-            # TODO: parser kaputt wenn testcases z.B. TestCaseXXX heissen und nicht in einem Unterordner liegen
-            if '/' in line:
-                testcasepath, user = line.split()
-                caselines[testcasepath] = user
-                testcases = self._parse_testcasemarkup(caselines)
-        return attributes, testcases
+                x = x.lower().strip()
+                attributes[x] = y.strip()
+
+            # otherwise it should be a testcase line
+            else:
+                users= list()
+                try:
+                    tcpattern, rest= line.split(None, 1)
+                    # more than one user given?
+                    users= rest.split(',')
+                except ValueError:
+                    tcpattern= line.strip()
+                    users= ['',]
+                 
+                tcpats_and_users.append( [tcpattern.strip(), users,] )
+                
+                # eval the wildcard testcase names
+                tcnames_and_users= self._eval_wildcards(tcpats_and_users)
+
+        return attributes, tcnames_and_users
 
     def _get_wiki_pages(self,prefix):
         """ wrap the wiki api
@@ -119,36 +149,44 @@ class TestPlanMacro(WikiMacroBase):
         for page in WikiSystem(self.env).get_pages(prefix):
             yield page
 
-    def _parse_testcasemarkup(self, markup):
-        """ take the 'Testcases/*' syntax and get all uc for them
-            return a dict with a pagename and the user
-            {'Testcases/UC011':'johndoe'}
-        """
-        testcases = dict()
-        for key in markup:
-            path = key.split('*')[0]
-            path = path.rstrip('/')
-            for title in self._get_wiki_pages(path):
-                testcases[title] = markup[key]
-        return testcases
+    def _eval_wildcards(self, tcpats_and_users):
+        """ take the testcasepattern - user tuples, eval the wildcard pattern
 
-    def _build_testcases_wiki(self, testcases):
-        """ builds the testcases in wiki syntax
+            e.g. ( 'TestMan*', ['max', 'muster', ])
+        """
+        self.log.debug( 'TestPlanMacro._eval_wildcards: %s' % tcpats_and_users )
+
+        tcnames_and_users = dict()
+
+        for tcpat, users in tcpats_and_users:
+            if '*' in tcpat:
+                wildcard = tcpat.rstrip('*')
+                for title in self._get_wiki_pages(wildcard):
+                    tcnames_and_users[title] = users
+            else:
+                tcnames_and_users[tcpat] = users
+
+        self.log.debug( 'tcnames_and_users: %s' % tcnames_and_users )
+        return tcnames_and_users
+
+    def _build_testcases_wiki(self, tcnames_and_users):
+        """ builds the testcases names and users in wiki syntax
             returns wikitext
         """
-        text = "\n== Zu testende Testcases ==\n||'''Testcase'''||'''User'''||\n"
-        for key in testcases:
-            text += '||%s||%s||\n' % (key, testcases[key])
+        self.log.debug( "TestPlanMacro._build_testcases_wiki(%s)" % tcnames_and_users)
+        text = u"\n== Zu testende Testcases ==\n||'''Testcase'''||'''User'''||\n"
+        for tcname, users in tcnames_and_users.items():
+            text += u'||%s||%s||\n' % (unicode(tcname), unicode(string.join(users, ', ')))
         return text
 
     def _build_configs_wiki(self, config):
         """ builds wiki formatting for the configuration table
         """
-        text = "== Testparameter ==\n||'''Attribut'''||'''Wert'''||\n"
-        table = ''
+        text = u"== Testparameter ==\n||'''Attribut'''||'''Wert'''||\n"
+        table = u''
         for key in config.keys():
-            table += '||%s||%s||\n' % (key, config[key])
-        return text + table
+            table += u'||%s||%s||\n' % (unicode(key), unicode(config[key]))
+        return unicode(text + table)
 
 class TestCaseMacro(WikiMacroBase):
     """TestCase macro.
@@ -290,7 +328,8 @@ class TestRunMonitorMacro(WikiMacroBase):
         for tc in tcs:
             tc.color = get_status_color(tc.status)
             tc_data = {
-                    "testcase" : "[%s/TestManager/general/testcase/%s TestCase #%s]" % (req.abs_href(), tc.id, tc.id),
+                    "testcase" : "[%s/TestManager/general/testcase/%s #%s %s]" %
+                    (req.abs_href(), tc.id, tc.id, tc.wiki),
                     "tester" : tc.tester,
                     "status" : tc.status,
                     "color" : tc.color

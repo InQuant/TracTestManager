@@ -24,99 +24,163 @@ __docformat__ = 'plaintext'
 from trac.wiki import WikiPage
 from trac.core import TracError
 
-from docutils.core import publish_parts
-import xml.etree.ElementTree as Tree
+from docutils.core import publish_doctree
+from docutils.nodes import SkipChildren, SkipSiblings
+
 from models import TestCase
 from models import TestAction
+from TestManagerLib import safe_unicode
 
 class TestcaseParser(object):
-    """ Testcase parser class
+    """ parses a testcase in wiki format 
     """
     def __init__(self, env):
         self.env   = env
+        self.dbg   = env.log.debug
         #setup_all(True)
         #create_all()
 
-    def _parse_xml(self, pagename, version=None):
-        # TODO: refactore the parsing of nodes...
+    def parseTestcase(self, pagename= None, text= None):
+        self.dbg('TestcaseParser.parseTestcase( %s, %s )' % (pagename, text))
 
-        tree = Tree.fromstring(self.xml)
-        # initial iteration
+        if pagename:
+            # get the text from the given wiki page
+            wikipage= WikiPage(self.env, pagename)
+            text= wikipage.text
+            version= wikipage.version
+        else:
+            # text must be given for syntax check
+            version= None
+
+        xmltree = publish_doctree(text)
+        case = self._parse_xml(xmltree, pagename, version)
+
+        return case
+
+    def _parse_xml(self, xmltree, pagename= None, version= None):
+        self.dbg('TestcaseParser._parse_xml( %s, %s )' % (pagename, version))
+
         # it is a Testcase
         case = TestCase(self.env)
         case.version = version
-        try:
-            case.wiki = pagename
-        except Exception:
-            ("This is only a dryrun")
+        case.wiki = pagename
+        case.description= ""
+
         # we now have paragraph, paragraph and definition list
         # which represent "title", "description" and "actions"
-        line = 0
-        for node in tree:
-            # set title and description
-            if node.tag == 'paragraph':
-                # TODO: if description has more paragraphs...
-                line += 1
-                if '=' in node.text:
-                    case.title = node.text
+        for node in xmltree:
+
+            if node.tagname not in ['paragraph', 'block_quote']:
+                self.dbg('ignored: %s' % node.shortrepr())
+                continue
+
+            # set title or description
+            if node.tagname == 'paragraph':
+                text= self._node_text(node)
+
+                if '=' in text:
+                    self.dbg('set title: %s' % node.shortrepr())
+                    case.title = text
                 else:
-                    case.description = node.text
-            # now we have actions as definition list items
+                    # TODO - save the pararagraph or linefeed
+                    self.dbg('append description: %s' % node.shortrepr())
+                    case.description += text
+
             else:
-                for child in node.getchildren():
-                    # every child has two children "term" and "definition"
-                    # they are called action
-                    ac = TestAction(self.env)
-                    for action in child.getchildren():
-                        if action.tag == 'definition':
-                            # we have two paragraphs - action description and expected result
-                            try:
-                                actiondesc                  = action.getchildren()[0]
-                                actionresult                = action.getchildren()[1]
-                                ac.description              = self._build_markup(actiondesc)
-                                ac.expected_result          = self._build_markup(actionresult)
-                                line+=2
-                            except IndexError:
-                                # TODO: %s - dinger rein
-                                raise TracError('No Expected Result near line %s: %s' % (line, actiondesc.text))
-                        else:
-                            # append actiontitle to action
-                            ac.title  = action.text
-                            line +=1
-                    case.add_action(ac)
-        return case
+                # we have a block_quote which can be lists
 
-    def _build_markup(self, node):
-        # helperfunction to append additional markup tags
-        # TODO: validate that text is built right
-        nodemarkup = node.text
-        for child in node.getchildren():
-            if child.tag == 'title_reference':
-                nodemarkup += child.text
-        return nodemarkup
+                for child in node.children:
 
-    def parseTestcase(self, pagename=None, text=None):
-        # if we give a text - we only want to evaluate
-        if text is not None:
-            self.xml = publish_parts(text,writer_name = 'xml')['whole']
-            return self._parse_xml()
+                    if child.tagname == 'definition_list':
+                        # a definition list contains our actions
+                        self._parse_deflist( case, child )
+                    else:
+                        # all the rest will be interpreted as description
+                        self.dbg('append description: %s' % child.shortrepr())
+                        case.description += self._node_text(child)
+
+        self.dbg( "case: %s" % case.getattrs() )
+        
+        # check testcase
+        if not case.title:
+            raise TracError( safe_unicode(
+                'Testcase title is missing, please fix: %s' % xmltree.astext()[:256]))
+
+        if len(case.actions) == 0:
+            raise TracError( safe_unicode(
+                'Testcase actions are missing, please add actions for: "%s"' %
+                case.title))
+
+        return case 
+
+    def _parse_deflist( self, case, node ):
+        self.dbg('TestcaseParser._parse_deflist( %s )' % node.shortrepr())
+        for child in node.children:
+
+            if child.tagname != 'definition_list_item':
+                self.dbg('ignored: %s' % child.shortrepr())
+                continue
+
+            ta= self._parse_deflist_item( child )
+
+            for key in ['title', 'description', 'expected_result']:
+                if not ta[key]:
+                    raise TracError( safe_unicode(
+                        'Action definition incomplete (%s missing!), please fix! Near line %s: %s' % 
+                        (key, child.line, child.astext())))
+                self.dbg( "action %s: %s" % (key, ta[key]) )
+
+            case.add_action( ta )
+
+    def _parse_deflist_item( self, node ):
+        self.dbg('TestcaseParser._parse_deflist_item( %s )' % node.shortrepr())
+
+        ta= TestAction( self.env )
+        for child in node.children:
+
+            if child.tagname not in ['term', 'definition',]:
+                self.dbg('ignored: %s' % child.shortrepr())
+                continue
+
+            if child.tagname == 'term':
+                # term is the action title
+                text= self._node_text(child)
+                self.dbg('set action title: %s' % text)
+                ta.title= text 
+
+            if child.tagname == 'definition':
+                self._parse_definition( ta, child )
+
+        return ta
+
+    def _parse_definition( self, taction, node ):
+        self.dbg('TestcaseParser._parse_definition( %s )' % node.shortrepr())
+        
+        description_set= False
+        for child in node.children:
+
+            if child.tagname not in ['paragraph', 'block_quote',]:
+                self.dbg('ignored: %s' % child.shortrepr())
+                continue
+            
+            # action description
+            if not description_set:
+                text= self._node_text(child)
+                self.dbg('set action description: %s' % text)
+                taction.description= text
+                description_set= True
+
+            # action result
+            else:
+                text= self._node_text(child)
+                self.dbg('set action result: %s' % text)
+                taction.expected_result= text
+                break
+         
+    def _node_text( self, node ):
+        if node.rawsource:
+            return node.rawsource
         else:
-            # get the wiki page
-            wikipage      = WikiPage(self.env, pagename)
-            # get the xml representation of a testcase
-            self.xml = publish_parts(wikipage.text,writer_name = 'xml')['whole']
-            try:
-                case = self._parse_xml(pagename, wikipage.version)
-            except TracError, e:
-                raise e
-            return case
-
-
-class NoExpectedResult(Exception):
-    pass
-
-#   def __init__(self, message, errors):
-#       Exception.__init__(self, message)
-#       self.errors = "No expected result set"
+            return node.astext()
 
 # vim: set ft=python ts=4 sw=4 expandtab :

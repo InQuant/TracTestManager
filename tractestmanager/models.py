@@ -409,9 +409,9 @@ class TestRun(object):
 
         try:
             attributes, tc_tester_tups = TestPlanMacro(self.env).parse_config(
-                    self.wikiplan.text)
+                    self._testplan_macro_content(self.wikiplan.text))
         except TracError, e:
-            raise TracError( "No testplan found on, parser error on %s, %s" %
+            raise TracError( "Testplan error on %s, %s" %
                     (self.wikiplan.name, e.message))
 
         # TODO: verify that tc_tester_tups are valid
@@ -422,20 +422,23 @@ class TestRun(object):
         errors = dict()
         self.testcases= list()
 
-        for pagename, tester in tc_tester_tups.iteritems():
-            try:
-                tc = parser.parseTestcase(pagename= pagename)
-                tc.tester = tester
-                tc.testrun = self.runid
-                tc.status = NOT_TESTED
+        for pagename, testers in tc_tester_tups.iteritems():
+            for tester in testers:
+                try:
+                    tc = parser.parseTestcase(pagename= pagename)
+                    tc.testrun = self.runid
+                    tc.status = NOT_TESTED
+                    tc.tester= tester
 
-                for ta in tc.actions:
-                    ta.testrun = self.runid
-                    ta.status = NOT_TESTED
-            except TracError, e:
-                errors[pagename] = e.message
-                continue
-            self.testcases.append(tc)
+                    for ta in tc.actions:
+                        ta.testrun = self.runid
+                        ta.status = NOT_TESTED
+                except TracError, e:
+                    self.env.log.error(e)
+                    errors[pagename] = e.message
+                    continue
+
+                self.testcases.append(tc)
 
         if errors:
             self._set_defect(errors)
@@ -443,6 +446,24 @@ class TestRun(object):
                 "Testplan could not be started, for more information "\
                 "review the testplan page '%s' and restart the testplan" %
                 self.wikiplan.name)
+
+    def _testplan_macro_content( self, wikitext ):
+        """ searches the testplan macro text in a wiki page.
+        """
+        self.dbg( "TestRun._testplan_macro_content()" )
+
+        # pattern to search all text inside macro brackets
+        pat= re.compile('\{\{\{[\r\n\s]*#\!\s*TestPlan(.*?)\}\}\}', re.MULTILINE and
+                re.DOTALL)
+
+        m= pat.search(wikitext)
+
+        if m:
+            return m.group(1)
+        else:
+            self.env.log.error('no testplan found')
+            raise TracError('no testplan found')
+
 
     def start(self):
         """
