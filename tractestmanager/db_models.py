@@ -160,7 +160,9 @@ class DbLite(object):
                     getInsertPlaceHolders(TC_KEYS[1:]))
             self.dbg(stmt)
 
-            c.execute(stmt, orderedValues(TC_KEYS[1:], tcDict))
+            values= orderedValues(TC_KEYS[1:], tcDict)
+            self.dbg("values= %s" % values)
+            c.execute(stmt, values)
             dbs[0]= c.lastrowid
             self.dbg("tcid= %d" % dbs[0])
 
