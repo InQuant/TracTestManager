@@ -24,7 +24,7 @@ from TestManagerLib import safe_unicode
 SUMMARY = 'summary'
 OWNER   = 'owner'
 STATUS  = 'status'
-STATUSES = [NOT_TESTED, PASSED, PASSED_COMMENT, SKIPPED , FAILED]
+STATUSES = [SKIPPED, PASSED, PASSED_COMMENT, FAILED, NOT_TESTED]
 
 def test_status():
     return [SKIPPED, NOT_TESTED, PASSED, FAILED, PASSED_COMMENT]
