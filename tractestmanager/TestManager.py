@@ -51,7 +51,7 @@ from trac.resource import Resource
 # testman specific imports
 from interfaces import ITestManagerPanelProvider
 from config import MANAGER_PERMISSION, TESTER_PERMISSION
-
+from TestManagerLib import safe_unicode
 import models
 
 class TestManagerPlugin(Component):
@@ -217,7 +217,7 @@ class TestPlanPanel(Component):
                 testrun.setup(pagename, req.authname)
                 testrun.start()
             except TracError, e:
-                data["error"] = e.message
+                data["error"] = safe_unicode(e.message)
 
         elif 'testplan_to_restart' in req.args:
             # we have a defect testrun to be restarted
@@ -227,7 +227,7 @@ class TestPlanPanel(Component):
             try:
                 testrun.start()
             except TracError, e:
-                data["error"] = e.message
+                data["error"] = safe_unicode(e.message)
 
         # query and render accepted testruns
         runs = models.TestRunQuery(self.env, status='accepted').execute()
@@ -369,9 +369,12 @@ class TestCasePanel(Component):
                     for action in testcase.actions:
                         from TestManagerLib import get_status_color
                         action.color = {"style" : ("background:%s" % get_status_color(action.status))}
+                    data["TestCaseTitle"] = testcase.title.strip('=')
+                    data["TestCaseDescription"] = testcase.description
                     data["TestCaseActions"] = testcase.actions
                     data["revision"] = testcase.revision
-                    data["title"] = 'TestCase %s' % testcase.tcid
+                    #data["title"] = 'TestCase %s' % testcase.tcid
+                    data["title"] = '(%s) ' % testcase.tcid + testcase.wiki
                     # XXX: we have to fix this in 0.13 because wiki_to_html is deprecated
                     for action in testcase.actions:
                         for comment in action.comments:

@@ -23,6 +23,7 @@ __docformat__ = 'plaintext'
 
 from trac.wiki import WikiPage
 from trac.core import TracError
+from trac.wiki import WikiSystem
 
 from docutils.core import publish_doctree
 from docutils.nodes import SkipChildren, SkipSiblings
@@ -144,7 +145,7 @@ class TestcaseParser(object):
 
             if child.tagname == 'term':
                 # term is the action title
-                text= self._node_text(child)
+                text= self._node_text(child).strip(':')
                 self.dbg('set action title: %s' % text)
                 ta.title= text 
 
@@ -182,5 +183,76 @@ class TestcaseParser(object):
             return node.rawsource
         else:
             return node.astext()
+
+class TestPlanMacroParser(object):
+    
+    def __init__(self, env):
+        self.env= env
+        self.dbg= env.log.debug
+
+    def parse_config(self, text):
+        """Parses the macro configuration parameters
+           returns a dictionary of attributes
+        """
+        self.dbg( 'TestPlanMacroParser.parse_config' )
+        attributes = dict()
+        tcpats_and_users = list()
+        lines = text.splitlines()
+        # parse attributes
+        for line in lines:
+            line= line.strip()
+
+            # skip empty lines
+            if not line: continue
+
+            # this is a test parameter
+            if ':' in line:
+                x,y = line.split(':')
+                x = x.lower().strip()
+                attributes[x] = y.strip()
+
+            # otherwise it should be a testcase line
+            else:
+                users= list()
+                try:
+                    tcpattern, rest= line.split(None, 1)
+                    # more than one user given?
+                    users= rest.split(',')
+                except ValueError:
+                    tcpattern= line.strip()
+                    users= ['',]
+                 
+                tcpats_and_users.append( [tcpattern.strip(), users,] )
+                
+                # eval the wildcard testcase names
+                tcnames_and_users= self._eval_wildcards(tcpats_and_users)
+
+        return attributes, tcnames_and_users
+
+    def _get_wiki_pages(self,prefix):
+        """ wrap the wiki api
+        """
+        for page in WikiSystem(self.env).get_pages(prefix):
+            yield page
+
+    def _eval_wildcards(self, tcpats_and_users):
+        """ take the testcasepattern - user tuples, eval the wildcard pattern
+
+            e.g. ( 'TestMan*', ['max', 'muster', ])
+        """
+        self.dbg( 'TestPlanMacroParser._eval_wildcards: %s' % tcpats_and_users )
+
+        tcnames_and_users = dict()
+
+        for tcpat, users in tcpats_and_users:
+            if '*' in tcpat:
+                wildcard = tcpat.rstrip('*')
+                for title in self._get_wiki_pages(wildcard):
+                    tcnames_and_users[title] = users
+            else:
+                tcnames_and_users[tcpat] = users
+
+        self.dbg( 'tcnames_and_users: %s' % tcnames_and_users )
+        return tcnames_and_users
 
 # vim: set ft=python ts=4 sw=4 expandtab :

@@ -16,6 +16,8 @@ import trac.db
 import logging
 import string
 
+from testmanconst import *
+
 LOGGER="db_models"
 def debug(msg): logging.getLogger(LOGGER).debug(msg)
 
@@ -24,20 +26,6 @@ class DbException(Exception):
     pass
 class DbAlreadyExistException(DbException):
     pass
-
-# (case | action) status
-NOT_TESTED= 'not tested'
-PASSED= 'passed'
-PASSED_COMMENT= 'passed with comment'
-FAILED= 'failed'
-SKIPPED= 'skipped'
-
-# TestCase collumns
-TC_TABLE= 'testcase'
-TC_KEYS= [ 'tcid', 'wiki', 'title', 'description', 'revision', 'tester', 'testrun', 'status']
-# TestAction collumns
-TA_TABLE= 'testaction'
-TA_KEYS= [ 'id', 'tcid', 'testrun', 'title', 'description', 'expected_result', 'status', 'comment']
 
 ##############################################################################
 def orderedValues(keys, adict):

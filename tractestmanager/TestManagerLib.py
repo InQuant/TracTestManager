@@ -18,14 +18,7 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-from trac.wiki import WikiSystem
-from models import PASSED, PASSED_COMMENT, FAILED, SKIPPED
-
-def _get_wiki_pages(self,prefix):
-    """ wrap the wiki api
-    """
-    for page in WikiSystem(self.env).get_pages(prefix):
-        yield page
+from testmanconst import *
 
 def get_status_color(status):
     colors = {
@@ -39,5 +32,36 @@ def get_status_color(status):
         return colors[status]
     else:
         return colors["default"]
+
+def safe_unicode(value, encoding='utf-8'):
+    """Converts a value to unicode, even it is already a unicode string.
+
+        copied from Products.CMFPlone.utils
+
+        >>> safe_unicode('spam')
+        u'spam'
+        >>> safe_unicode(u'spam')
+        u'spam'
+        >>> safe_unicode(u'spam'.encode('utf-8'))
+        u'spam'
+        >>> safe_unicode('\xc6\xb5')
+        u'\u01b5'
+        >>> safe_unicode(u'\xc6\xb5'.encode('iso-8859-1'))
+        u'\u01b5'
+        >>> safe_unicode('\xc6\xb5', encoding='ascii')
+        u'\u01b5'
+        >>> safe_unicode(1)
+        1
+        >>> print safe_unicode(None)
+        None
+    """
+    if isinstance(value, unicode):
+        return value
+    elif isinstance(value, basestring):
+        try:
+            value = unicode(value, encoding)
+        except (UnicodeDecodeError):
+            value = value.decode('utf-8', 'replace')
+    return value
 
 # vim: set ft=python ts=4 sw=4 expandtab :

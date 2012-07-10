@@ -8,18 +8,18 @@
 __author__ = 'Otto Hockel <otto.hockel@inquant.de>'
 __docformat__ = 'plaintext'
 
-import string
 from trac.ticket.query import Query as TicketQuery
 from trac.ticket.model import Ticket
 from trac.wiki import WikiPage
 from trac.core import TracError
 
+import string
 import re
 
 import db_models
-from db_models import TA_TABLE, TA_KEYS, TC_TABLE, TC_KEYS
-from db_models import SKIPPED, NOT_TESTED, PASSED, FAILED, PASSED_COMMENT
-from macros import TestPlanMacro
+from testmanconst import *
+
+from TestManagerLib import safe_unicode
 
 SUMMARY = 'summary'
 OWNER   = 'owner'
@@ -248,10 +248,10 @@ class TestAction(TestItem):
         self.dbg('TestAction.set_status( %s, %s)' % (str(status), str(comment)))
 
         if status not in STATUSES:
-            raise TracError("Wrong status for a test action")
+            raise TestManError("Wrong status for a test action")
 
         if status == FAILED and comment == None:
-            raise TracError("This status must be commented.")
+            raise TestManError("This status must be commented.")
 
         setattr(self, 'status', status)
         self._prepare_for_update( status= status )
@@ -383,8 +383,9 @@ class TestRun(object):
             self.ticket['description'] = self.description
             self.ticket.save_changes()
         except TracError, e:
-            raise TracError( "TestRun ticket could not be created: %s" %
-                    e.message )
+            self.env.log.error(e)
+            raise TracError( safe_unicode("TestRun ticket could not be created: %s" %
+                    e.message ))
 
         self.dbg('runid =  %d' % self.runid)
         return self.runid
@@ -408,11 +409,13 @@ class TestRun(object):
         self.dbg('TestRun.validate()')
 
         try:
-            attributes, tc_tester_tups = TestPlanMacro(self.env).parse_config(
+            from TestcaseParser import TestPlanMacroParser
+            attributes, tc_tester_tups = TestPlanMacroParser(self.env).parse_config(
                     self._testplan_macro_content(self.wikiplan.text))
         except TracError, e:
-            raise TracError( "Testplan error on %s, %s" %
-                    (self.wikiplan.name, e.message))
+            self.env.log.error(e)
+            raise TracError( safe_unicode("Testplan error on %s, %s" %
+                    (self.wikiplan.name, e.message)))
 
         # TODO: verify that tc_tester_tups are valid
 
@@ -435,14 +438,14 @@ class TestRun(object):
                         ta.status = NOT_TESTED
                 except TracError, e:
                     self.env.log.error(e)
-                    errors[pagename] = e.message
+                    errors[pagename] = safe_unicode(e.message)
                     continue
 
                 self.testcases.append(tc)
 
         if errors:
             self._set_defect(errors)
-            raise TracError(
+            raise TestManError(
                 "Testplan could not be started, for more information "\
                 "review the testplan page '%s' and restart the testplan" %
                 self.wikiplan.name)
@@ -462,7 +465,7 @@ class TestRun(object):
             return m.group(1)
         else:
             self.env.log.error('no testplan found')
-            raise TracError('no testplan found')
+            raise TestManError('no testplan found')
 
 
     def start(self):

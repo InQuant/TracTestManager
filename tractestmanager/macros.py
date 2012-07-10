@@ -41,6 +41,8 @@ from trac.wiki.api import IWikiMacroProvider, parse_args
 import StringIO
 import string
 
+from TestManagerLib import safe_unicode
+from TestcaseParser import TestcaseParser, TestPlanMacroParser
 
 class TestPlanMacro(WikiMacroBase):
     """Testplan macro.
@@ -69,7 +71,6 @@ class TestPlanMacro(WikiMacroBase):
         """
         self.env.log.debug("TestPlanMacro.expand_macro()")
 
-        from TestcaseParser import TestcaseParser
         parser = TestcaseParser(self.env)
 
         self.env.log.debug( "name: %s", str(name))
@@ -78,7 +79,7 @@ class TestPlanMacro(WikiMacroBase):
 
         errors = list()
         # Parse config and testcases
-        attrs, tcnames_and_users = self.parse_config(text)
+        attrs, tcnames_and_users = TestPlanMacroParser(self.env).parse_config(text)
         self.log.debug("attrs: %s" % attrs)
 
         # syntax check the testcases
@@ -86,8 +87,17 @@ class TestPlanMacro(WikiMacroBase):
             try:
                 parser.parseTestcase(tcname)
             except TracError, e:
-                error_message = "Parsing error in Testcase %s:" % tcname
-                errors.append(system_message(error_message, text=e.message))
+                # FIXME: commented because auf genshi unicode error - raised
+                # instead, see other FIXME below!
+                """
+                error_message = safe_unicode("Parsing error in Testcase %s:" %
+                        tcname)
+                errors.append(system_message(error_message,
+                    text= safe_unicode(e.message)))
+                """
+                raise TracError(safe_unicode("Parsing error in Testcase %s: %s" %
+                        (tcname, e.message)))
+
 
         # Build config params in wiki syntax
         text = self._build_configs_wiki(attrs)
@@ -99,75 +109,13 @@ class TestPlanMacro(WikiMacroBase):
         out = StringIO.StringIO()
 
         # TODO: Escape wiki markup for text
-        Formatter(self.env, formatter.context).format(text,out)
-        for e in errors:
-            out.write(e)
+        Formatter(self.env, formatter.context).format(safe_unicode(text),out)
+
+        # FIXME: commented because auf genshi unicode error - see raise above
+        #for e in errors:
+            #out.write(safe_unicode(e))
+
         return Markup(out.getvalue())
-
-    def parse_config(self, text):
-        """Parses the macro configuration parameters
-           returns a dictionary of attributes
-        """
-        self.log.debug( 'TestPlanMacro.parse_config' )
-        attributes = dict()
-        tcpats_and_users = list()
-        lines = text.splitlines()
-        # parse attributes
-        for line in lines:
-            line= line.strip()
-
-            # skip empty lines
-            if not line: continue
-
-            # this is a test parameter
-            if ':' in line:
-                x,y = line.split(':')
-                x = x.lower().strip()
-                attributes[x] = y.strip()
-
-            # otherwise it should be a testcase line
-            else:
-                users= list()
-                try:
-                    tcpattern, rest= line.split(None, 1)
-                    # more than one user given?
-                    users= rest.split(',')
-                except ValueError:
-                    tcpattern= line.strip()
-                    users= ['',]
-                 
-                tcpats_and_users.append( [tcpattern.strip(), users,] )
-                
-                # eval the wildcard testcase names
-                tcnames_and_users= self._eval_wildcards(tcpats_and_users)
-
-        return attributes, tcnames_and_users
-
-    def _get_wiki_pages(self,prefix):
-        """ wrap the wiki api
-        """
-        for page in WikiSystem(self.env).get_pages(prefix):
-            yield page
-
-    def _eval_wildcards(self, tcpats_and_users):
-        """ take the testcasepattern - user tuples, eval the wildcard pattern
-
-            e.g. ( 'TestMan*', ['max', 'muster', ])
-        """
-        self.log.debug( 'TestPlanMacro._eval_wildcards: %s' % tcpats_and_users )
-
-        tcnames_and_users = dict()
-
-        for tcpat, users in tcpats_and_users:
-            if '*' in tcpat:
-                wildcard = tcpat.rstrip('*')
-                for title in self._get_wiki_pages(wildcard):
-                    tcnames_and_users[title] = users
-            else:
-                tcnames_and_users[tcpat] = users
-
-        self.log.debug( 'tcnames_and_users: %s' % tcnames_and_users )
-        return tcnames_and_users
 
     def _build_testcases_wiki(self, tcnames_and_users):
         """ builds the testcases names and users in wiki syntax
@@ -176,8 +124,8 @@ class TestPlanMacro(WikiMacroBase):
         self.log.debug( "TestPlanMacro._build_testcases_wiki(%s)" % tcnames_and_users)
         text = u"\n== Zu testende Testcases ==\n||'''Testcase'''||'''User'''||\n"
         for tcname, users in tcnames_and_users.items():
-            text += u'||%s||%s||\n' % (unicode(tcname), unicode(string.join(users, ', ')))
-        return text
+            text += '||%s||%s||\n' % (tcname, string.join(users, ', '))
+        return safe_unicode(text)
 
     def _build_configs_wiki(self, config):
         """ builds wiki formatting for the configuration table
@@ -186,7 +134,7 @@ class TestPlanMacro(WikiMacroBase):
         table = u''
         for key in config.keys():
             table += u'||%s||%s||\n' % (unicode(key), unicode(config[key]))
-        return unicode(text + table)
+        return safe_unicode(text + table)
 
 class TestCaseMacro(WikiMacroBase):
     """TestCase macro.
