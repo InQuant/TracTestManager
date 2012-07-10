@@ -1,6 +1,28 @@
 Changelog
 =========
 
+0.2 (2012-07-10)
+----------------
+
+- refactored safe_unicode error handling in all mods
+- refactored circular import dependencies (added testmanconst.py)
+- enhanced some minor accordion - visual issues.
+- Refactored all parser classes and methods:
+    1. TestPlanMacro
+      - now accepts Testcases
+        - with or w/o slashes
+        - with none or more than one tester(s)
+    2. TestParser class
+      - now don't accepts Testcases with no title or actions
+      - is more tolerant in wiki formatting
+      - gives better error messages
+    3. TestRun class
+      - parses only the TestPlanMacro not the wiki content
+      - deals with more than one tester per testcase
+    4. error messages will be given in safe_unicode
+[lmende]
+
+
 0.1 (2012-07-02)
 ----------------
 
