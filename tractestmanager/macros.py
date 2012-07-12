@@ -102,7 +102,7 @@ class TestPlanMacro(WikiMacroBase):
         # Build config params in wiki syntax
         text = self._build_configs_wiki(attrs)
         self.log.debug(text)
-        
+
         # Build testcase section in wiki syntax as a table
         testcases = self._build_testcases_wiki(tcnames_and_users)
         text += testcases

@@ -33,13 +33,11 @@ from models import TestAction
 from TestManagerLib import safe_unicode
 
 class TestcaseParser(object):
-    """ parses a testcase in wiki format 
+    """ parses a testcase in wiki format
     """
     def __init__(self, env):
         self.env   = env
         self.dbg   = env.log.debug
-        #setup_all(True)
-        #create_all()
 
     def parseTestcase(self, pagename= None, text= None):
         self.dbg('TestcaseParser.parseTestcase( %s, %s )' % (pagename, text))
@@ -101,7 +99,7 @@ class TestcaseParser(object):
                         case.description += self._node_text(child)
 
         self.dbg( "case: %s" % case.getattrs() )
-        
+
         # check testcase
         if not case.title:
             raise TracError( safe_unicode(
@@ -112,7 +110,7 @@ class TestcaseParser(object):
                 'Testcase actions are missing, please add actions for: "%s"' %
                 case.title))
 
-        return case 
+        return case
 
     def _parse_deflist( self, case, node ):
         self.dbg('TestcaseParser._parse_deflist( %s )' % node.shortrepr())
@@ -127,7 +125,7 @@ class TestcaseParser(object):
             for key in ['title', 'description', 'expected_result']:
                 if not ta[key]:
                     raise TracError( safe_unicode(
-                        'Action definition incomplete (%s missing!), please fix! Near line %s: %s' % 
+                        'Action definition incomplete (%s missing!), please fix! Near line %s: %s' %
                         (key, child.line, child.astext())))
                 self.dbg( "action %s: %s" % (key, ta[key]) )
 
@@ -147,7 +145,7 @@ class TestcaseParser(object):
                 # term is the action title
                 text= self._node_text(child).strip(':')
                 self.dbg('set action title: %s' % text)
-                ta.title= text 
+                ta.title= text
 
             if child.tagname == 'definition':
                 self._parse_definition( ta, child )
@@ -156,14 +154,14 @@ class TestcaseParser(object):
 
     def _parse_definition( self, taction, node ):
         self.dbg('TestcaseParser._parse_definition( %s )' % node.shortrepr())
-        
+
         description_set= False
         for child in node.children:
 
             if child.tagname not in ['paragraph', 'block_quote',]:
                 self.dbg('ignored: %s' % child.shortrepr())
                 continue
-            
+
             # action description
             if not description_set:
                 text= self._node_text(child)
@@ -177,7 +175,7 @@ class TestcaseParser(object):
                 self.dbg('set action result: %s' % text)
                 taction.expected_result= text
                 break
-         
+
     def _node_text( self, node ):
         if node.rawsource:
             return node.rawsource
@@ -185,7 +183,7 @@ class TestcaseParser(object):
             return node.astext()
 
 class TestPlanMacroParser(object):
-    
+
     def __init__(self, env):
         self.env= env
         self.dbg= env.log.debug
@@ -221,9 +219,9 @@ class TestPlanMacroParser(object):
                 except ValueError:
                     tcpattern= line.strip()
                     users= ['',]
-                 
+
                 tcpats_and_users.append( [tcpattern.strip(), users,] )
-                
+
                 # eval the wildcard testcase names
                 tcnames_and_users= self._eval_wildcards(tcpats_and_users)
 
