@@ -89,14 +89,14 @@ class TestPlanMacro(WikiMacroBase):
             except TracError, e:
                 # FIXME: commented because auf genshi unicode error - raised
                 # instead, see other FIXME below!
-                """
+                #"""
                 error_message = safe_unicode("Parsing error in Testcase %s:" %
                         tcname)
                 errors.append(system_message(error_message,
                     text= safe_unicode(e.message)))
-                """
-                raise TracError(safe_unicode("Parsing error in Testcase %s: %s" %
-                        (tcname, e.message)))
+                #"""
+                #raise TracError(safe_unicode("Parsing error in Testcase %s: %s" %
+                        #(tcname, e.message)))
 
 
         # Build config params in wiki syntax
@@ -112,8 +112,8 @@ class TestPlanMacro(WikiMacroBase):
         Formatter(self.env, formatter.context).format(safe_unicode(text),out)
 
         # FIXME: commented because auf genshi unicode error - see raise above
-        #for e in errors:
-            #out.write(safe_unicode(e))
+        for e in errors:
+            out.write(e)
 
         return Markup(out.getvalue())
 
