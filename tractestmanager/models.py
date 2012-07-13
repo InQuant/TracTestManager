@@ -24,7 +24,7 @@ from TestManagerLib import safe_unicode
 SUMMARY = 'summary'
 OWNER   = 'owner'
 STATUS  = 'status'
-STATUSES = [SKIPPED, PASSED, PASSED_COMMENT, FAILED, NOT_TESTED]
+STATUSES = [PASSED, PASSED_COMMENT, SKIPPED, FAILED, NOT_TESTED]
 
 def test_status():
     return [SKIPPED, NOT_TESTED, PASSED, FAILED, PASSED_COMMENT]
@@ -117,14 +117,16 @@ class TestCase(TestItem):
         """
         self.dbg('TestCase.set_status()')
 
-        new_status= NOT_TESTED
+        overall_status = PASSED
+        old_status = TestCaseQuery(self.env, tcid=self.id).execute()[0].status
         for action in self.actions:
-            if STATUSES.index(action.status) > STATUSES.index(new_status):
-                new_status = action.status
+            if STATUSES.index(action.status) > STATUSES.index(overall_status):
+                overall_status = action.status
 
-        setattr(self, 'status', new_status)
-        self._prepare_for_update( status= new_status )
-        self.save_changes()
+        if STATUSES.index(overall_status) != old_status:
+            setattr(self, '_status', overall_status)
+            self._prepare_for_update( status= overall_status )
+            self.save_changes()
 
 class TestItemGroupStats(object):
     """ Encapsulates statistics on a group of test items (actions or cases).
