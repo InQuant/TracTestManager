@@ -166,7 +166,7 @@ class TestItemGroupStats(object):
         self.done_percent = 0
         self.done_count = 0
 
-    def add_interval(self, title, count, qry_args, css_class, 
+    def add_interval(self, title, count, qry_args, css_class,
                      overall_completion=None):
         """Adds a division to this stats' group's progress bar.
 
@@ -248,10 +248,10 @@ class TestAction(TestItem):
         self.dbg('TestAction.set_status( %s, %s)' % (str(status), str(comment)))
 
         if status not in STATUSES:
-            raise TestManError("Wrong status for a test action")
+            raise TracError("Wrong status for a test action")
 
         if status == FAILED and comment == None:
-            raise TestManError("This status must be commented.")
+            raise TracError("This status must be commented.")
 
         setattr(self, 'status', status)
         self._prepare_for_update( status= status )
@@ -445,7 +445,7 @@ class TestRun(object):
 
         if errors:
             self._set_defect(errors)
-            raise TestManError(
+            raise TracError(
                 "Testplan could not be started, for more information "\
                 "review the testplan page '%s' and restart the testplan" %
                 self.wikiplan.name)
@@ -465,7 +465,7 @@ class TestRun(object):
             return m.group(1)
         else:
             self.env.log.error('no testplan found')
-            raise TestManError('no testplan found')
+            raise TracError('no testplan found')
 
 
     def start(self):
@@ -518,7 +518,7 @@ class TestItemQuery(object):
                 else:
                     filter_keys.append("%s=%%s" % key)
                     filter_vals.append(val)
-                    
+
             self.query= string.join(filter_keys, ' AND ')
             self.values= filter_vals
 
