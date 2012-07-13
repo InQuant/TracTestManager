@@ -7,39 +7,39 @@ Testergebnisse nachvollzieht und
 gegebenenfalls korrigiert und den Test mit einem 
 Status fehlgeschlagen bzw. durchgeführt abschließt.
 
-Testmanager wechselt in den Testbereich
-  Klick auf tab [/TestManager TestManager], Navigationsitem [/TestManager/general/testplans TestPlans].
+    Testmanager wechselt in den Testbereich::
+      Klick auf tab [/TestManager TestManager], Navigationsitem [/TestManager/general/testplans TestPlans].
 
-  Er erhält eine Übersicht der aktiven TestRun(s).
+      Er erhält eine Übersicht der aktiven TestRun(s).
 
-Der Testmanager wählt einen TestRun aus der Liste
-  Auswählen des TestRuns, durch klick auf dessen Name in TestRuns Tabelle.
-  
-  Es erscheint das zum TestRun gehörige Ticket
-  Es erhält eine Übersicht aller Testcases des TestRun(s). 
-  Zu jedem TestCase wird der aktuelle Status gelistet.
+    Der Testmanager wählt einen TestRun aus der Liste::
+      Auswählen des TestRuns, durch klick auf dessen Name in TestRuns Tabelle.
+      
+      Es erscheint das zum TestRun gehörige Ticket
+      Es erhält eine Übersicht aller Testcases des TestRun(s). 
+      Zu jedem TestCase wird der aktuelle Status gelistet.
 
-Der Testmanager wählt einen Testcase aus der Liste
-  Durch Klick auf den Namen des TestCase
+    Der Testmanager wählt einen Testcase aus der Liste::
+      Durch Klick auf den Namen des TestCase
 
-  Er erhält eine Übersicht aller Aktionen 
-  mit dem aktuellen Status und dem erwarteten Ergebnis der Aktion 
-  und dem eventuell vorhandenem Tester-Kommentar.
+      Er erhält eine Übersicht aller Aktionen 
+      mit dem aktuellen Status und dem erwarteten Ergebnis der Aktion 
+      und dem eventuell vorhandenem Tester-Kommentar.
 
-Der Testmanager wählt eine kommentierte Aktion
-  Durch Klick auf den Schritt
+    Der Testmanager wählt eine kommentierte Aktion::
+      Durch Klick auf den Schritt
 
-  Der Status und Kommentare des Testers werden angezeigt.
-  Es kann ein weiterer Kommentar und ein beliebiger 
-  Status für den Schritt gesetzt werden.
-  
-Das TestManPlugin "antwortet" auf den Tester-Kommentar
-  Der testmanager verwendet Die **Reply** Funktion auf dem Tciket Kommentar
-  um dem Tester eine Frage zu stellen / einen Kommentar an ihn zu geben.
+      Der Status und Kommentare des Testers werden angezeigt.
+      Es kann ein weiterer Kommentar und ein beliebiger 
+      Status für den Schritt gesetzt werden.
+      
+    Das TestManPlugin "antwortet" auf den Tester-Kommentar::
+      Der testmanager verwendet Die **Reply** Funktion auf dem Tciket Kommentar
+      um dem Tester eine Frage zu stellen / einen Kommentar an ihn zu geben.
 
-  Auf dem Ticket ist ersichtlich, dass der Kommentar zu einem anderen Kommentar gehört (Thread)
+      Auf dem Ticket ist ersichtlich, dass der Kommentar zu einem anderen Kommentar gehört (Thread)
 
-Der Testmanager wiederholt die Schritte
-  bis alle kommentierten Aktionen bearbeitet sind.
+    Der Testmanager wiederholt die Schritte::
+      bis alle kommentierten Aktionen bearbeitet sind.
 
-  Kommetnare bearbeitet
+      Kommetnare bearbeitet

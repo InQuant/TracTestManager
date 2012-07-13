@@ -3,29 +3,29 @@
 Usecase: UcTestcaseCreate 
 Der Testmanager erstellt Testcases.
 
-Testmanager wechselt in den Testbereich
-  einloggen als testadmin
-  WikiSeite mit Titel TestCase1 erstellen
-  TestCase1
+    Testmanager wechselt in den Testbereich::
+      einloggen als testadmin
+      WikiSeite mit Titel TestCase1 erstellen
+      TestCase1
 
-  Es erscheint eine Seite
-  The page TestCase1 does not exist. You can create it here.
+      Es erscheint eine Seite
+      The page TestCase1 does not exist. You can create it here.
 
-Neue Wiki Seite erstellen
-  auf Create this Page klicken
+    Neue Wiki Seite erstellen::
+      auf Create this Page klicken
 
-  Es öffnet sich eine Seite Editing TestCase1, samt Freitextfeld zur Eingabe des Inhalts.
+      Es öffnet sich eine Seite Editing TestCase1, samt Freitextfeld zur Eingabe des Inhalts.
 
-Testmanager trägt den Testcase ein::
-  dabei wendet er die vorgegebene TestCaseSyntax an.
-  Einen Testcase mit mindestens einem Schritt erzeugen.
-  
-  Eingabemaske enthält jetzt den Tescase entsprechend TestCaseSyntax
- 
-Testmanager speichert den Test:: 
-  mit **Submit Changes** die Änderungen speichern
+    Testmanager trägt den Testcase ein::
+      dabei wendet er die vorgegebene TestCaseSyntax an.
+      Einen Testcase mit mindestens einem Schritt erzeugen.
+      
+      Eingabemaske enthält jetzt den Tescase entsprechend TestCaseSyntax
+     
+    Testmanager speichert den Test:: 
+      mit **Submit Changes** die Änderungen speichern
 
-  Die Wikiseite samt Inhalt wird angezeigt.
-  Es erscheint eine grüne Meldung 
-  Your changes have been saved in Version ...
+      Die Wikiseite samt Inhalt wird angezeigt.
+      Es erscheint eine grüne Meldung 
+      Your changes have been saved in Version ...
 

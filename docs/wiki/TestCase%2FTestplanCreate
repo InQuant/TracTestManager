@@ -6,43 +6,43 @@ und diese einem oder mehreren Testern zuweisen.
 Die TestCase(s) liegen bereits in einem vordefinierten 
 Format vor und sollen referenziert werden.
 
-WikiSeite erstellen
-  Titel muss mit **Testplan** beginnen
+    Wikiseite erstellen::
+      Titel muss mit **Testplan** beginnen
 
-  Eingabemaske zur Eingabe des Inhalts der Wikiseite wird angezeigt.
+      Eingabemaske zur Eingabe des Inhalts der Wikiseite wird angezeigt.
 
-Testmanager fügt Macro hinzu und referenziert tests
-  Der Testplan muss mit einem Makro beginnen, das wie folgt aussieht
-  {{{
-  {{{
-  #!TestPlan
-  Id: Testman
-  Release: 0.1
-  Usecases: UcTestRunEvaluate, UcTestRunInfo, UcTestRunReview, UcTestcaseCreate, UcTestcaseExecute, UcTestplanCreate, UcTestplanStart
+    Testmanager fügt Macro hinzu und referenziert tests::
+      Der Testplan muss mit einem Makro beginnen, das wie folgt aussieht
+      {{{
+      {{{
+      #!TestPlan
+      Id: Testman
+      Release: 0.1
+      Usecases: UcTestRunEvaluate, UcTestRunInfo, UcTestRunReview, UcTestcaseCreate, UcTestcaseExecute, UcTestplanCreate, UcTestplanStart
 
-  TestCase/TestcaseCreate testadmin
-  TestCase/TestplanCreate testadmin
-  }}}
-  }}}
+      TestCase/TestcaseCreate testadmin
+      TestCase/TestplanCreate testadmin
+      }}}
+      }}}
 
-Ansicht des Makros
+    Ansicht des Makros
 
-Testmanager referenziert Tests
-  innerhalb des Macros über die Angabe eines Pfades oder einer ID
-  in diesem Beispiel 
-  TestCase/TestcaseCreate und
-  TestCase/TestplanCreate
+    Testmanager referenziert Tests::
+      innerhalb des Macros über die Angabe eines Pfades oder einer ID
+      in diesem Beispiel 
+      TestCase/TestcaseCreate und
+      TestCase/TestplanCreate
 
-  Ansicht des Makros
+    Ansicht des Makros
 
-3 Testmanager wählt Tester aus
-  über die Angabe einer Userid innerhalb des Macros
-  in diesem Beispiel
-  testadmin
+    Testmanager wählt Tester aus::
+      über die Angabe einer Userid innerhalb des Macros
+      in diesem Beispiel
+      testadmin
 
-  Ansicht des Makros
+    Ansicht des Makros
 
-4 Testmanager bestätigt die Änderung der Wikipage
-  durch Klick auf **Submit Changes**
+    Testmanager bestätigt die Änderung der Wikipage::
+      durch Klick auf **Submit Changes**
 
-  das Macro wird ausgeführt und listet die hinzugefügten Testcases in Wikinotation.
+    das Macro wird ausgeführt und listet die hinzugefügten Testcases in Wikinotation.

@@ -3,17 +3,17 @@
 Der Testmanager startet den Testplan und ermöglicht den Testern, 
 noch nicht durchgeführte Tests zu wählen und auszuführen.
 
-Testmanager wechselt in den Testbereich
-  [/TestManager TestManager]
-  wählt den vorher erstellten Testplan aus einer Liste noch nicht gestarteter Testpläne und startet diesen zur Ausführung.
-  Auswahl mit **start testplan** bestätigen
+    Testmanager wechselt in den Testbereich::
+      [/TestManager TestManager]
+      wählt den vorher erstellten Testplan aus einer Liste noch nicht gestarteter Testpläne und startet diesen zur Ausführung.
+      Auswahl mit **start testplan** bestätigen
 
-  Testplan erscheint in der Liste der Testruns und hat Status **accepted**
+      Testplan erscheint in der Liste der Testruns und hat Status **accepted**
 
-Das System stellt eine Zusammenfassung
-  der auszuführenden Tests ähnlich wie bei der Auswertung dar.
-  Klick auf Name des Testplans in Testrun Tabelle
+    Das System stellt eine Zusammenfassung::
+      der auszuführenden Tests ähnlich wie bei der Auswertung dar.
+      Klick auf Name des Testplans in Testrun Tabelle
 
-  Ansicht eines Tickets das alle Informationen zum Testrun enthält, dies sind:
-  Fortschrittsbalken (enthält Prozent und absolute Zahlen für die verschiedenen Stati)
-  testcases (samt zugeordnetem Tester und aktuellem Status)
+      Ansicht eines Tickets das alle Informationen zum Testrun enthält, dies sind:
+      Fortschrittsbalken (enthält Prozent und absolute Zahlen für die verschiedenen Stati)
+      testcases (samt zugeordnetem Tester und aktuellem Status)
