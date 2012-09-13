@@ -224,10 +224,17 @@ class TestEvalMacro(WikiMacroBase):
         # Create & execute the query string
         from models import TestCaseQuery
         tcs= TestCaseQuery( self.env, **kwargs ).execute()
+        # TODO: this is double code - refactor this
+        testruns = kwargs['testrun'].split("|")
+        testcases = list()
+        for testrun in testruns:
+            tcs = TestCaseQuery(self.env, testrun=testrun).execute()
+            for tc in tcs:
+                testcases.append(tc)
 
         # Calculate stats
         from evaluate import TestCaseStatus
-        stats = TestCaseStatus(self.env).get_testcase_stats( tcs )
+        stats = TestCaseStatus(self.env).get_testcase_stats( testcases )
         stats_data = my_query_stats_data(req, stats, kwargs)
 
         self.components = self.compmgr.components
@@ -270,10 +277,17 @@ class TestRunMonitorMacro(WikiMacroBase):
         # get testrun
         from models import TestCaseQuery
         # TODO: get the config - we have to make the config persistent in some way
-        tcs = TestCaseQuery(self.env, testrun=kwargs['testrun']).execute()
+        # now we take more than one testrun to monitor
+        # TODO: should we really split this here?
+        testruns = kwargs['testrun'].split("|")
+        testcases = list()
+        for testrun in testruns:
+            tcs = TestCaseQuery(self.env, testrun=testrun).execute()
+            for tc in tcs:
+                testcases.append(tc)
         text = "\n||'''Testcase'''||'''User'''||'''Status'''||\n"
         from TestManagerLib import get_status_color
-        for tc in tcs:
+        for tc in testcases:
             tc.color = get_status_color(tc.status)
             tc_data = {
                     "testcase" : "[%s/TestManager/general/testcase/%s #%s %s]" %
