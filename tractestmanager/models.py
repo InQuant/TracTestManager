@@ -377,7 +377,7 @@ class TestRun(object):
             SUMMARY        : self.wikiplan.name,
             'type'         : 'testrun',
         }
-        self.dbg('tickte data: %s' % data)
+        self.dbg('ticket data: %s' % data)
 
         try:
             self.ticket.populate(data)
@@ -510,7 +510,10 @@ class TestItemQuery(object):
             # build filter
             # e.g. 'testrun=%s AND (status=%s OR status=%s)
             # e.g. 'testrun=19 AND (status=not tested OR status=skipped)
+            # XXX: i think this should be kwargs.iteritems()
             for key, val in kwargs.items():
+                # TODO: check if any value is a list
+                # i think we get something like { "testrun" : "1|2" }
                 if type(val) == list:
                     # construct OR clause
                     newkey= "(" + string.join(
