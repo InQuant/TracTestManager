@@ -209,6 +209,7 @@ class TestEvalMacro(WikiMacroBase):
     """
     implements(ITemplateProvider)
 
+    # TODO: we got all args in common with TestRunMonitorMacro
     def _parse_macro_content(self, content, req):
         args, kwargs = parse_args(content, strict=False)
         ids = list()
@@ -260,6 +261,7 @@ class TestRunMonitorMacro(WikiMacroBase):
 
     """
 
+    # TODO: we got all args in common with TestEvalMacro
     def _parse_macro_content(self, content, req):
         args, kwargs = parse_args(content, strict=False)
         if '|' in kwargs['testrun']:
