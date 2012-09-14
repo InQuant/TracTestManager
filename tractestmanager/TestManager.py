@@ -221,13 +221,14 @@ class TestPlanPanel(Component):
 
         elif 'testplan_to_restart' in req.args:
             # we have a defect testrun to be restarted
-            runid = req.args['testplan_to_restart']
-            self.log.debug("trying to restart testplan " + runid)
-            testrun = models.TestRun(self.env, runid)
-            try:
-                testrun.start()
-            except TracError, e:
-                data["error"] = safe_unicode(e.message)
+            runids = req.args['testplan_to_restart']
+            for runid in runids:
+                try:
+                    self.log.debug("trying to restart testplan " + runid)
+                    testrun = models.TestRun(self.env, runid)
+                    testrun.start()
+                except TracError, e:
+                    data["error"] = safe_unicode(e.message)
 
         # query and render accepted testruns
         runs = models.TestRunQuery(self.env, status='accepted').execute()
