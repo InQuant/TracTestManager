@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 import sys, os
 
 PACKAGE = 'TestManager'
-version = '0.2'
+version = '0.2.1'
 
 setup(name='TracTestManager',
       version=version,
