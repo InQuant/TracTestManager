@@ -1,5 +1,12 @@
 Changelog
 =========
+0.2.1 (2012-09-14)
+----------------
+
+- fixed bug on restarting multiple defect testruns
+- fixed bug on monitoring and evaluating multiple testruns
+- added TestcaseTestRunEvaluateMultiple
+[otto]
 
 0.2 (2012-07-10)
 ----------------
