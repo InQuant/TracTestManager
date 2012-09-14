@@ -5,7 +5,7 @@ Tester wählt Tests und führt die Aktionen nach der Beschreibung durch,
 für fehlgeschlagene oder nicht durchführbare Tests, hinterlegt er einen Kommentar oder öffnet ein Ticket.
 
     Tester wechselt in den Testbereich::
-    durch Klick auf Tab [/TestManager TestManager], wählt [/TestManager/general/testquery TestCases] Navigationspunkt, wählt einen der testcases aus einem laufenden Testrun, z.B. **TestCase/TestcaseCreate** durch Klick auf dessen Titel aus
+      durch Klick auf Tab [/TestManager TestManager], wählt [/TestManager/general/testquery TestCases] Navigationspunkt, wählt einen der testcases aus einem laufenden Testrun, z.B. **TestCase/TestcaseCreate** durch Klick auf dessen Titel aus
 
     Es öffnet sich ein neues Fenster
 
