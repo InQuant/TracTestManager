@@ -1,0 +1,23 @@
+= TestCase TestRunEvaluateMultiple =
+
+Der Testmanager erstellt einen neuen TestRun 
+und modifiziert einen noch laufenden TestRun um beide zu vereinen.
+
+    Testmanager wechselt zur Übersicht der aktiven TestRun(s)::
+      Klick auf tab [/TestManager TestManager], Navigationsitem [/TestManager/general/testplans TestPlans].
+      Auswählen des laufenden, zu aktualisierenden TestRuns, durch klick auf dessen Name in TestRuns Tabelle.
+
+      TestRun Ticket wird angezeigt.
+
+    Das Testmanager modifiziert das TestRunEvaluate Macro::
+      Klick auf **Modify Ticket**.
+
+      In der Description erscheinen die TestEval und TestRunMonitor Macros.
+     
+    Fügt den neuen TestRun zur evaluation hinzu::
+      Durch erweitern des TestEvalMacros `[[TestEval(testrun=1|2)]]` und
+      bestätigt durch Klick auf den **Submit changes** Button.
+
+      Das aktualisierte TestRun Ticket wird angezeigt.
+      Das Makro zeigt nun die Auswertung für den hinzugefügten Testrun an.
+
