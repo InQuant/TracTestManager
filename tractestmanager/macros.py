@@ -211,6 +211,11 @@ class TestEvalMacro(WikiMacroBase):
 
     def _parse_macro_content(self, content, req):
         args, kwargs = parse_args(content, strict=False)
+        ids = list()
+        if '|' in kwargs['testrun']:
+            for i in kwargs['testrun'].split("|"):
+                ids.append(i)
+            kwargs['testrun'] = ids
         assert not args and not ('status' in kwargs or 'format' in kwargs), \
           "Invalid input!"
 
@@ -225,16 +230,11 @@ class TestEvalMacro(WikiMacroBase):
         from models import TestCaseQuery
         tcs= TestCaseQuery( self.env, **kwargs ).execute()
         # TODO: this is double code - refactor this
-        testruns = kwargs['testrun'].split("|")
-        testcases = list()
-        for testrun in testruns:
-            tcs = TestCaseQuery(self.env, testrun=testrun).execute()
-            for tc in tcs:
-                testcases.append(tc)
+        tcs = TestCaseQuery(self.env, testrun=kwargs['testrun']).execute()
 
         # Calculate stats
         from evaluate import TestCaseStatus
-        stats = TestCaseStatus(self.env).get_testcase_stats( testcases )
+        stats = TestCaseStatus(self.env).get_testcase_stats( tcs )
         stats_data = my_query_stats_data(req, stats, kwargs)
 
         self.components = self.compmgr.components
@@ -262,6 +262,11 @@ class TestRunMonitorMacro(WikiMacroBase):
 
     def _parse_macro_content(self, content, req):
         args, kwargs = parse_args(content, strict=False)
+        if '|' in kwargs['testrun']:
+            ids = list()
+            for i in kwargs['testrun'].split("|"):
+                ids.append(i)
+            kwargs['testrun'] = ids
         assert not args and not ('status' in kwargs or 'format' in kwargs), \
           "Invalid input!"
 
@@ -279,15 +284,10 @@ class TestRunMonitorMacro(WikiMacroBase):
         # TODO: get the config - we have to make the config persistent in some way
         # now we take more than one testrun to monitor
         # TODO: should we really split this here?
-        testruns = kwargs['testrun'].split("|")
-        testcases = list()
-        for testrun in testruns:
-            tcs = TestCaseQuery(self.env, testrun=testrun).execute()
-            for tc in tcs:
-                testcases.append(tc)
+        tcs = TestCaseQuery(self.env, testrun=kwargs['testrun']).execute()
         text = "\n||'''Testcase'''||'''User'''||'''Status'''||\n"
         from TestManagerLib import get_status_color
-        for tc in testcases:
+        for tc in tcs:
             tc.color = get_status_color(tc.status)
             tc_data = {
                     "testcase" : "[%s/TestManager/general/testcase/%s #%s %s]" %

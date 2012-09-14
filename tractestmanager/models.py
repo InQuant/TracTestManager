@@ -510,10 +510,8 @@ class TestItemQuery(object):
             # build filter
             # e.g. 'testrun=%s AND (status=%s OR status=%s)
             # e.g. 'testrun=19 AND (status=not tested OR status=skipped)
-            # XXX: i think this should be kwargs.iteritems()
-            for key, val in kwargs.items():
+            for key, val in kwargs.iteritems():
                 # TODO: check if any value is a list
-                # i think we get something like { "testrun" : "1|2" }
                 if type(val) == list:
                     # construct OR clause
                     newkey= "(" + string.join(
