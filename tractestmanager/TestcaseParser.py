@@ -32,6 +32,8 @@ from models import TestCase
 from models import TestAction
 from TestManagerLib import safe_unicode
 
+import re
+
 class TestcaseParser(object):
     """ parses a testcase in wiki format
     """
@@ -215,7 +217,7 @@ class TestPlanMacroParser(object):
                 try:
                     tcpattern, rest= line.split(None, 1)
                     # more than one user given?
-                    users= rest.split(',')
+                    users= rest.split()
                 except ValueError:
                     tcpattern= line.strip()
                     users= ['',]
