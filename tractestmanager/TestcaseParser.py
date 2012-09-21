@@ -32,8 +32,6 @@ from models import TestCase
 from models import TestAction
 from TestManagerLib import safe_unicode
 
-import re
-
 class TestcaseParser(object):
     """ parses a testcase in wiki format
     """
