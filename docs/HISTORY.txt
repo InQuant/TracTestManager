@@ -4,6 +4,7 @@ Changelog
 ----------------
 
 - fixing comment bug
+- alphabetical sorting of testcases
 [otto]
 
 0.2.1 (2012-09-14)

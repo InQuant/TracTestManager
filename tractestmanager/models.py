@@ -420,6 +420,7 @@ class TestRun(object):
                     (self.wikiplan.name, e.message)))
 
         # TODO: verify that tc_tester_tups are valid
+        # FIX: tc_tester_tups were a dict instead of a tuple list
 
         # now parse (get) all testcases from tc_tester_tups
         from TestcaseParser import TestcaseParser
@@ -427,7 +428,7 @@ class TestRun(object):
         errors = dict()
         self.testcases= list()
 
-        for pagename, testers in tc_tester_tups.iteritems():
+        for pagename, testers in tc_tester_tups:
             for tester in testers:
                 try:
                     tc = parser.parseTestcase(pagename= pagename)

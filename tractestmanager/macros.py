@@ -83,7 +83,7 @@ class TestPlanMacro(WikiMacroBase):
         self.log.debug("attrs: %s" % attrs)
 
         # syntax check the testcases
-        for tcname in tcnames_and_users:
+        for tcname, users in tcnames_and_users:
             try:
                 parser.parseTestcase(tcname)
             except TracError, e:
@@ -123,7 +123,7 @@ class TestPlanMacro(WikiMacroBase):
         """
         self.log.debug( "TestPlanMacro._build_testcases_wiki(%s)" % tcnames_and_users)
         text = u"\n== Zu testende Testcases ==\n||'''Testcase'''||'''User'''||\n"
-        for tcname, users in tcnames_and_users.items():
+        for tcname, users in tcnames_and_users:
             text += '||%s||%s||\n' % (tcname, string.join(users, ', '))
         return safe_unicode(text)
 

@@ -225,7 +225,9 @@ class TestPlanMacroParser(object):
                 # eval the wildcard testcase names
                 tcnames_and_users= self._eval_wildcards(tcpats_and_users)
 
-        return attributes, tcnames_and_users
+        # now we sort tcnames_and_users and build a tuple list
+        tc_assignment_sorted = sorted(tcnames_and_users.items())
+        return attributes, tc_assignment_sorted
 
     def _get_wiki_pages(self,prefix):
         """ wrap the wiki api
