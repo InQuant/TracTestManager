@@ -1,10 +1,14 @@
 Changelog
 =========
-0.2.4 (2012-??-??)
+0.3 (2012-??-??)
 ------------------
 
-- fixing bug on the evalmacro with multiple testruns
+- enhancement #31 assign a testcase multiple without
+  assigning it to a specific tester
+- fixed bug on the evalmacro with multiple testruns
   this fixes #39
+- fixed bug on wildcard-evaluation where testcases are
+  sorted out
 [otto]
 
 0.2.3 (2012-10-19)
