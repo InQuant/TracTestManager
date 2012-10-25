@@ -1,5 +1,12 @@
 Changelog
 =========
+0.2.4 (2012-??-??)
+------------------
+
+- fixing bug on the evalmacro with multiple testruns
+  this fixes #39
+[otto]
+
 0.2.3 (2012-10-19)
 ----------------
 
