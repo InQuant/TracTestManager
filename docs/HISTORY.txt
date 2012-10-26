@@ -3,6 +3,8 @@ Changelog
 0.3 (2012-??-??)
 ------------------
 
+- enhancement #32 the possibility of merging multiple
+  testcases with the same name on testevalmacro
 - enhancement #31 assign a testcase multiple without
   assigning it to a specific tester
 - fixed bug on the evalmacro with multiple testruns
