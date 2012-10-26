@@ -1,7 +1,7 @@
 Changelog
 =========
-0.3 (2012-??-??)
-------------------
+0.3.0 (2012-10-26)
+----------------
 
 - enhancement #32 the possibility of merging multiple
   testcases with the same name on testevalmacro
@@ -11,6 +11,8 @@ Changelog
   this fixes #39
 - fixed bug on wildcard-evaluation where testcases are
   sorted out
+- known bug #40 click on failed without comment passes
+  silently
 [otto]
 
 0.2.3 (2012-10-19)
