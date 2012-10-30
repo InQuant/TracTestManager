@@ -300,10 +300,16 @@ class TestQueryPanel(Component):
         if filters.get('testrun', None) is None:
             runs = models.TestRunQuery(self.env, status='accepted').execute()
         else:
-            runs.append( models.TestRun(self.env,
-                int(req.args.get('testrun', None))))
-            # drop testrun filter
-            filters.pop('testrun')
+            try:
+                runs.append(models.TestRun(self.env,
+                    int(filters.get('testrun', None))))
+            except TypeError:
+                # we have more than one testrun
+                for run in filters.get('testrun'):
+                    runs.append(models.TestRun(self.env, int(run)))
+            finally:
+                # drop testrun filter
+                filters.pop('testrun')
 
         for run in runs:
             run.testcases = models.TestCaseQuery(self.env, testrun=run.id, **filters).execute()

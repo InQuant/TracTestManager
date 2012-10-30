@@ -215,19 +215,15 @@ class TestPlanMacroParser(object):
                 try:
                     tcpattern, rest= line.split(None, 1)
                     # more than one user given?
-                    users= rest.split()
+                    users= rest.split(',')
                 except ValueError:
                     tcpattern= line.strip()
-                    users= ['',]
+                    users= ['']
 
-                tcpats_and_users.append( [tcpattern.strip(), users,] )
+                for item in self.__eval_wildcard(tcpattern.strip(), users):
+                    tcpats_and_users.append(item)
 
-                # eval the wildcard testcase names
-                tcnames_and_users= self._eval_wildcards(tcpats_and_users)
-
-        # now we sort tcnames_and_users and build a tuple list
-        tc_assignment_sorted = sorted(tcnames_and_users.items())
-        return attributes, tc_assignment_sorted
+        return attributes, tcpats_and_users
 
     def _get_wiki_pages(self,prefix):
         """ wrap the wiki api
@@ -235,24 +231,17 @@ class TestPlanMacroParser(object):
         for page in WikiSystem(self.env).get_pages(prefix):
             yield page
 
-    def _eval_wildcards(self, tcpats_and_users):
-        """ take the testcasepattern - user tuples, eval the wildcard pattern
-
-            e.g. ( 'TestMan*', ['max', 'muster', ])
+    def __eval_wildcard(self, tc, users):
+        """ takes a tuple ('TestCase*', ['john', 'jane'])
+            and yields the existing wiki pages
         """
-        self.dbg( 'TestPlanMacroParser._eval_wildcards: %s' % tcpats_and_users )
-
-        tcnames_and_users = dict()
-
-        for tcpat, users in tcpats_and_users:
-            if '*' in tcpat:
-                wildcard = tcpat.rstrip('*')
-                for title in self._get_wiki_pages(wildcard):
-                    tcnames_and_users[title] = users
-            else:
-                tcnames_and_users[tcpat] = users
-
-        self.dbg( 'tcnames_and_users: %s' % tcnames_and_users )
-        return tcnames_and_users
+        ret = list()
+        if '*' in tc:
+            wildcard = tc.rstrip('*')
+            for title in self._get_wiki_pages(wildcard):
+                ret.append((title, users))
+        else:
+            ret.append((tc, users))
+        return ret
 
 # vim: set ft=python ts=4 sw=4 expandtab :

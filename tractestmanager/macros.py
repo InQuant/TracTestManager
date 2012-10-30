@@ -124,7 +124,7 @@ class TestPlanMacro(WikiMacroBase):
         self.log.debug( "TestPlanMacro._build_testcases_wiki(%s)" % tcnames_and_users)
         text = u"\n== Zu testende Testcases ==\n||'''Testcase'''||'''User'''||\n"
         for tcname, users in tcnames_and_users:
-            text += '||[wiki:%s]||%s||\n' % (tcname, string.join(users, ', '))
+            text += '||[wiki:%s]||%s||\n' % (tcname, ",".join(users))
         return safe_unicode(text)
 
     def _build_configs_wiki(self, config):
@@ -227,11 +227,30 @@ class TestEvalMacro(WikiMacroBase):
         kwargs = self._parse_macro_content(content, req)
         self.env.log.debug("Macro Args: %s" % kwargs)
 
+        # merge tcs with the same name
+        try:
+            merge = kwargs.pop("merge")
+        except KeyError:
+            merge = False
+
         # Create & execute the query string
-        from models import TestCaseQuery
+        from models import TestCaseQuery, STATUSES
         tcs= TestCaseQuery( self.env, **kwargs ).execute()
-        # TODO: this is double code - refactor this
-        tcs = TestCaseQuery(self.env, testrun=kwargs['testrun']).execute()
+        if not merge:
+            tcs= TestCaseQuery( self.env, **kwargs ).execute()
+        else:
+            #tcs = TestCaseQuery(self.env, testrun=kwargs['testrun']).execute()
+            tcs= TestCaseQuery( self.env, **kwargs ).execute()
+            merged = dict()
+            for tc in tcs:
+                if merged.get(tc.wiki, None):
+                    # if we have a double, the worst status wins
+                    if not STATUSES.index(merged[tc.wiki].status) > STATUSES.index(tc.status):
+                        merged[tc.wiki] = tc
+                else:
+                    merged[tc.wiki] = tc
+            # now we generate the list :)
+            tcs = merged.values()
 
         # Calculate stats
         from evaluate import TestCaseStatus

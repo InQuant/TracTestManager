@@ -48,7 +48,7 @@ var set_status = function($id, $value){
     inputs.each(function(){
         values[this.name] = $(this).val();
     });
-    t_area            = $('#accordion'+values['action']).find('textarea')[0];
+    t_area = $('#accordion'+values['action']).find('textarea')[0];
     if(t_area.value && $value == "passed"){
         values['comment'] = t_area.value;
         values['status']  = "passed with comment";
