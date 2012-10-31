@@ -1,0 +1,40 @@
+= TcTestcaseExecutePassedComment =
+
+Tester wählt einen Test Case und führt dessen TestAktion(en) durch, wobei eine
+der Aktionen kommentiert wird.
+
+  Voraussetzung:: 
+    Ein Testplan wurde mit UcTestplanStart gestartet.
+
+    Der Testcase `TcTestcaseExecutePassedComment` wird als Testcase im Test Bereich gelistet.
+
+  1 Der Tester wählt einen Testcase:: 
+    Über das Trac-Menü `TestManager` und den Filter `alle` wählt er den Testcase
+    `TcTestcaseExecutePassedComment` zur Durchführung.
+
+    Ein (popup) Fenster öffnet sich und die TestAktion(en) des Testcases
+    werden angezeigt, die Voraussetzung ist über die Akkordeonfunktion mit
+    Details und erwartetem Ergebnis dargestellt.
+
+  2 Der Tester kommentiert die Aktion:: 
+    Er schreibt den Kommentar "Test wurde gefunden" in das Kommentarfeld.
+    Über den Button `passed` markiert er die Aktion als erfolgreich.
+
+    Die Voraussetzungs-Aktion ist gelb gefärbt, eingeklappt und die nächste
+    (erste) Testaktion ist über die Akkordeonfunktion mit Details und erwartetem
+    Ergebnis dargestellt.
+
+  3 Der Tester schließt alle restlichen Aktionen als erfüllt ab:: 
+    Über den Button `passed` markiert er sämtliche verbleibenden Aktionen als
+    erfolgreich.
+
+    Alle Aktionen  sind grün gefärbt und eingeklappt.
+
+  4 Der Tester schließt das Testcase Fenster:: 
+    Er aktualisiert dann die Ansicht im Test Bereich. Er wechselt zur
+    Ticket-View des TestRun(s).
+
+      - Der eben durchgeführte Test Case ist gelb gefärbt und damit
+        abgeschlossen.
+      - In der TestRun - Ticket View ist sein Kommentar mit Link zum Test Case
+        gespeichert.
