@@ -12,6 +12,9 @@ import os
 import unittest
 import string
 
+import pytest
+from trac_pytest import build_trac_env
+
 from trac.env import Environment
 
 import db_models
@@ -22,10 +25,11 @@ from models import TestCase, TestAction
 # TC_KEYS= [ 'tcid', 'wiki', 'title', 'description', 'revision', 'tester', 'testrun', 'status']
 # TA_KEYS= [ 'id', 'tcid', 'testrun', 'title', 'description', 'expected_result', 'status', 'comment']
 
+@pytest.mark.usefixtures("build_trac_env")
 class TestCaseTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.env= Environment( '/Users/lmende/develop/tractestman/buildout/parts/trac' )
+        self.env= build_trac_env
 
         self.tcvals= ['TcDocCreate', 'Create Docs', 'bla', '2', 'lmende', 3, NOT_TESTED]
 
