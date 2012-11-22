@@ -22,10 +22,16 @@ from models import TestCase, TestAction
 # TC_KEYS= [ 'tcid', 'wiki', 'title', 'description', 'revision', 'tester', 'testrun', 'status']
 # TA_KEYS= [ 'id', 'tcid', 'testrun', 'title', 'description', 'expected_result', 'status', 'comment']
 
+#import pytest
+#from trac_pytest import build_trac_env
+#@pytest.mark.usefixtures("build_trac_env")
 class TestCaseTestCase(unittest.TestCase):
 
     def setUp(self):
         self.env= Environment( '/Users/lmende/develop/tractestman/buildout/parts/trac' )
+        # if using build_trac_env fixture self.env is automatically set,
+        # TODO: figure out how to add the TracTestManager plugin so all needed
+        # tables are created.
 
         self.tcvals= ['TcDocCreate', 'Create Docs', 'bla', '2', 'lmende', 3, NOT_TESTED]
 
