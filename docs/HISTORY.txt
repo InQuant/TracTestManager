@@ -4,7 +4,9 @@ Changelog
 0.3.0 (????-??-??)
 ------------------
 
-- no changes yet
+- TestCaseAccordion now enforces specifying a comment when setting a step to failed.
+  this fixes #40
+[hplocher]
 
 0.2.3 (2012-10-19)
 ------------------

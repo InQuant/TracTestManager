@@ -65,6 +65,7 @@ class TestCaseManipulator(Component):
         return re.match(r'/json_testaction', req.path_info) is not None
 
     def process_request(self, req):
+        toggle_container_id = req.args.get("toggle_container_id", None)
         id = req.args.get("action", None)
         status = req.args.get("status", None)
         comment = req.args.get("comment", "")
@@ -91,9 +92,8 @@ class TestCaseManipulator(Component):
             # send ajax callback success
             else:
                 testaction.set_status(status=status, comment=None)
-            req.send(json.dumps({"update":"success", "status":status}))
-        except TracError:
-                # TODO: use callback to render errors
-                req.send(json.dumps({"update":"failed"}))
+            req.send(json.dumps({"update":"success", "status":status, "toggle_container_id":toggle_container_id}))
+        except TracError, e:
+            req.send(json.dumps({"update":"failed", "message":unicode(e)}), status=500)
 
 # vim: set ft=python ts=4 sw=4 expandtab :

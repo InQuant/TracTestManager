@@ -1,34 +1,9 @@
 jQuery(document).ready(function($) {
+    // initalize Accordion (hide all containers except first)
+    $('.toggle_container').hide();
+    $(".toggle_container").first().show()
 
-
-    $('input:button').click(function(){
-        var actionid = parseInt(this.parentNode.id);
-        set_status(actionid, this.value);
-        var trig = $(this.parentNode.previousElementSibling);
-        var duration = 100;
-        // close old container
-        if ( trig.hasClass('trigger_active') ) {
-            trig.next('.toggle_container').slideToggle(duration);
-        } else {
-            $('.trigger_active').next('.toggle_container').slideToggle(duration);
-            trig.next('.toggle_container').slideToggle(duration);
-        };
-        if($(this.parentNode.parentNode.parentNode.nextElementSibling) != null){
-            var trig = $(this.parentNode.parentNode.parentNode.nextElementSibling.children[0].children[1]);
-            if (trig != null){
-                // the next one is opened, only close me
-                if ( trig.next('.toggle_container')[0].style.display != "block" ){
-                    trig.next('.toggle_container').slideToggle(duration);
-                };
-            };
-        };
-        return false;
-    });
-
-    // Accordion
-    $('.trigger').not('.trigger_active').next('.toggle_container').hide();
-    $("[class^=trigger]:first").next('.toggle_container').slideToggle(0);
-    
+    // Show / hide container when clicking on the step's headline
     $('.trigger').click( function() {
         var trig = $(this);
         var duration = 100;
@@ -39,18 +14,55 @@ jQuery(document).ready(function($) {
             trig.next('.toggle_container').slideToggle(duration);
         };
         return false;
-    });                       
+    });
+
+    // handle the button clicks (skipped / passed /failed)
+    $('input:button').click(function(){
+        var actionid = parseInt(this.parentNode.id);
+        set_status(actionid, this.value);
+        return false;
+    });
 });
+
+
+var set_status_success =  function(data){
+    //callback when setting the status was successful
+    json = jQuery.parseJSON(data);
+    var toggle_container_id = parseInt(json.toggle_container_id);
+
+    // change clolor of step according to json.status
+    $("#accordion" + toggle_container_id)[0].children[1].style['background'] = status_color[json.status];
+    var duration = 100;
+
+    // hide current container
+    var toggle_container = $("#" + toggle_container_id);
+    toggle_container.slideToggle(duration);
+
+    // show next container
+    var next_toggle_container = $("#" + (toggle_container_id + 1));
+    if(next_toggle_container != null){
+        if(next_toggle_container[0].style.display != "block"){
+            next_toggle_container.slideToggle(duration);
+        }
+    };
+};
+
+
+var set_status_error =  function(data){
+    //callback when setting the status wasn't successful
+    json = jQuery.parseJSON(data.responseText);
+    alert(json.message);
+};
+
 
 var set_status = function($id, $value){
     var inputs = $("#accordion" + $id + ' :input');
     var values = {};
+    values["toggle_container_id"] = $id;
     inputs.each(function(){
         values[this.name] = $(this).val();
     });
-    t_area = $('#accordion'+values['action']).find('textarea')[0];
-    if(t_area.value && $value == "passed"){
-        values['comment'] = t_area.value;
+    if(values["comment"] && $value == "passed"){
         values['status']  = "passed with comment";
     }
     else{
@@ -58,8 +70,12 @@ var set_status = function($id, $value){
     }
     url               = '../../../json_testaction';
     // do the post request
-    $.post(url, values, function(data){
-        json = jQuery.parseJSON(data);
-        $("#accordion" + $id)[0].children[1].style['background'] = status_color[json.status];
+    $.ajax({
+      type: 'POST',
+      url: url,
+      data: values,
+      success: set_status_success,
+      error: set_status_error,
+      async:false
     });
 };
