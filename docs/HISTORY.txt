@@ -1,21 +1,27 @@
 Changelog
 =========
+
+0.3.0 (????-??-??)
+------------------
+
+- no changes yet
+
 0.2.3 (2012-10-19)
-----------------
+------------------
 
 - fixing bug on the wikilinks of the testplanmacro
   this fixes #37
 [otto]
 
 0.2.2 (2012-10-18)
-----------------
+------------------
 
 - fixing comment bug
 - alphabetical sorting of testcases
 [otto]
 
 0.2.1 (2012-09-14)
-----------------
+------------------
 
 - fixed bug on restarting multiple defect testruns
 - fixed bug on monitoring and evaluating multiple testruns
