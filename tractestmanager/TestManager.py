@@ -258,12 +258,12 @@ class TestPlanPanel(Component):
         data["title"] = 'TestPlans'
         return data['page'] , data
 
-def build_testcase_link( tc ):
+def build_testcase_link(tm_href, tc):
     # build link with genshi
-    # url = self.env.abs_href("/TestManager/general/testcase/"+tc.id ) 
+    url = "%s/testcase/%s" % (tm_href, tc.tcid)
     return tag.a(tc.wiki, href="#",
-        onclick='window.open("testcase/%s", "Popupfenster",'\
-        '"width=400,height=400,resizable=yes,scrollbars=yes");' % tc.tcid)
+        onclick='window.open("%s", "Popupfenster",'\
+        '"width=400,height=400,resizable=yes,scrollbars=yes");' % url)
 
 class TestQueryPanel(Component):
     """ Queries testcases via url handler
@@ -288,6 +288,7 @@ class TestQueryPanel(Component):
         data["info"] = req.args.get("info", "")
         data["warning"] = req.args.get("warning", "")
         data["error"] = req.args.get("error", "")
+        tm_href = self.env.abs_href("TestManager/general")
         # get the testcase filter args
         filters= dict()
         for arg in req.args:
@@ -315,7 +316,7 @@ class TestQueryPanel(Component):
             run.testcases = models.TestCaseQuery(self.env, testrun=run.id, **filters).execute()
 
             # build link with genshi
-            for tc in run.testcases: tc.ref= build_testcase_link( tc )
+            for tc in run.testcases: tc.ref= build_testcase_link(tm_href, tc)
 
         # The template to be rendered
         data["filter"]= {}
@@ -382,7 +383,7 @@ class TestCasePanel(Component):
                     data["revision"] = testcase.revision
                     #data["title"] = 'TestCase %s' % testcase.tcid
                     data["title"] = '(%s) ' % testcase.tcid + testcase.wiki
-                    # XXX: we have to fix this in 0.13 because wiki_to_html is deprecated
+                    # XXX: we have to fix this in 1.0 because wiki_to_html is deprecated
                     for action in testcase.actions:
                         for comment in action.comments:
                             comment["text"] = wiki_to_html(comment["text"], self.env, req)
