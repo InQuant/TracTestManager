@@ -1,8 +1,11 @@
 Changelog
 =========
 
-0.3.0 (????-??-??)
+0.2.4 (2013-01-16)
 ------------------
+
+- fixing bug on clicking on a testcase without redirecting to the testquery macro
+[otto]
 
 - TestCaseAccordion now enforces specifying a comment when setting a step to failed.
   this fixes #40
