@@ -1,7 +1,7 @@
 Changelog
 =========
 
-0.2.4 (2013-01-16)
+??0.2.4?? (????-??-??)
 ------------------
 
 - fixing bug on clicking on a testcase without redirecting to the testquery macro
