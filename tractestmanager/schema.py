@@ -26,6 +26,7 @@ class TestManagerModelProvider(Component):
             Column('expected_result'),
             Column('status'),
             Column('comment'),
+            Column('tester'),
             Index(['id', 'title'])],
 
           Table('testcase', key = ('tcid'))[

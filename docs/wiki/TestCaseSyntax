@@ -1,17 +1,16 @@
 = Beispiel TestCase zur Veranschaulichung der Syntax =
 
-Hier kommt die Zusammenfassende Beschreibung des Testcases hin, sie sollte das
-Ziel der Durchführung dieses Tests zusammenfassen.
+Hier steht eine zusammenfassende Beschreibung zum Testcase als normaler
+Wiki-Paragraph, diese sollte das Ziel der des Testcases reflektieren.
+Es folgen die einzelnen Testaktionen als `definition list`.
 
-Überschrift Schritt 1
-  Anweisung zum Durchführen von Schritt 1
+  Überschrift der Testaktion oder Vorbedingung:: 
+    Details zur Aktion oder Vorbedingung (definition description)
 
-  Erwartetes Ergebnis von Schritt 1
+    Erwartetes Ergebnis zur Aktion oder Vorbedingung als separater paragraph zur
+    defintion description
 
-Überschrift Schritt 2
-  Anweisung zum Durchführen 
-  von Schritt 2 (kann auch mehrueilig sein)
+  Überschrift Testaktion 2:: 
+    Details zur Aktion 2.
 
-  Erwartetes Ergebnis von Schritt 2
-  (kann auch mehrzeilig sein)
-
+    Erwartetes Ergebnis zur Aktion 2

@@ -21,4 +21,5 @@ TC_KEYS= [ 'tcid', 'wiki', 'title', 'description', 'revision', 'tester', 'testru
 
 # TestAction collumns
 TA_TABLE= 'testaction'
-TA_KEYS= [ 'id', 'tcid', 'testrun', 'title', 'description', 'expected_result', 'status', 'comment']
+TA_KEYS= [ 'id', 'tcid', 'testrun', 'title', 'description', 'expected_result',
+'status', 'comment', 'tester']

@@ -73,7 +73,7 @@ class TestCaseManipulator(Component):
         try:
             testaction = models.TestActionQuery(self.env, id=id).execute()[0]
             if comment:
-                testaction.set_status(status=status, comment=comment)
+                testaction.set_status(status=status, comment=comment, tester=req.authname)
                 testrun = Ticket(self.env, tkt_id=runid)
                 # add comment to ticket with ta_id, comment and tcid
                 testcase = models.TestCaseQuery(self.env, tcid=testaction.tcid).execute()[0]
@@ -91,7 +91,7 @@ class TestCaseManipulator(Component):
                 testrun.save_changes(author=req.authname, comment=comment)
             # send ajax callback success
             else:
-                testaction.set_status(status=status, comment=None)
+                testaction.set_status(status=status, comment=None, tester=req.authname)
             req.send(json.dumps({"update":"success", "status":status, "toggle_container_id":toggle_container_id}))
         except TracError, e:
             req.send(json.dumps({"update":"failed", "message":unicode(e)}), status=500)

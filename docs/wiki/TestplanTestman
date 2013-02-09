@@ -3,7 +3,6 @@
 Dieser Test testet die Funktionalität von TestMan, und dient als Beispiel für die
 Verwendung von TestMan
 
-
 TestMan by InQuant
 
 {{{
@@ -12,12 +11,14 @@ Id: Testman
 Release: 0.1
 Usecases: UcTestRunEvaluate, UcTestRunInfo, UcTestRunReview, UcTestcaseCreate, UcTestcaseExecute, UcTestplanCreate, UcTestplanStart
 
-TestCase/TestcaseCreate testadmin
-TestCase/TestplanCreate testadmin
-TestCase/TestplanStart testadmin
-TestCase/TestcaseExecute testadmin
-TestCase/TestcaseTestRunEvaluate testadmin
-TestCase/TestcaseTestRunInfo testadmin
-TestCase/TestcaseTestRunReview testadmin
+TcTestcaseCreate testadmin, tester
+TcTestplanCreate
+TcTestplanStart
+TcTestcaseExecute
+TcTestcaseExecuteFailedComment
+TcTestcaseExecutePassedComment
+TcTestrunEvaluate
+TcTestrunInfo
+TcTestrunReview
 }}}
 

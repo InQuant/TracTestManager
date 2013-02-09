@@ -1,31 +1,22 @@
 = TestCase Testcase erstellen =
 
 Usecase: UcTestcaseCreate 
-Der Testmanager erstellt Testcases.
+Ein Anwender erstellt Testcases.
 
-    Testmanager wechselt in den Testbereich::
-      einloggen als testadmin
-      WikiSeite mit Titel TestCase1 erstellen
-      TestCase1
+  Anwender erstellt neue Wiki Seite:: 
+    im Trac Wikisystem und benennt diese sinnvollerweise nach einer Regel, z.B.
+    TcTestCaseCreate
 
-      Es erscheint eine Seite
-      The page TestCase1 does not exist. You can create it here.
+    Das Trac Formular zum Bearbeiten von Wikiseiten ist geöffnet.
 
-    Neue Wiki Seite erstellen::
-      auf Create this Page klicken
+  Anwender editiert den Testcase:: 
+    dabei formuliert er eine Überschrift, Beschreibung und Testaktionen mit
+    deren erwarteten Ergebnissen.
 
-      Es öffnet sich eine Seite Editing TestCase1, samt Freitextfeld zur Eingabe des Inhalts.
+    Eingabemaske enthält jetzt den Tescase mit mindestens einer Aktion
+    entsprechend TestCaseSyntax.
 
-    Testmanager trägt den Testcase ein::
-      dabei wendet er die vorgegebene TestCaseSyntax an.
-      Einen Testcase mit mindestens einem Schritt erzeugen.
-      
-      Eingabemaske enthält jetzt den Tescase entsprechend TestCaseSyntax
-     
-    Testmanager speichert den Test:: 
-      mit **Submit Changes** die Änderungen speichern
+  Anwender beendet und speichert:: 
+    seine Änderungen.
 
-      Die Wikiseite samt Inhalt wird angezeigt.
-      Es erscheint eine grüne Meldung 
-      Your changes have been saved in Version ...
-
+    Testcase wird fehlerfrei in WikiSyntax angezeigt.

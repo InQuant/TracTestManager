@@ -113,7 +113,9 @@ class TestCase(TestItem):
         return self.db.insertTestCase( dict(self.getattrs()), actionsattrs )
 
     def set_status(self):
-        """ sets the status of an test case, the worst status wins.
+        """ sets the status and tester of an test case, the worst status wins.
+        if a tester has set the status for more than 75% of the test actions, he
+        is set as the test case tester.
         """
         self.dbg('TestCase.set_status()')
 
@@ -127,6 +129,24 @@ class TestCase(TestItem):
             setattr(self, '_status', overall_status)
             self._prepare_for_update( status= overall_status )
             self.save_changes()
+
+        # eval tester
+        acs = TestActionQuery(self.env, tcid=self.id).execute()
+        testers= {}
+        for action in acs:
+            if not action.tester: continue
+
+            if testers.has_key(action.tester):
+                testers[action.tester] += 1
+            else:
+                testers[action.tester]= 1
+
+        if not testers: return
+        testers_inv= dict(zip(testers.values(), testers.keys()))
+        tester= testers_inv[max(testers.values())]
+        setattr(self, 'tester', tester)
+        self._prepare_for_update( tester= tester )
+        self.save_changes()
 
 class TestItemGroupStats(object):
     """ Encapsulates statistics on a group of test items (actions or cases).
@@ -244,7 +264,7 @@ class TestAction(TestItem):
             return []
 
 
-    def set_status(self, status, comment=None):
+    def set_status(self, status, comment=None, tester=None):
         """ sets the status and comment of an test action.
         """
         self.dbg('TestAction.set_status( %s, %s)' % (str(status), str(comment)))
@@ -261,6 +281,10 @@ class TestAction(TestItem):
         if comment:
             setattr(self, 'comment', comment)
             self._prepare_for_update( comment= comment )
+
+        if tester:
+            setattr(self, 'tester', tester)
+            self._prepare_for_update( tester= tester )
 
         self.save_changes()
 
