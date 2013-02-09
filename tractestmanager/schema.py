@@ -46,9 +46,7 @@ class TestManagerModelProvider(Component):
         self._upgrade_db(self.env.get_db_cnx())
 
     def environment_needs_upgrade(self, db):
-        if self._need_migration(db):
-            return True
-        return False
+        return self._need_migration(db)
 
     def upgrade_environment(self, db):
         self._upgrade_db(db)
@@ -60,7 +58,6 @@ class TestManagerModelProvider(Component):
             return False
         except Exception, e:
             self.log.error("DatabaseError: %s", e)
-            db.rollback()
             return True
 
     def _upgrade_db(self, db):
