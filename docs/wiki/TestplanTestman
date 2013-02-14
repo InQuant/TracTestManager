@@ -9,15 +9,16 @@ TestMan by InQuant
 {{{
 #!TestPlan
 Id: Testman
-Release: 0.1
+Release: 0.3.2
 Usecases: UcTestRunEvaluate, UcTestRunInfo, UcTestRunReview, UcTestcaseCreate, UcTestcaseExecute, UcTestplanCreate, UcTestplanStart
 
-TestCase/TestcaseCreate testadmin
-TestCase/TestplanCreate testadmin
-TestCase/TestplanStart testadmin
-TestCase/TestcaseExecute testadmin
-TestCase/TestcaseTestRunEvaluate testadmin
-TestCase/TestcaseTestRunInfo testadmin
-TestCase/TestcaseTestRunReview testadmin
+TcTestcaseCreate
+TcTestcaseExecute
+TcTestcaseExecuteFailedComment
+TcTestcaseExecutePassedComment
+TcTestplanCreate
+TcTestplanStart
+TcTestrunEvaluate
+TcTestrunInfo
+TcTestrunReview
 }}}
-
