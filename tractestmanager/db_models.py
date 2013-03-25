@@ -180,7 +180,7 @@ class DbLite(object):
         """
         selects all testcases of a given testrun with a given status.
         """
-        self.dbg('DbLite.getTestCases()')
+        self.dbg('DbLite.getTestCases( %s, %s)' %(querystring, values))
         dbs= [[],]
 
         @with_transaction(self.env)

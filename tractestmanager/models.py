@@ -129,8 +129,16 @@ class TestCase(TestItem):
             setattr(self, '_status', overall_status)
             self._prepare_for_update( status= overall_status )
             self.save_changes()
+        
+        tester= self.eval_tester()
+        self._prepare_for_update( tester= tester )
+        self.save_changes()
 
-        # eval tester
+    def eval_tester(self):
+        """ evals the tester - it's the one with the most completed test
+        actions.
+        """
+
         acs = TestActionQuery(self.env, tcid=self.id).execute()
         testers= {}
         for action in acs:
@@ -141,12 +149,16 @@ class TestCase(TestItem):
             else:
                 testers[action.tester]= 1
 
-        if not testers: return
+        if not testers: return ""
+        
+        # determine the tester with the most actions from inv dict
         testers_inv= dict(zip(testers.values(), testers.keys()))
         tester= testers_inv[max(testers.values())]
+
+        self.dbg('set tester to %s' % tester)
         setattr(self, 'tester', tester)
-        self._prepare_for_update( tester= tester )
-        self.save_changes()
+
+        return tester
 
 class TestItemGroupStats(object):
     """ Encapsulates statistics on a group of test items (actions or cases).
@@ -282,7 +294,9 @@ class TestAction(TestItem):
             setattr(self, 'comment', comment)
             self._prepare_for_update( comment= comment )
 
-        if tester:
+        # set tester the first time only, the second status may be set
+        # through a test manager who reviews and comments the test case.
+        if status not in [SKIPPED, NOT_TESTED] and tester and not getattr(self, 'tester'):
             setattr(self, 'tester', tester)
             self._prepare_for_update( tester= tester )
 

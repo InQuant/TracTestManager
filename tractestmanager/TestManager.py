@@ -349,14 +349,12 @@ class TestCasePanel(Component):
     def match_request(self, req):
         match = re.match(r'/testcase/([0-9]+)$', req.path_info)
         if match:
-            #import pdb; pdb.set_trace()
             req.args['id'] = match.group(1)
             return True
 
     def render_admin_panel(self, req, cat, page, path_info):
         """ main request handler
         """
-        import pdb; pdb.set_trace()
         if TESTER_PERMISSION in req.perm:
             data = dict() #template data            
             data["info"] = req.args.get("info", "")
