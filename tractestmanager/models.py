@@ -633,4 +633,78 @@ class TestRunQuery(object):
             testruns.append(TestRun( self.env, t['id']))
         return testruns
 
+
+class Element(dict):
+    def __init__(self, value, children=None):
+        """ instantiate model
+        >>> e = Element("root")
+        >>> e.children # doctest: +ELLIPSIS
+        <generator object children at 0x...>
+        >>> e.value
+        'root'
+        """
+        self['value'] = value
+        self['children'] = []
+        if children and type(children) == list:
+            for c in children:
+                if c.__class__ == self.__class__:
+                    self['children'].append(c)
+
+    def __repr__(self):
+        """ representation string
+        >>> e = Element('foo')
+        >>> e
+        <Element: foo>
+        """
+        return '<Element: %s>' % self['value']
+
+    @property
+    def children(self):
+        """
+        >>> e1 = Element("child 1")
+        >>> e2 = Element("child 2")
+        >>> e = Element("root", children=[e1,e2])
+        >>> e.children # doctest: +ELLIPSIS
+        <generator object children at 0x...>
+        """
+        if not self['children']: raise KeyError
+        for c in self['children']:
+            yield c
+
+    @property
+    def value(self):
+        """ value property for title
+        >>> e = Element("root")
+        >>> e.value
+        'root'
+        >>> e = Element(None)
+        >>> e.value
+        """
+        try:
+            return self['value']
+        except KeyError:
+            return ""
+
+    def to_list(self):
+        """ html list getter
+        >>> e = Element('test')
+        >>> e.to_list()
+        '<li>test</li>'
+        >>> e1 = Element("child 1")
+        >>> e2 = Element("child 2")
+        >>> e = Element("root", children=[e1,e2])
+        >>> e.to_list()
+        '<li>root</li><ul><li>child 1</li><li>child 2</li></ul>'
+        """
+        # <li>Root<ul><li>Node</li><li>Node</li></ul></li>
+        try:
+            item = '<li>%s' % self.value
+            childnodes = ''
+            for c in self.children:
+                childnodes = childnodes + c.to_list()
+            return "%s<ul>%s</ul></li>" % (item, childnodes)
+        except KeyError:
+            return '<li>%s</li>' % self.value
+
+
 # vim: set ft=python ts=4 sw=4 expandtab :

@@ -366,16 +366,27 @@ class ProjectEvalMacro(WikiMacroBase):
         """
         req = formatter.req
         add_stylesheet(req, "TestManager/css/jquery.jOrgChart.css")
-        add_stylesheet(req, "TestManager/css/cutom.css")
         add_script(req, "TestManager/js/jquery.jOrgChart.js")
         add_script(req, "TestManager/js/start_org.js")
+
+        from models import Element
+        e1 = Element("bar")
+        e2 = Element("gazonk")
+        e3 = Element("baz")
+        e = Element("root", children=[e1,e2,e3])
+
         out = StringIO.StringIO()
+        e.to_list()
         text = """{{{#!html
-        <ul id='org' style='display:none'><li>Root<ul><li>Node</li><li>Node</li></ul></li></ul>
+        <ul id='org' style='display:none'>
+        %s</ul>
         <div id="chart" class="orgChart"></div>
-        }}}"""
+        }}}""" % e.to_list()
         Formatter(self.env, formatter.context).format(safe_unicode(text),out)
         return Markup(out.getvalue())
+
+    def _parse_macro_content(self, content, req):
+        return content
 
 
 # vim: set ft=python ts=4 sw=4 expandtab :
