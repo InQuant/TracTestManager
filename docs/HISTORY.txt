@@ -6,6 +6,10 @@ Changelog
 
 - fix automatic creation of needed custom tables
   [hplocher]
+- fix to alter table and add tester column
+  [ohockel]
+- initial projecteval macro with dependencies
+  [ohockel]
 
 0.3.1 (2013-01-16)
 ------------------

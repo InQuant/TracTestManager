@@ -54,9 +54,11 @@ class TestManagerModelProvider(Component):
     def _need_migration(self, db):
         try:
             cursor = db.cursor()
-            # TODO: verify this in the next release
+            # check if table should be created
+            cursor.execute("select * from testaction")
             # we changed testaction table to save the tester in version 0.3.1
-            cursor.execute("select tester from testaction")
+            # XXX: this is a hack to check this and alter
+            self.upgrade_alter_table(db, "testaction", "tester", "char(30)")
             return False
         except Exception, e:
             self.log.error("DatabaseError: %s", e)
@@ -80,3 +82,16 @@ class TestManagerModelProvider(Component):
             self.log.error("DatabaseError: %s", e)
             db.rollback()
             raise
+
+    def upgrade_alter_table(self, db, tablename, colname, coltype):
+        """ Does the alter table query if colname in tablename does not exist
+        """
+        try:
+            cursor = db.cursor()
+            cursor.execute("select %s from %s" % (colname,tablename))
+        except Exception, e:
+            self.log.debug("upgrade_alter_table: %s", e)
+            alter = "ALTER TABLE %s add column %s %s" % (tablename, colname,
+                    coltype)
+            cursor.execute(alter)
+            db.commit()
