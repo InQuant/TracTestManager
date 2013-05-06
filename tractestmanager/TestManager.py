@@ -222,7 +222,12 @@ class TestPlanPanel(Component):
         elif 'testplan_to_restart' in req.args:
             # we have a defect testrun to be restarted
             runids = req.args['testplan_to_restart']
-            for runid in runids:
+            def ensure_list(var):
+                if type(var) == list:
+                    return var
+                else:
+                    return [var]
+            for runid in ensure_list(runids):
                 try:
                     self.log.debug("trying to restart testplan " + runid)
                     testrun = models.TestRun(self.env, runid)

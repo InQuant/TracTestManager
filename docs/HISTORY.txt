@@ -10,6 +10,11 @@ Changelog
   [ohockel]
 - initial projecteval macro with dependencies
   [ohockel]
+- fixing bug on iterating over string when restarting
+  broken testplans
+  [ohockel]
+- now sets the tester of a tc, who executes it
+  [lmende]
 
 0.3.1 (2013-01-16)
 ------------------
