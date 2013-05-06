@@ -370,23 +370,47 @@ class ProjectEvalMacro(WikiMacroBase):
         add_script(req, "TestManager/js/start_org.js")
 
         from models import Element
-        e1 = Element("bar")
-        e2 = Element("gazonk")
-        e3 = Element("baz")
-        e = Element("root", children=[e1,e2,e3])
-
+        con = self._parse_macro_content(text, req)
         out = StringIO.StringIO()
-        e.to_list()
+        con.to_list()
         text = """{{{#!html
         <ul id='org' style='display:none'>
         %s</ul>
         <div id="chart" class="orgChart"></div>
-        }}}""" % e.to_list()
+        }}}""" % con.to_list()
         Formatter(self.env, formatter.context).format(safe_unicode(text),out)
         return Markup(out.getvalue())
 
     def _parse_macro_content(self, content, req):
-        return content
+        data = dict()
+        for line in content.split('\n'):
+            if line:
+                key, val = line.split(':')
+                data[key] = val.strip()
+        return self._build_project(data)
+
+    def _build_project(self, data):
+        if not 'Project' in data.keys():
+            return None
+        else:
+            from models import Element
+            def structure_from_dict(data, root):
+                elements = list()
+                vals = data.get(root.value, None)
+                if not vals:
+                    # no children, break
+                    return list()
+                for c in vals.split(', '):
+                    el = Element(c)
+                    nodes = structure_from_dict(data, el)
+                    if nodes:
+                        el.set_children(nodes)
+                    elements.append(el)
+                return elements
+
+            root = Element(data['Project'])
+            root.set_children(structure_from_dict(data, root))
+        return root
 
 
 # vim: set ft=python ts=4 sw=4 expandtab :

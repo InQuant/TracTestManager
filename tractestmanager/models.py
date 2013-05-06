@@ -644,11 +644,9 @@ class Element(dict):
         'root'
         """
         self['value'] = value
-        self['children'] = []
-        if children and type(children) == list:
-            for c in children:
-                if c.__class__ == self.__class__:
-                    self['children'].append(c)
+        self['children'] = list()
+        if children:
+            self.set_children(children)
 
     def __repr__(self):
         """ representation string
@@ -670,6 +668,12 @@ class Element(dict):
         if not self['children']: raise KeyError
         for c in self['children']:
             yield c
+
+    def set_children(self, children):
+        if children and type(children) == list:
+            for c in children:
+                if c.__class__ == self.__class__:
+                    self['children'].append(c)
 
     @property
     def value(self):
