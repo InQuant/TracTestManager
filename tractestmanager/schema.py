@@ -54,7 +54,9 @@ class TestManagerModelProvider(Component):
     def _need_migration(self, db):
         try:
             cursor = db.cursor()
-            cursor.execute("select * from testaction")
+            # TODO: verify this in the next release
+            # we changed testaction table to save the tester in version 0.3.1
+            cursor.execute("select tester from testaction")
             return False
         except Exception, e:
             self.log.error("DatabaseError: %s", e)
