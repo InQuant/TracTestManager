@@ -339,7 +339,7 @@ class ProjectEvalMacro(WikiMacroBase):
 
        Usage::
            {{{
-           !#ProjectEval
+           #!ProjectEval
            Project: Manage Tests
            TestRuns: 28, 29, 30, 31
            Build: TM-3.1.1
