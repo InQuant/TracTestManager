@@ -204,7 +204,8 @@ class TestEvalMacro(WikiMacroBase):
     """Test query wiki macro plugin for Trac Testman, evaluates the status of
     testcases not testactions!
 
-    usage: TestEval(<kwargs>), e.g.: [[TestEval(testrun=18|19, tester=testadmin)]]
+    usage: TestEval(<kwargs>), e.g.: {{{[[TestEval(testrun=18|19,
+    tester=testadmin)]]}}}
 
     """
     implements(ITemplateProvider)
