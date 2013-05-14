@@ -222,7 +222,12 @@ class TestPlanPanel(Component):
         elif 'testplan_to_restart' in req.args:
             # we have a defect testrun to be restarted
             runids = req.args['testplan_to_restart']
-            for runid in runids:
+            def ensure_list(var):
+                if type(var) == list:
+                    return var
+                else:
+                    return [var]
+            for runid in ensure_list(runids):
                 try:
                     self.log.debug("trying to restart testplan " + runid)
                     testrun = models.TestRun(self.env, runid)
@@ -385,6 +390,8 @@ class TestCasePanel(Component):
                     data["title"] = '(%s) ' % testcase.tcid + testcase.wiki
                     # XXX: we have to fix this in 1.0 because wiki_to_html is deprecated
                     for action in testcase.actions:
+                        action.description= wiki_to_html(action.description, self.env, req)
+                        action.expected_result= wiki_to_html(action.expected_result, self.env, req)
                         for comment in action.comments:
                             comment["text"] = wiki_to_html(comment["text"], self.env, req)
                     if req.authname != testcase.tester:

@@ -35,7 +35,7 @@ from trac.ticket.query import Query
 from trac.ticket.roadmap import ITicketGroupStatsProvider, \
                                 apply_ticket_permissions, get_ticket_stats
 from trac.core import *
-from trac.web.chrome import Chrome, ITemplateProvider, add_stylesheet
+from trac.web.chrome import Chrome, ITemplateProvider, add_stylesheet, add_script
 from trac.wiki.api import IWikiMacroProvider, parse_args
 
 import StringIO
@@ -333,5 +333,85 @@ class TestRunMonitorMacro(WikiMacroBase):
         # ... and finally display them
         Formatter(self.env, formatter.context).format(text,out)
         return Markup(out.getvalue())
+
+
+class ProjectEvalMacro(WikiMacroBase):
+    """project evaluation macro.
+
+       Usage::
+           {{{
+           #!ProjectEval
+           Project: Manage Tests
+           TestRuns: 28, 29, 30, 31
+           Build: TM-3.1.1
+
+           Manage Tests: BucTestPrepare, BucTestExecute
+
+           BucTestPrepare: UcTestcaseCreate, UcTestplanCreate, UcTestplanStart
+           BucTestExecute: UcTestcaseExecute, UcTestRunInfo, UcTestRunReview, UcTestRunEvaluate
+
+           UcTestplanStart: TcTestplanStart, TcTestplanStartFailed
+           UcTestplanCreate: TcTestplanCreate
+           UcTestcaseCreate: TcTestcaseCreate
+           UcTestcaseExecute: TcTestCaseExecute*
+           UcTestRunReview: TcTestRunReview*
+           UcTestRunInfo: TcTestRunInfo
+           UcTestRunEvaluate: TcTestRunEvaluate, TcTestRunEvaluateProjectEval
+           }}}
+    """
+    revision = "$Rev$"
+    url = "$URL$"
+
+    def expand_macro(self, formatter, name, text, args):
+        """Execute the macro
+        """
+        req = formatter.req
+        add_stylesheet(req, "TestManager/css/jquery.jOrgChart.css")
+        add_script(req, "TestManager/js/jquery.jOrgChart.js")
+        add_script(req, "TestManager/js/start_org.js")
+
+        from models import Element
+        con = self._parse_macro_content(text, req)
+        out = StringIO.StringIO()
+        con.to_list()
+        text = """{{{#!html
+        <ul id='org' style='display:none'>
+        %s</ul>
+        <div id="chart" class="orgChart"></div>
+        }}}""" % con.to_list()
+        Formatter(self.env, formatter.context).format(safe_unicode(text),out)
+        return Markup(out.getvalue())
+
+    def _parse_macro_content(self, content, req):
+        data = dict()
+        for line in content.split('\n'):
+            if line:
+                key, val = line.split(':')
+                data[key] = val.strip()
+        return self._build_project(data)
+
+    def _build_project(self, data):
+        if not 'Project' in data.keys():
+            return None
+        else:
+            from models import Element
+            def structure_from_dict(data, root):
+                elements = list()
+                vals = data.get(root.value, None)
+                if not vals:
+                    # no children, break
+                    return list()
+                for c in vals.split(', '):
+                    el = Element(c)
+                    nodes = structure_from_dict(data, el)
+                    if nodes:
+                        el.set_children(nodes)
+                    elements.append(el)
+                return elements
+
+            root = Element(data['Project'])
+            root.set_children(structure_from_dict(data, root))
+        return root
+
 
 # vim: set ft=python ts=4 sw=4 expandtab :

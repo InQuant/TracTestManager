@@ -46,7 +46,9 @@ class TestManagerModelProvider(Component):
         self._upgrade_db(self.env.get_db_cnx())
 
     def environment_needs_upgrade(self, db):
-        return self._need_migration(db)
+        if self._need_migration(db):
+            return True
+        return False
 
     def upgrade_environment(self, db):
         self._upgrade_db(db)
@@ -54,10 +56,15 @@ class TestManagerModelProvider(Component):
     def _need_migration(self, db):
         try:
             cursor = db.cursor()
+            # check if table should be created
             cursor.execute("select * from testaction")
+            # we changed testaction table to save the tester in version 0.3.1
+            # XXX: this is a hack to check this and alter
+            self.upgrade_alter_table(db, "testaction", "tester", "char(30)")
             return False
         except Exception, e:
             self.log.error("DatabaseError: %s", e)
+            db.rollback()
             return True
 
     def _upgrade_db(self, db):
@@ -78,3 +85,17 @@ class TestManagerModelProvider(Component):
             self.log.error("DatabaseError: %s", e)
             db.rollback()
             raise
+
+    def upgrade_alter_table(self, db, tablename, colname, coltype):
+        """ Does the alter table query if colname in tablename does not exist
+        """
+        try:
+            cursor = db.cursor()
+            cursor.execute("select %s from %s" % (colname,tablename))
+        except Exception, e:
+            self.log.debug("upgrade_alter_table: %s", e)
+            cursor = db.cursor()
+            alter = "ALTER TABLE %s add column %s %s" % (tablename, colname,
+                    coltype)
+            cursor.execute(alter)
+            db.commit()
