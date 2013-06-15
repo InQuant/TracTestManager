@@ -64,7 +64,6 @@ class TestManagerModelProvider(Component):
             return False
         except Exception, e:
             self.log.error("DatabaseError: %s", e)
-            db.rollback()
             return True
 
     def _upgrade_db(self, db):
@@ -80,10 +79,8 @@ class TestManagerModelProvider(Component):
                 for stmt in db_backend.to_sql(table):
                     self.env.log.debug(stmt)
                     cursor.execute(stmt)
-            db.commit()
         except Exception, e:
             self.log.error("DatabaseError: %s", e)
-            db.rollback()
             raise
 
     def upgrade_alter_table(self, db, tablename, colname, coltype):
@@ -98,4 +95,3 @@ class TestManagerModelProvider(Component):
             alter = "ALTER TABLE %s add column %s %s" % (tablename, colname,
                     coltype)
             cursor.execute(alter)
-            db.commit()
