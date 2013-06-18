@@ -4,6 +4,7 @@ Changelog
 0.4.1 (2013-??-??)
 ------------------
 
+- implemented skip remaining function in accordion
 - removing 'commit' and 'rollback' statements from schema.py
   as they are not to be emitted anymore since Trac 1.0
   [otto]
