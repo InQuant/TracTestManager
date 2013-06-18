@@ -19,11 +19,25 @@ jQuery(document).ready(function($) {
     // handle the button clicks (skipped / passed /failed)
     $('input:button').click(function(){
         var actionid = parseInt(this.parentNode.id);
-        set_status(actionid, this.value);
+        if(this.name=='skip_remaining') skip_remaining(this.parentNode.id);
+        else set_status(actionid, this.value);
         return false;
     });
 });
 
+var skip_remaining = function(data){
+    // called if skip_remaining is clicked
+    // get all containers
+    var containers = $('div.toggle_container').toArray();
+    // remove previous steps
+    while(containers[0].id < data){
+        containers.shift();
+    }
+    for(var i=0;i<containers.length;i++){
+       // click skipped for each container 
+       $('#' + containers[i].id + ' input[value=skipped]')[0].click();
+    }
+}
 
 var set_status_success =  function(data){
     //callback when setting the status was successful
