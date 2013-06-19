@@ -30,6 +30,7 @@ from trac.core import TracError
 
 from trac.web import HTTPNotFound
 from trac.web import IRequestHandler
+from trac.web.api import IRequestFilter
 from trac.web.chrome import INavigationContributor
 from trac.web.chrome import ITemplateProvider
 from trac.web.chrome import add_stylesheet
