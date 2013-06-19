@@ -39,7 +39,7 @@
         <h2>$TestCaseTitle</h2>            
         <p>$TestCaseDescription</p>            
         <span py:for="action in TestCaseActions">                                    
-          <form py:if="action" method="POST" id="accordion$action.id">
+          <form py:if="action" method="POST" name="Action" id="accordion$action.id">
             <h3 py:attrs="action.color" class="trigger">$action.title ($action.id)</h3>            
             <div class="toggle_container" id="$action.id" style="font: monospace; font-weight: normal;">
                 <input type="hidden" name="testrun" value="$action.testrun" />
@@ -49,7 +49,18 @@
                 <p py:if="action.comments">
                 <p py:for="comment in action.comments"><hr /><b>$comment.user said:</b>$comment.text</p>
                 </p>
-                <textarea cols="50" name="comment"></textarea><br /><br />
+                <textarea cols="50" name="comment"></textarea>
+                <p>
+                <input type="radio" name="option" value="attach_file">Attach File to Comment.</input>
+                <br/>
+                <input type="radio" name="option" value="create_ticket">Create Ticket with Prio: </input>
+                <select name="Prio" size="1">
+                  <option>blocker</option>
+                  <option>critical</option>
+                  <option>major</option>
+                  <option>minor</option>
+                </select>
+                </p>
                 <input type="button" value="$status.skipped" name="status" />                    
                 <input type="button" value="$status.passed" name="status" />                    
                 <input type="button" value="$status.failed" name="status" />                

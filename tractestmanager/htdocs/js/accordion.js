@@ -22,8 +22,20 @@ jQuery(document).ready(function($) {
         set_status(actionid, this.value);
         return false;
     });
-});
 
+    // handle the checkbox ()
+    /*
+    $('input:checkbox').click(function(){
+        //document.getElementById("create_ticket").value= "yes";
+        if (this.checked == true) {
+            this.value= "yes";
+        } else {
+            this.value= "no";
+        }
+        return false;
+    });
+    */
+});
 
 var set_status_success =  function(data){
     //callback when setting the status was successful
@@ -59,9 +71,19 @@ var set_status = function($id, $value){
     var inputs = $("#accordion" + $id + ' :input');
     var values = {};
     values["toggle_container_id"] = $id;
+
+    values["option"]= false;
     inputs.each(function(){
         values[this.name] = $(this).val();
+        if (this.name == "option" && this.checked == true ) {
+            if (this.value == "create_ticket") {
+                values["option"]= "create_ticket";
+            } else {
+                values["option"]= "create_attachment";
+            }
+        }
     });
+
     if(values["comment"] && $value == "passed"){
         values['status']  = "passed with comment";
     }

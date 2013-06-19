@@ -391,7 +391,7 @@ class TestCasePanel(Component):
                     # XXX: we have to fix this in 1.0 because wiki_to_html is deprecated
                     for action in testcase.actions:
                         action.description= wiki_to_html(action.description, self.env, req)
-                        action.expected_result= wiki_to_html(action.expected_result, self.env, req)
+                        action.expected_result= wiki_to_html("''Result:''[[BR]]" + action.expected_result, self.env, req)
                         for comment in action.comments:
                             comment["text"] = wiki_to_html(comment["text"], self.env, req)
                     if req.authname != testcase.tester:
