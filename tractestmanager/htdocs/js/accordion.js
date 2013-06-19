@@ -23,6 +23,7 @@ jQuery(document).ready(function($) {
         else set_status(actionid, this.value);
         return false;
     });
+});
 
 var skip_remaining = function(data){
     // called if skip_remaining is clicked
@@ -35,8 +36,8 @@ var skip_remaining = function(data){
     for(var i=0;i<containers.length;i++){
        // click skipped for each container 
        $('#' + containers[i].id + ' input[value=skipped]')[0].click();
-    }
-}
+    };
+};
 
 var set_status_success =  function(data){
     //callback when setting the status was successful
