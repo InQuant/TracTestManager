@@ -410,4 +410,19 @@ class TestManagerPermissions(Component):
     def get_permission_actions(self):
         return (MANAGER_PERMISSION, TESTER_PERMISSION)
 
+
+class TestManagerAttachmentScript(Component):
+    """ This class adds a javascript to prefill the description of an attachment
+    """
+    implements(IRequestFilter)
+
+    # IRequestFilter methods
+    def pre_process_request(self, req, handler):
+        return handler
+
+    def post_process_request(self, req, template, data, content_type):
+        if template == 'attachment.html':
+            add_script(req, 'TestManager/js/prefill_att_desc.js')
+        return template, data, content_type
+
 # vim: set ft=python ts=4 sw=4 expandtab :

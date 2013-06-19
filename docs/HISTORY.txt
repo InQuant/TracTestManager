@@ -5,6 +5,8 @@ Changelog
 ------------------
 
 - implemented skip remaining function in accordion
+- prefilling attachment attribute 'description' through javascript (see
+  TestManager.py class TestManagerAttachmentScript)
 - removing 'commit' and 'rollback' statements from schema.py
   as they are not to be emitted anymore since Trac 1.0
   [otto]
