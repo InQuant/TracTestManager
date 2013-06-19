@@ -76,13 +76,10 @@ var set_status = function($id, $value){
 
     values["option"]= false;
     inputs.each(function(){
-        values[this.name] = $(this).val();
-        if (this.name == "option" && this.checked == true ) {
-            if (this.value == "create_ticket") {
-                values["option"]= "create_ticket";
-            } else {
-                values["option"]= "create_attachment";
-            }
+        if (this.name == "option") {
+            if(this.checked == true) values['option'] = this.value;
+        }else{
+            values[this.name] = $(this).val();
         }
     });
 
@@ -102,4 +99,9 @@ var set_status = function($id, $value){
       error: set_status_error,
       async:false
     });
+    var testrun = $('input[name=testrun]').first().val();
+    var action_title = $('#accordion' + values.toggle_container_id + ' h3').text()
+    if(values['option'] == 'attach_file' && json.update != 'failed'){
+        window.location.href = '/trac/attachment/ticket/' + testrun + '?action=new&description=' + encodeURI(action_title);
+    }
 };
