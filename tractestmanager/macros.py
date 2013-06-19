@@ -142,9 +142,11 @@ class TestCaseMacro(WikiMacroBase):
        Usage::
 
            {{{
+           {{{
            #!TestCase
-           foo
-           bar
+
+           test case text
+           }}}
            }}}
     """
 
