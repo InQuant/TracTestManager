@@ -49,21 +49,21 @@
                 <p py:if="action.comments">
                 <p py:for="comment in action.comments"><hr /><b>$comment.user said:</b>$comment.text</p>
                 </p>
-                <textarea cols="50" name="comment"></textarea>
+                <textarea rows="4" cols="50" name="comment"></textarea>
                 <p>
                 <input type="radio" name="option" value="attach_file">Attach File to Comment.</input>
                 <br/>
                 <input type="radio" name="option" value="create_ticket">Create Ticket with Prio: </input>
-                <select name="Prio" size="1">
+                <select name="priority" size="1">
                   <option>blocker</option>
                   <option>critical</option>
                   <option>major</option>
                   <option>minor</option>
                 </select>
                 </p>
-                <input type="button" value="$status.skipped" name="status" />                    
                 <input type="button" value="$status.passed" name="status" />                    
                 <input type="button" value="$status.failed" name="status" />                
+                <input type="button" value="$status.skipped" name="status" />
                 <input type="button" value="skip remaining" name="skip_remaining" />
             </div>            
           </form>            

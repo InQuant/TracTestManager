@@ -77,7 +77,9 @@ var set_status = function($id, $value){
     values["option"]= false;
     inputs.each(function(){
         if (this.name == "option") {
-            if(this.checked == true) values['option'] = this.value;
+            if(this.checked == true) {
+                values['option'] = $(this).val();
+            }
         }else{
             values[this.name] = $(this).val();
         }
