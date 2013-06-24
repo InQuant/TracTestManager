@@ -53,12 +53,14 @@ var set_status_success =  function(data){
     toggle_container.slideToggle(duration);
 
     // show next container
-    var next_toggle_container = $("#" + (toggle_container_id + 1));
-    if(next_toggle_container != null){
-        if(next_toggle_container[0].style.display != "block"){
-            next_toggle_container.slideToggle(duration);
-        }
-    };
+    try{
+        var next_toggle_container = $("#" + (toggle_container_id + 1));
+        if(next_toggle_container != null){
+            if(next_toggle_container[0].style.display != "block"){
+                next_toggle_container.slideToggle(duration);
+            }
+        };
+    }catch(TypeError){console.log("no container left");}
 };
 
 
@@ -102,8 +104,7 @@ var set_status = function($id, $value){
       async:false
     });
     var testrun = $('input[name=testrun]').first().val();
-    var action_title = $('#accordion' + values.toggle_container_id + ' h3').text()
     if(values['option'] == 'attach_file' && json.update != 'failed'){
-        window.location.href = '/trac/attachment/ticket/' + testrun + '?action=new&description=' + encodeURI(action_title);
+        window.location.href = '/trac/attachment/ticket/' + testrun + '?action=new&testman_cnum=' + json.cnum;
     }
 };

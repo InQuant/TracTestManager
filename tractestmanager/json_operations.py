@@ -76,16 +76,26 @@ class TestCaseManipulator(Component):
         option  = req.args.get("option", None)
         runid   = req.args.get("testrun", None)
 
-        #import ipdb; ipdb.set_trace();
+        json_response = {
+                'update' : 'success',
+                'status' : status,
+                'toggle_container_id' : toggle_container_id
+                }
 
         try:
             testaction = models.TestActionQuery(self.env, id=id).execute()[0]
-            
+
             if option == "create_ticket":
                 if not comment:
                     raise AttributeError("For ticket creation a comment is mandatory!")
                 if status == 'skipped':
                     raise AttributeError("Status 'skipped' is not allowed for ticket creation!")
+
+            if option == "attach_file":
+                if not comment:
+                    raise AttributeError("For attachment creation a comment is mandatory!")
+                if status == 'skipped':
+                    raise AttributeError("Status 'skipped' is not allowed for attachment creation!")
 
             if comment:
                 if comment == testaction.comment:
@@ -96,13 +106,13 @@ class TestCaseManipulator(Component):
                     tid= self._create_ticket( runid, testaction, comment, req )
                     comment= "%s\n\nSee ticket #%-d." % (comment, tid)
 
-                self._add_comment_to_testrun( runid, testaction, comment, req )
+                json_response['cnum'] = self._add_comment_to_testrun( runid, testaction, comment, req )
 
             else:
                 testaction.set_status(status=status, comment=None, tester=req.authname)
 
             # send ajax callback success
-            req.send(json.dumps({"update":"success", "status":status, "toggle_container_id":toggle_container_id}))
+            req.send(json.dumps(json_response))
         except (AttributeError, TracError) , e:
             req.send(json.dumps({"update":"failed", "message":unicode(e)}), status=500)
 
@@ -126,7 +136,7 @@ class TestCaseManipulator(Component):
         # 'Creator checks in the model of TcCaddocCreate failed.'
         testcase = models.TestCaseQuery(self.env, tcid=testaction.tcid).execute()[0]
         summary= "%s of %s %s." % (testaction.title, testcase.wiki, todo)
-        
+
         # check if a similar ticket already exists...
         existing_tickets= Query.from_string(self.env, "summary=%s" % summary).execute()
         if existing_tickets:
@@ -197,6 +207,6 @@ class TestCaseManipulator(Component):
                 "comment": comment}
         comment = COMMENT_TEMPLATE % comment_data
         # TODO: decode base64
-        testrun.save_changes(author= req.authname, comment=comment)
+        return testrun.save_changes(author= req.authname, comment=comment)
 
 # vim: set ft=python ts=4 sw=4 expandtab :

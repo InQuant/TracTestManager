@@ -48,6 +48,7 @@ from trac.wiki.formatter import wiki_to_html
 from trac.wiki.formatter import format_to_html
 from trac.mimeview.api import Context
 from trac.resource import Resource
+from trac.ticket import Ticket
 
 # testman specific imports
 from interfaces import ITestManagerPanelProvider
@@ -419,11 +420,19 @@ class TestManagerAttachmentScript(Component):
 
     # IRequestFilter methods
     def pre_process_request(self, req, handler):
+        if req.method == 'POST' and req.args.get('testman_cnum', None):
+            t = Ticket(self.env, tkt_id=req.args.get('path'))
+            cdate = t.get_change(cnum=req.args.get('testman_cnum'))['date']
+            comment = t.get_change(cnum=req.args.get('testman_cnum'))['fields']['comment']['new']
+            new_comment = u"%s\n attachment added: [attachment:ticket:%s:%s]" % (comment, req.args.get("id"), req.args.get('attachment').filename)
+            t.modify_comment(cdate, req.authname, new_comment, when=cdate)
         return handler
 
     def post_process_request(self, req, template, data, content_type):
         if template == 'attachment.html':
             add_script(req, 'TestManager/js/prefill_att_desc.js')
+            if not req.args.get('testman_cnum', None):
+                return template, data, content_type
         return template, data, content_type
 
 # vim: set ft=python ts=4 sw=4 expandtab :
