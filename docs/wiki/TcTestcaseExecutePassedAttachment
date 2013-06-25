@@ -1,0 +1,46 @@
+= TcTestcaseExecutePassedAttachment =
+
+Tester wählt einen Test Case und führt dessen TestAktion(en) durch, wobei eine
+der Aktionen kommentiert wird.
+
+  Voraussetzung:: 
+    Ein Testplan wurde mit UcTestplanStart gestartet.
+
+    Der Testcase `TcTestcaseExecutePassedComment` wird als Testcase im Test Bereich gelistet.
+
+  1 Der Tester wählt einen Testcase:: 
+    über die Ticket-Ansicht des Testlaufs (TestRun).
+
+    Die TestAktion(en) des Testcases
+    werden angezeigt, die Voraussetzung ist über die Akkordeonfunktion mit
+    Details und erwartetem Ergebnis dargestellt.
+
+  2 Der Tester wählt `Attach File to Comment`:: 
+    und markiert die Aktion als erfolgreich indem er den Button `passed` drückt.
+
+    Ein Popup-Fenster erscheint, in dem gemeldet wird, dass für diesen Status
+    ein Kommentar hinterlegt werden muss.
+
+  3 Der Tester kommentiert die Aktion und wählt `Attach File to Comment`:: 
+    Er schreibt den Kommentar "Test wurde gefunden" in das Kommentarfeld und
+    markiert `Attach File to Comment`
+    Über den Button `passed` markiert er die Aktion als erfolgreich.
+
+    Die Voraussetzungs-Aktion ist gelb gefärbt, eingeklappt und der Benutzer
+    wird an das Attachment-Formular weitergeleitet. 
+
+  4 Der Tester wählt eine Datei und lädt sie hoch:: 
+    indem er sie über das Standard-Trac-Formular `Add Attachment to Ticket
+    <#Testrun-Nummer>` hochlädt.
+
+    Das neue Attachment wird angezeigt.
+
+  5 Kehrt zum Testlauf zurück, indem er auf Ticket <#Testrun-Nummer>:: 
+    klickt und überprüft ob sein Kommentar mit dem neuen Attachment verbunden
+    wurde.
+
+      - Sein Kommentar wurde übernommen
+      - Zusätlich wurde zu seinem Kommentar ein link hinzugefügt, der auf das
+        Attachment verweist.
+      - Im behandelten Test case wird ebenso Kommentar und Attachment verlinkt.
+
