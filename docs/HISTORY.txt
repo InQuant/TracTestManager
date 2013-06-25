@@ -1,17 +1,23 @@
 Changelog
 =========
 
-0.4.1 (2013-??-??)
+0.5.0 (2013-06-25)
 ------------------
 
+- fixed #41 test action comments are often multiplied
+- implemented create ticket in testcase accordion
+  [lmende]
 - implemented skip remaining function in accordion
+- added error handling for javascript bug on closing the last test action on a
+  test case in accordion
 - parsing get param testman_cnum on attachment creation javascript (see
   TestManager.py class TestManagerAttachmentScript)
 - event to update test comment if attachment is inserted with change number of
   comment (testman_cnum)
 - removing 'commit' and 'rollback' statements from schema.py
   as they are not to be emitted anymore since Trac 1.0
-  [otto]
+- updated test cases
+  [ohockel]
 
 0.4.0 (2013-05-08)
 ------------------
