@@ -22,28 +22,28 @@ from models import TestCase, TestCaseQuery
 def default_teststatus_groups():
     return [
         {
-            'name': PASSED, 
+            'name': PASSED,
             'status': PASSED,
             'overall_completion': 'true',
             'css_class': 'passed',
             'statuses': set([PASSED]),
         },
         {
-            'name': PASSED_COMMENT, 
+            'name': PASSED_COMMENT,
             'status': PASSED_COMMENT,
             'overall_completion': 'true',
             'css_class': 'passed_comment',
             'statuses': set([PASSED_COMMENT]),
         },
         {
-            'name': FAILED, 
+            'name': FAILED,
             'status': FAILED,
             'css_class': 'failed',
             'statuses': set([FAILED]),
         },
-        {   
-            'name': SKIPPED, 
-            'status': '*', 
+        {
+            'name': SKIPPED,
+            'status': '*',
             'css_class': 'open',
             'statuses': set([SKIPPED, NOT_TESTED]),
         },
@@ -98,7 +98,7 @@ class TestCaseStatus(object):
                         if '=' in kv]:
                 k, v = [a.strip() for a in arg.split('=', 1)]
                 query_args.setdefault(k, []).append(v)
-            stat.add_interval(group.get('label', group['name']), 
+            stat.add_interval(group.get('label', group['name']),
                               group_cnt, query_args,
                               group.get('css_class', group['name']),
                               bool(group.get('overall_completion')))
@@ -145,7 +145,7 @@ class TestItemGroupStats(object):
         self.done_percent = 0
         self.done_count = 0
 
-    def add_interval(self, title, count, qry_args, css_class, 
+    def add_interval(self, title, count, qry_args, css_class,
                      overall_completion=None):
         """Adds a division to this stats' group's progress bar.
 
@@ -161,7 +161,7 @@ class TestItemGroupStats(object):
                                    interval count towards overall
                                    completion of this group of
                                    tickets.
-          
+
         """
         self.intervals.append({
             'title': title,
@@ -180,7 +180,7 @@ class TestItemGroupStats(object):
         self.done_percent = 0
         self.done_count = 0
         for interval in self.intervals:
-            interval['percent'] = round(float(interval['count'] / 
+            interval['percent'] = round(float(interval['count'] /
                                         float(self.count) * 100))
             total_percent = total_percent + interval['percent']
             if interval['overall_completion']:

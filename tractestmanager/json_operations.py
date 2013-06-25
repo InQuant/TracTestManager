@@ -186,7 +186,7 @@ class TestCaseManipulator(Component):
             return ""
 
     def _build_tc_link(self, testaction, req):
-        return "[%s/TestManager/general/testcase/%s TestCase #%s]" % (req.abs_href(), 
+        return "[%s/TestManager/general/testcase/%s TestCase #%s]" % (req.abs_href(),
                 testaction.tcid, testaction.tcid)
 
     def _add_comment_to_testrun(self, runid, testaction, comment, req):
@@ -197,7 +197,7 @@ class TestCaseManipulator(Component):
         # add comment to ticket with ta_id, comment and tcid
         testcase = models.TestCaseQuery(self.env, tcid=testaction.tcid).execute()[0]
         # TODO: check if testcase can be opened from a ticket
-        tc_link = self._build_tc_link( testaction, req)  
+        tc_link = self._build_tc_link( testaction, req)
         comment_data = {"title": testaction.title,
                 "ta_id" : id,
                 "status" : testaction.status,

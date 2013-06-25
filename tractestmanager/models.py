@@ -129,7 +129,7 @@ class TestCase(TestItem):
             setattr(self, '_status', overall_status)
             self._prepare_for_update( status= overall_status )
             self.save_changes()
-        
+
         tester= self.eval_tester()
         self._prepare_for_update( tester= tester )
         self.save_changes()
@@ -150,7 +150,7 @@ class TestCase(TestItem):
                 testers[action.tester]= 1
 
         if not testers: return ""
-        
+
         # determine the tester with the most actions from inv dict
         testers_inv= dict(zip(testers.values(), testers.keys()))
         tester= testers_inv[max(testers.values())]

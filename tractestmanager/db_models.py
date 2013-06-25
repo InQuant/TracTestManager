@@ -101,7 +101,7 @@ class DbLite(object):
     Get failed actions
     >>> acs= db.getTestActions('testrun=%s AND status=%s', [3, FAILED])
 
-    Update test case 
+    Update test case
     >>> db.updateTestItem(TC_TABLE, tcid, 'status=%s',[FAILED,])
 
     >>> db.getTestCases( 'status=%s', [FAILED,])
@@ -233,7 +233,7 @@ class DbLite(object):
     def updateTestItem(self, table, id, value_stmt, values):
         """Updates a test action or test case of the given id.
 
-        e.g. 
+        e.g.
         value_stmt= "status=%s, comment=%s"
         values    = [PASSED, 'was too slow']
         """
