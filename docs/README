@@ -1,1 +1,3 @@
-tbd
+Dependencies:
+    - Trac
+    - docutils
