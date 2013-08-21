@@ -316,7 +316,7 @@ class TestRunMonitorMacro(WikiMacroBase):
             tc.color = get_status_color(tc.status)
             tc_data = {
                     "testcase" : "[%s/TestManager/general/testcase/%s #%s %s]" %
-                    (req.abs_href(), tc.id, tc.id, tc.wiki),
+                    (req.abs_href(), tc.id, tc.id, tc.title.replace('=','').strip()),
                     "tester" : tc.tester,
                     "status" : tc.status,
                     "color" : tc.color
