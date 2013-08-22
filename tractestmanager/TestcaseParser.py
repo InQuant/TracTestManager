@@ -223,7 +223,7 @@ class TestPlanMacroParser(object):
                 for item in self.__eval_wildcard(tcpattern.strip(), users):
                     tcpats_and_users.append(item)
 
-        return attributes, tcpats_and_users
+        return attributes, sorted(tcpats_and_users)
 
     def _get_wiki_pages(self,prefix):
         """ wrap the wiki api
