@@ -49,6 +49,7 @@ from trac.wiki.formatter import format_to_html
 from trac.mimeview.api import Context
 from trac.resource import Resource
 from trac.ticket import Ticket
+from trac.ticket import Priority
 
 # testman specific imports
 from interfaces import ITestManagerPanelProvider
@@ -360,10 +361,10 @@ class TestCasePanel(Component):
             return True
 
     def get_default_priority(self):
-        return 'blocker'
+        return 'todo - read default prio as configured'
 
     def get_priorities(self):
-        return ['blocker','critical','major','minor']
+        return [prio.name for prio in Priority.select(self.env)]
 
     def render_admin_panel(self, req, cat, page, path_info):
         """ main request handler
