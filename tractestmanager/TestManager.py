@@ -359,6 +359,12 @@ class TestCasePanel(Component):
             req.args['id'] = match.group(1)
             return True
 
+    def get_default_priority(self):
+        return 'blocker'
+
+    def get_priorities(self):
+        return ['blocker','critical','major','minor']
+
     def render_admin_panel(self, req, cat, page, path_info):
         """ main request handler
         """
@@ -377,6 +383,8 @@ class TestCasePanel(Component):
             data["url"] = req.abs_href + req.path_info
             # get the testcase
 
+            data['priorities'] = self.get_priorities()
+            data['default_priority'] = self.get_default_priority()
             if data["id"]:
                 try:
                     testcase = models.TestCaseQuery(self.env,

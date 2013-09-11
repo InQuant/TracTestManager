@@ -70,10 +70,12 @@
                 <br/>
                 <input type="radio" name="option" value="create_ticket">Create Ticket with Prio: </input>
                 <select name="priority" size="1">
-                  <option>blocker</option>
-                  <option>critical</option>
-                  <option>major</option>
-                  <option>minor</option>
+                  <py:for each="prio in priorities">
+                  <py:choose test="prio == default_priority">
+                  <option py:when="True" selected="selected">$prio</option>
+                  <option py:otherwise="">$prio</option>
+                  </py:choose>
+                  </py:for>
                 </select>
                 </p>
                 <input type="button" value="$status.passed" name="status" />                    
