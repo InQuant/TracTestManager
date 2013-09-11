@@ -48,6 +48,7 @@ from trac.wiki.formatter import wiki_to_html
 from trac.wiki.formatter import format_to_html
 from trac.mimeview.api import Context
 from trac.resource import Resource
+from trac.ticket.api import TicketSystem
 from trac.ticket import Ticket
 from trac.ticket import Priority
 
@@ -361,7 +362,7 @@ class TestCasePanel(Component):
             return True
 
     def get_default_priority(self):
-        return 'todo - read default prio as configured'
+        return TicketSystem(self.env).default_priority
 
     def get_priorities(self):
         return [prio.name for prio in Priority.select(self.env)]
