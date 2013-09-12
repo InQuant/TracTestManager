@@ -4,7 +4,8 @@ Changelog
 0.5.2 (????-??-??)
 ------------------
 
-- fixed #57 ticket priorities nicth hardcoded
+- writing comment to ticket if 'create ticket' option is selected in accordion
+- fixed #57 ticket priorities not hardcoded
   [hplocher,ohockel]
 
 0.5.1 (2013-09-09)

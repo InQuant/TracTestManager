@@ -103,7 +103,7 @@ class TestCaseManipulator(Component):
                 testaction.set_status(status=status, comment=comment, tester=req.authname)
 
                 if option == "create_ticket":
-                    tid= self._create_ticket( runid, testaction, comment, req )
+                    tid= self._create_or_update_ticket( runid, testaction, comment, req )
                     comment= "%s\n\nSee ticket #%-d." % (comment, tid)
 
                 json_response['cnum'] = self._add_comment_to_testrun( runid, testaction, comment, req )
@@ -116,13 +116,13 @@ class TestCaseManipulator(Component):
         except (AttributeError, TracError) , e:
             req.send(json.dumps({"update":"failed", "message":unicode(e)}), status=500)
 
-    def _create_ticket(self, runid, testaction, comment, req):
-        """ creates a ticket for an action (defect if failed, enhancement if
+    def _create_or_update_ticket(self, runid, testaction, comment, req):
+        """ creates or updates a ticket for an action (defect if failed, enhancement if
         passed)
-
+        update means add a comment to the already created ticket and add keyword
+        if neccesary
         """
-        self.dbg('accordion.request._create_ticket(%s)' % req.args)
-
+        self.dbg('accordion.request._create_or_update_ticket(%s)' % req.args)
         testrun = Ticket(self.env, tkt_id=runid)
 
         # determine type of ticket
@@ -137,16 +137,22 @@ class TestCaseManipulator(Component):
         testcase = models.TestCaseQuery(self.env, tcid=testaction.tcid).execute()[0]
         summary= "%s of %s %s." % (testaction.title, testcase.wiki, todo)
 
+        # build description
+        description= "Related test case: %s.\n\n%s" % (self._build_tc_link(testaction, req), comment)
         # check if a similar ticket already exists...
         existing_tickets= Query.from_string(self.env, "summary=%s" % summary).execute()
         if existing_tickets:
-            # TODO: add the comment to existing ticket
-
             # if yes return the ticket id
-            return existing_tickets[0]['id']
-
-        # build description
-        description= "Related test case: %s.\n\n%s" % (self._build_tc_link(testaction, req), comment)
+            t = Ticket(self.env, existing_tickets[0]['id'])
+            tp_title = self._get_testplan_title(testrun)
+            if t['keywords']:
+                kws = t['keywords'].split(',')
+                if not tp_title in kws:
+                    t['keywords'] += ',%s' % tp_title
+            else:
+                t['keywords'] = tp_title
+            t.save_changes(author=req.authname,comment=description)
+            return t.id
 
         # build the ticket
         ticket = Ticket(self.env)
