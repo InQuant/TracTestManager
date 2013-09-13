@@ -44,6 +44,8 @@ import string
 from TestManagerLib import safe_unicode
 from TestcaseParser import TestcaseParser, TestPlanMacroParser
 
+from config import get_display_states
+
 class TestPlanMacro(WikiMacroBase):
     """Testplan macro.
        Formats a Wiki Testplan.
@@ -226,7 +228,6 @@ class TestEvalMacro(WikiMacroBase):
         return kwargs
 
     def expand_macro(self, formatter, name, content):
-        #import ipdb; ipdb.set_trace();
         req = formatter.req
         kwargs = self._parse_macro_content(content, req)
         self.env.log.debug("Macro Args: %s" % kwargs)
@@ -304,6 +305,7 @@ class TestRunMonitorMacro(WikiMacroBase):
         out = StringIO.StringIO()
 
         self.components = self.compmgr.components
+        display = get_display_states(self)
         # get testrun
         from models import TestCaseQuery
         # TODO: get the config - we have to make the config persistent in some way
@@ -318,7 +320,7 @@ class TestRunMonitorMacro(WikiMacroBase):
                     "testcase" : "[%s/TestManager/general/testcase/%s #%s %s]" %
                     (req.abs_href(), tc.id, tc.id, tc.title.replace('=','').strip()),
                     "tester" : tc.tester,
-                    "status" : tc.status,
+                    "status" : display[tc.status],
                     "color" : tc.color
                     }
             text += """{{{#!td style="background: %(color)s"

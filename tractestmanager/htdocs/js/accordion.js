@@ -17,7 +17,7 @@ jQuery(document).ready(function($) {
     });
 
     // handle the button clicks (skipped / passed /failed)
-    $('input:button').click(function(){
+    $('button:button').click(function(){
         var actionid = parseInt(this.parentNode.id);
         if(this.name=='skip_remaining') skip_remaining(this.parentNode.id);
         else set_status(actionid, this.value);
@@ -35,7 +35,7 @@ var skip_remaining = function(data){
     }
     for(var i=0;i<containers.length;i++){
        // click skipped for each container 
-       $('#' + containers[i].id + ' input[value=skipped]')[0].click();
+       $('#' + containers[i].id + ' button[value=skipped]')[0].click();
     };
 };
 
@@ -103,7 +103,7 @@ var set_status = function($id, $value){
       error: set_status_error,
       async:false
     });
-    var testrun = $('input[name=testrun]').first().val();
+    var testrun = $('button[name=testrun]').first().val();
     if(values['option'] == 'attach_file' && json.update != 'failed'){
         window.location.href = '/trac/attachment/ticket/' + testrun + '?action=new&testman_cnum=' + json.cnum;
     }

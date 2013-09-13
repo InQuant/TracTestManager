@@ -21,5 +21,29 @@
 __author__ = 'Rainer Hihn <rainer.hihn@inquant.de>'
 __docformat__ = 'plaintext'
 
+from testmanconst import *
+
 MANAGER_PERMISSION = 'TM_TESTMANAGER'
 TESTER_PERMISSION = 'TM_TESTER'
+
+DISPLAY_STATES = {
+        PASSED : u'passed',
+        PASSED_COMMENT : u'passed with comment',
+        FAILED : u'failed',
+        SKIPPED : u'skipped',
+        NOT_TESTED : u'not tested',
+    }
+
+def get_display_states(component):
+    """ get configured display states from trac.ini if configured
+    [testmanager]
+    passed = foo
+    passed with comment = bar
+    failed = doh
+    skipped = n
+    not tested = -
+    """
+    states = dict([option for option in component.config.options('testmanager')])
+    if not states or not len(states) == len(DISPLAY_STATES):
+        return DISPLAY_STATES
+    return states

@@ -54,7 +54,7 @@ from trac.ticket import Priority
 
 # testman specific imports
 from interfaces import ITestManagerPanelProvider
-from config import MANAGER_PERMISSION, TESTER_PERMISSION
+from config import MANAGER_PERMISSION, TESTER_PERMISSION, get_display_states
 from TestManagerLib import safe_unicode
 import models
 
@@ -278,7 +278,7 @@ class TestQueryPanel(Component):
     """ Queries testcases via url handler
     """
     implements(ITestManagerPanelProvider)
-    # XXX: this is not very cool
+
     def __init__(self):
         Component.__init__(self)
 
@@ -328,6 +328,9 @@ class TestQueryPanel(Component):
             for tc in run.testcases: tc.ref= build_testcase_link(tm_href, tc)
 
         # The template to be rendered
+        display = get_display_states(self)
+        display[req.authname] = req.authname
+        display['all'] = 'all'
         data["filter"]= {}
         data["testcases"]= runs
         data["page"] = 'TestManager_base.html'
@@ -335,13 +338,14 @@ class TestQueryPanel(Component):
 
         data["url"] = req.abs_href + req.path_info + "?" + req.query_string
         data["filter_caption"] = {
-            'tester': "Tester: ",
+        'tester': "Tester: ",
             'status' : "Testcase Status: "
         }
         data["filter"] = {
-            'tester' : [ req.authname, "all"],
-            'status' : [ models.FAILED, models.NOT_TESTED, models.SKIPPED, models.PASSED, models.PASSED_COMMENT],
+                'tester' : [req.authname, 'all'],
+            'status' : [models.FAILED, models.NOT_TESTED, models.SKIPPED, models.PASSED, models.PASSED_COMMENT],
         }
+        data['display_filter'] = display
         return 'TestManager_base.html' , data
 
 class TestCasePanel(Component):
@@ -375,6 +379,7 @@ class TestCasePanel(Component):
             data["info"] = req.args.get("info", "")
             data["warning"] = req.args.get("warning", "")
             data["error"] = req.args.get("error", "")
+            data["display_status"] = get_display_states(self)
             data["status"] = {"passed" : models.PASSED,
                     "failed" : models.FAILED,
                     "passed_comment" : models.PASSED_COMMENT,
@@ -398,7 +403,6 @@ class TestCasePanel(Component):
                     data["TestCaseDescription"] = testcase.description
                     data["TestCaseActions"] = testcase.actions
                     data["revision"] = testcase.revision
-                    #data["title"] = 'TestCase %s' % testcase.tcid
                     data["title"] = '(%s) ' % testcase.tcid + testcase.wiki
                     # XXX: we have to fix this in 1.0 because wiki_to_html is deprecated
                     for action in testcase.actions:

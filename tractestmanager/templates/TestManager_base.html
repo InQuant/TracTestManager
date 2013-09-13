@@ -50,9 +50,9 @@ admin_perm = 'WIKI_ADMIN' in perm(page.resource)">
                     <p>
                         <strong>${filter_caption[row]}</strong>
                         <span py:for="key in filter[row]">
-                            <!-- <a href="$url&amp;${row}=${key}">${key}</a> / -->
-                            <label>
-                                <input type="radio" name="${row}" value="${key}" />${key}
+                          <label py:with="val = display_filter[key]">
+                                <input type="radio" name="${row}"
+                                value="${key}"/>${val}
                             </label>
                         </span>
                     </p> 
@@ -73,7 +73,7 @@ admin_perm = 'WIKI_ADMIN' in perm(page.resource)">
                     <tr py:when="testrun.testcases" py:for="testcase in testrun.testcases">
                         <td class="report">$testcase.ref</td>
                         <td class="title">$testcase.description</td>
-                        <td class="action">$testcase.status</td>
+                        <td py:with="stat = display_filter[testcase.status]" class="action">$stat</td>
                     </tr>
                 </tbody>
             </table>

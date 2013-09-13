@@ -15,6 +15,7 @@ from trac.core import TracError
 import db_models
 from db_models import TA_TABLE, TA_KEYS, TC_TABLE, TC_KEYS
 from db_models import SKIPPED, NOT_TESTED, PASSED, FAILED, PASSED_COMMENT
+from config import get_display_states
 
 import models
 from models import TestCase, TestCaseQuery
@@ -74,30 +75,23 @@ class TestCaseStatus(object):
             for s, cnt in cursor:
                 status_cnt[s] = cnt
 
-        '''
-        if total_cnt:
-            for status, count in self.env.db_query("""
-                    SELECT status, count(status) FROM testcase
-                    WHERE tcid IN (%s) GROUP BY status
-                    """ % ",".join(str(x) for x in sorted(tc_ids))):
-                status_cnt[status] = count
-        '''
-
         stat = TestItemGroupStats('testcase status', 'testcases')
 
         groups =  default_teststatus_groups()
 
+        display = get_display_states(self.env)
         for group in groups:
             group_cnt = 0
             query_args = {}
             for s, cnt in status_cnt.iteritems():
                 if s in group['statuses']:
                     group_cnt += cnt
-                    query_args.setdefault('status', []).append(s)
+                    query_args.setdefault('status', []).append(display[s])
             for arg in [kv for kv in group.get('query_args', '').split(',')
                         if '=' in kv]:
                 k, v = [a.strip() for a in arg.split('=', 1)]
                 query_args.setdefault(k, []).append(v)
+            group['label'] = display[group['name']]
             stat.add_interval(group.get('label', group['name']),
                               group_cnt, query_args,
                               group.get('css_class', group['name']),

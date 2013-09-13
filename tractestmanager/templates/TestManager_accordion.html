@@ -19,6 +19,13 @@
           "$status.skipped"        : "#AAAAAA",
           "$status.not_tested"     : "#FFFFFF"
       };
+      var display_status = {
+          "$status.passed" : "$display_status.passed",
+          "$status.passed_comment" : "$display_status.passed_comment",
+          "$status.failed" : "$display_status.failed",
+          "$status.skipped" : "$display_status.skipped",
+          "$status.not_tested" : "$display_status.not_tested",
+      };
     </script>
     <script type="text/javascript" src="${href.chrome()}/TestManager/js/accordion.js"></script>
   <style>
@@ -78,10 +85,10 @@
                   </py:for>
                 </select>
                 </p>
-                <input type="button" value="$status.passed" name="status" />                    
-                <input type="button" value="$status.failed" name="status" />                
-                <input type="button" value="$status.skipped" name="status" />
-                <input type="button" value="skip remaining" name="skip_remaining" />
+                <button type="button" value="$status.passed" name="status">$display_status.passed</button>
+                <button type="button" value="$status.failed" name="status">$display_status.failed</button>
+                <button type="button" value="$status.skipped" name="status">$display_status.skipped</button>
+                <button type="button" value="skip remaining" name="skip_remaining">skip remaining</button>
             </div>            
           </form>            
         </span>

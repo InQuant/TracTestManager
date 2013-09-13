@@ -1,10 +1,12 @@
 Changelog
 =========
 
-0.5.2 (????-??-??)
+0.5.2 (2013-09-13)
 ------------------
 
 - writing comment to ticket if 'create ticket' option is selected in accordion
+- introducing configurable display states through trac.ini
+  [ohockel]
 - fixed #57 ticket priorities not hardcoded
   [hplocher,ohockel]
 
