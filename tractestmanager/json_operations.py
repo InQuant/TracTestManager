@@ -46,6 +46,8 @@ from trac.util.datefmt import utc
 import json
 from trac.ticket.model import Ticket
 import models
+from config import get_display_states
+from testmanconst import *
 
 COMMENT_TEMPLATE = """
 %(status)s "%(title)s" in %(tc_link)s for [wiki:%(wiki)s?revision=%(revision)s&ta_id=%(ta_id)s]
@@ -124,18 +126,19 @@ class TestCaseManipulator(Component):
         """
         self.dbg('accordion.request._create_or_update_ticket(%s)' % req.args)
         testrun = Ticket(self.env, tkt_id=runid)
+        display = get_display_states(self.env)
 
         # determine type of ticket
         ticket_type= 'defect'
-        todo= 'failed'
-        if testaction.status != 'failed':
+        todo = FAILED
+        if testaction.status != FAILED:
             ticket_type= 'enhancement'
             todo= 'is unreasonable'
 
         # build ticket summary: <todo>: <action> of <testcase>, e.g.:
         # 'Creator checks in the model of TcCaddocCreate failed.'
         testcase = models.TestCaseQuery(self.env, tcid=testaction.tcid).execute()[0]
-        summary= "%s of %s %s." % (testaction.title, testcase.wiki, todo)
+        summary= "%s of %s %s." % (testaction.title, testcase.wiki, display[todo])
 
         # build description
         description= "Related test case: %s.\n\n%s" % (self._build_tc_link(testaction, req), comment)
@@ -196,9 +199,9 @@ class TestCaseManipulator(Component):
                 testaction.tcid, testaction.tcid)
 
     def _add_comment_to_testrun(self, runid, testaction, comment, req):
-
         id= testaction.id
         testrun = Ticket(self.env, tkt_id=runid)
+        display = get_display_states(self.env)
 
         # add comment to ticket with ta_id, comment and tcid
         testcase = models.TestCaseQuery(self.env, tcid=testaction.tcid).execute()[0]
@@ -206,7 +209,7 @@ class TestCaseManipulator(Component):
         tc_link = self._build_tc_link( testaction, req)
         comment_data = {"title": testaction.title,
                 "ta_id" : id,
-                "status" : testaction.status,
+                "status" : display[testaction.status],
                 "wiki": testcase.wiki,
                 "revision": testcase.revision,
                 "tc_link": tc_link,
