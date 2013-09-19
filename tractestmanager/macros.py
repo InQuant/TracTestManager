@@ -186,9 +186,6 @@ class TestCaseMacro(WikiMacroBase):
                 oneliner.format(action.description, out)
                 oneliner.format(action.expected_result, out)
             except Exception, e:
-                #oneliner.system_message(action.title, out)
-                #oneliner.system_message(action.description, out)
-                #oneliner.system_message(action.expected_result, out)
                 print e
         return out
 

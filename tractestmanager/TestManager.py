@@ -297,6 +297,7 @@ class TestQueryPanel(Component):
         data["info"] = req.args.get("info", "")
         data["warning"] = req.args.get("warning", "")
         data["error"] = req.args.get("error", "")
+        display = get_display_states(self)
         tm_href = self.env.abs_href("TestManager/general")
         # get the testcase filter args
         filters= dict()
@@ -304,6 +305,10 @@ class TestQueryPanel(Component):
             if arg in models.TC_KEYS:
                 filters[arg]= req.args.get(arg, "")
 
+        if filters.get('status'):
+            for k,v in display.items():
+                if v == filters.get('status'):
+                    filters['status'] = k
         runs= list()
         if filters.get('tester') == 'all':
             filters.pop('tester')
@@ -328,7 +333,6 @@ class TestQueryPanel(Component):
             for tc in run.testcases: tc.ref= build_testcase_link(tm_href, tc)
 
         # The template to be rendered
-        display = get_display_states(self)
         display[req.authname] = req.authname
         display['all'] = 'all'
         data["filter"]= {}
@@ -380,11 +384,11 @@ class TestCasePanel(Component):
             data["warning"] = req.args.get("warning", "")
             data["error"] = req.args.get("error", "")
             data["display_status"] = get_display_states(self)
-            data["status"] = {"passed" : models.PASSED,
-                    "failed" : models.FAILED,
-                    "passed_comment" : models.PASSED_COMMENT,
-                    "not_tested" : models.NOT_TESTED,
-                    "skipped" : models.SKIPPED}
+            data["status"] = {display[models.PASSED] : models.PASSED,
+                    display[models.FAILED] : models.FAILED,
+                    display[models.PASSED_COMMENT] : models.PASSED_COMMENT,
+                    display[models.NOT_TESTED] : models.NOT_TESTED,
+                    display[models.SKIPPED] : models.SKIPPED}
             data["id"] = req.args.get("path_info", None)
             data["page"] = 'TestManager_accordion.html'
             data["url"] = req.abs_href + req.path_info
