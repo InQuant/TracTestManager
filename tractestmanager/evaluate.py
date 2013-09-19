@@ -45,8 +45,14 @@ def default_teststatus_groups():
         {
             'name': SKIPPED,
             'status': '*',
+            'css_class': 'skipped',
+            'statuses': set([SKIPPED]),
+        },
+        {
+            'name': NOT_TESTED,
+            'status': '*',
             'css_class': 'open',
-            'statuses': set([SKIPPED, NOT_TESTED]),
+            'statuses': set([NOT_TESTED]),
         },
     ]
 

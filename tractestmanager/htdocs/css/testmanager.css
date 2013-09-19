@@ -32,4 +32,5 @@ table.progress td { background: #fff; padding: 0 }
 table.progress td.passed { background: #33ff00 }
 table.progress td.passed_comment { background: #ffff33 }
 table.progress td.failed { background: #cc3300 }
+table.progress td.skipped { background: #aaaaaa }
 
