@@ -270,7 +270,7 @@ class TestPlanPanel(Component):
 def build_testcase_link(tm_href, tc):
     # build link with genshi
     url = "%s/testcase/%s" % (tm_href, tc.tcid)
-    return tag.a(tc.wiki, href="#",
+    return tag.a(tc.title.strip('= '), href="#",
         onclick='window.open("%s", "Popupfenster",'\
         '"width=400,height=400,resizable=yes,scrollbars=yes");' % url)
 
@@ -378,6 +378,7 @@ class TestCasePanel(Component):
     def render_admin_panel(self, req, cat, page, path_info):
         """ main request handler
         """
+        display = get_display_states(self)
         if TESTER_PERMISSION in req.perm:
             data = dict() #template data            
             data["info"] = req.args.get("info", "")
