@@ -103,7 +103,7 @@ var set_status = function($id, $value){
       error: set_status_error,
       async:false
     });
-    var testrun = $('button[name=testrun]').first().val();
+    var testrun = $('input[name=testrun]').first().val();
     if(values['option'] == 'attach_file' && json.update != 'failed'){
         window.location.href = '/trac/attachment/ticket/' + testrun + '?action=new&testman_cnum=' + json.cnum;
     }
