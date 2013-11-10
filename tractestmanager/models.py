@@ -19,7 +19,8 @@ import re
 import db_models
 from testmanconst import *
 
-from tractestmanager.utils import safe_unicode
+import parsers
+from utils import safe_unicode
 
 SUMMARY = 'summary'
 OWNER   = 'owner'
@@ -449,8 +450,7 @@ class TestRun(object):
         self.dbg('TestRun.validate()')
 
         try:
-            from TestcaseParser import TestPlanMacroParser
-            attributes, tc_tester_tups = TestPlanMacroParser(self.env).parse_config(
+            attributes, tc_tester_tups = parsers.TestPlanMacroParser(self.env).parse_config(
                     self._testplan_macro_content(self.wikiplan.text))
         except TracError, e:
             self.env.log.error(e)
@@ -461,8 +461,7 @@ class TestRun(object):
         # FIX: tc_tester_tups were a dict instead of a tuple list
 
         # now parse (get) all testcases from tc_tester_tups
-        from TestcaseParser import TestcaseParser
-        parser = TestcaseParser(self.env)
+        parser = parsers.TestcaseParser(self.env)
         errors = dict()
         self.testcases= list()
 

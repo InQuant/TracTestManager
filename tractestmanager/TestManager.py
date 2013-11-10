@@ -56,7 +56,7 @@ from trac.ticket import Priority
 from interfaces import ITestManagerPanelProvider
 from config import MANAGER_PERMISSION, TESTER_PERMISSION, get_display_states
 from tractestmanager.utils import safe_unicode, get_status_color
-import tractestmanager.models
+import tractestmanager.models as models
 
 class TestManagerPlugin(Component):
     """ TRAC Group Administration Plugin

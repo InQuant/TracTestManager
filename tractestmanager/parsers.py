@@ -28,8 +28,7 @@ from trac.wiki import WikiSystem
 
 from docutils.core import publish_doctree
 
-from tractestmanager.models import TestCase
-from tractestmanager.models import TestAction
+from tractestmanager.models import TestCase, TestAction
 from tractestmanager.utils import safe_unicode
 
 
