@@ -22,16 +22,12 @@ __author__ = 'Otto Hockel <otto.hockel@inquant.de>'
 __docformat__ = 'plaintext'
 
 from genshi.core import Markup
-from genshi.builder import tag
 
 from trac.core import TracError
 from trac.wiki.formatter import system_message
 from trac.wiki.macros import WikiMacroBase
 from trac.wiki import Formatter
-from trac.wiki import WikiSystem
 
-from trac.config import ExtensionOption
-from trac.ticket.query import Query
 from trac.ticket.roadmap import ITicketGroupStatsProvider, \
                                 apply_ticket_permissions, get_ticket_stats
 from trac.core import *
@@ -39,12 +35,11 @@ from trac.web.chrome import Chrome, ITemplateProvider, add_stylesheet, add_scrip
 from trac.wiki.api import IWikiMacroProvider, parse_args
 
 import StringIO
-import string
 
-from TestManagerLib import safe_unicode
-from TestcaseParser import TestcaseParser, TestPlanMacroParser
+from tractestmanager.utils import safe_unicode, get_status_color
+from tractestmanager.parsers import TestcaseParser, TestPlanMacroParser
 
-from config import get_display_states
+from tractestmanager.config import get_display_states
 
 class TestPlanMacro(WikiMacroBase):
     """Testplan macro.
@@ -201,6 +196,7 @@ def my_query_stats_data( req, stat, constraints ):
             'interval_hrefs': [query_href(interval['qry_args'])
                             for interval in stat.intervals]}
 
+
 class TestEvalMacro(WikiMacroBase):
     """Test query wiki macro plugin for Trac Testman, evaluates the status of
     testcases not testactions!
@@ -256,7 +252,7 @@ class TestEvalMacro(WikiMacroBase):
 
         # Calculate stats
         from evaluate import TestCaseStatus
-        stats = TestCaseStatus(self.env).get_testcase_stats( tcs )
+        stats = TestCaseStatus(self.env).get_testcase_stats(tcs)
         stats_data = my_query_stats_data(req, stats, kwargs)
 
         self.components = self.compmgr.components
@@ -310,7 +306,6 @@ class TestRunMonitorMacro(WikiMacroBase):
         # TODO: should we really split this here?
         tcs = TestCaseQuery(self.env, testrun=kwargs['testrun']).execute()
         text = "\n||'''Testcase'''||'''User'''||'''Status'''||\n"
-        from TestManagerLib import get_status_color
         for tc in tcs:
             tc.color = get_status_color(tc.status)
             tc_data = {

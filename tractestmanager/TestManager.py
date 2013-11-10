@@ -55,8 +55,8 @@ from trac.ticket import Priority
 # testman specific imports
 from interfaces import ITestManagerPanelProvider
 from config import MANAGER_PERMISSION, TESTER_PERMISSION, get_display_states
-from TestManagerLib import safe_unicode
-import models
+from tractestmanager.utils import safe_unicode, get_status_color
+import tractestmanager.models
 
 class TestManagerPlugin(Component):
     """ TRAC Group Administration Plugin
@@ -380,7 +380,7 @@ class TestCasePanel(Component):
         """
         display = get_display_states(self)
         if TESTER_PERMISSION in req.perm:
-            data = dict() #template data            
+            data = dict() #template data
             data["info"] = req.args.get("info", "")
             data["warning"] = req.args.get("warning", "")
             data["error"] = req.args.get("error", "")
@@ -402,7 +402,6 @@ class TestCasePanel(Component):
                     testcase = models.TestCaseQuery(self.env,
                             tcid=data['id']).execute()[0]
                     for action in testcase.actions:
-                        from TestManagerLib import get_status_color
                         action.color = {"style" : ("background:%s" % get_status_color(action.status))}
                     data["TestCaseTitle"] = testcase.title.strip('=')
                     data["TestCaseDescription"] = testcase.description

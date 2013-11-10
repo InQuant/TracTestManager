@@ -19,7 +19,7 @@ import re
 import db_models
 from testmanconst import *
 
-from TestManagerLib import safe_unicode
+from tractestmanager.utils import safe_unicode
 
 SUMMARY = 'summary'
 OWNER   = 'owner'
@@ -314,8 +314,8 @@ class TestAction(TestItem):
             # (datetime.datetime(2012, 6, 25, 7, 19, 7, 742580, tzinfo=<FixedOffset "UTC" 0:00:00>),
             #  u'testadmin',
             #  u'comment',
-            #  u'2', 
-            #  u'\npassed with comment "Check menu and toolbar" in 
+            #  u'2',
+            #  u'\npassed with comment "Check menu and toolbar" in
             #  [http://localhorst:8000/trac/TestManager/general/testcase/23 TestCase #23]
             #  for [wiki:Testcases/UC012?revision=None]\n\ntoo slow\n', 1)
             match = pat.search(change[4])
