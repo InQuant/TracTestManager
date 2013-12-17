@@ -153,7 +153,6 @@ class TestCaseMacro(WikiMacroBase):
     def expand_macro(self, formatter, name, text, args):
         """Execute the macro
         """
-        from TestcaseParser import TestcaseParser
         parser = TestcaseParser(self.env)
         out = StringIO.StringIO()
         f = Formatter(self.env, formatter.context)
@@ -305,7 +304,7 @@ class TestRunMonitorMacro(WikiMacroBase):
         # now we take more than one testrun to monitor
         # TODO: should we really split this here?
         tcs = TestCaseQuery(self.env, testrun=kwargs['testrun']).execute()
-        text = "\n||'''Testcase'''||'''User'''||'''Status'''||\n"
+        text = "\n||'''Test case'''||'''User'''||'''Status'''||\n"
         for tc in tcs:
             tc.color = get_status_color(tc.status)
             tc_data = {
