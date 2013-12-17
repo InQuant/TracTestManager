@@ -24,7 +24,6 @@ __docformat__ = 'plaintext'
 
 import re
 from trac.core import Component
-#from trac.core import ExtensionPoint
 from trac.core import implements
 from trac.core import TracError
 from trac.ticket.query import Query
@@ -33,12 +32,6 @@ from trac.web import IRequestHandler
 
 from datetime import datetime
 from trac.util.datefmt import utc
-
-#from genshi.builder import tag
-#from trac.util.compat import partial
-
-#from trac.perm import IPermissionRequestor
-#from trac.perm import PermissionError
 
 # testman specific imports
 #from config import MANAGER_PERMISSION, TESTER_PERMISSION
