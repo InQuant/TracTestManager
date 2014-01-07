@@ -1,7 +1,7 @@
 
 # -*- coding: utf-8 -*-
 #
-# File: __init__.py
+# File: jsonapi.py
 #
 # Copyright (c) InQuant GmbH
 #

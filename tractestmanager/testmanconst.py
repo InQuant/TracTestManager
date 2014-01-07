@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# File: db_models.py - wraps the trac sql stuff needed in testman
+# File: testmanconst.py - wraps the trac sql stuff needed in testman
 #
 # Copyright (c) Inquant GmbH
 #

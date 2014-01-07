@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# File: models.py
+# File: test_models.py
 #
 # Copyright (c) Inquant GmbH
 #

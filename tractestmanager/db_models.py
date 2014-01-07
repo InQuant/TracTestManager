@@ -27,7 +27,6 @@ class DbException(Exception):
 class DbAlreadyExistException(DbException):
     pass
 
-##############################################################################
 def orderedValues(keys, adict):
     """
     Constructs the value list for insert operations in the right order.
@@ -40,7 +39,6 @@ def orderedValues(keys, adict):
     """
     return [adict.get(k, None) for k in keys]
 
-##############################################################################
 def getInsertPlaceHolders(keys):
     """
     Builds the tracdb required '%s' place holder list,
@@ -53,7 +51,6 @@ def getInsertPlaceHolders(keys):
     """
     return string.join(['%s' for i in range(len(keys))], ', ')
 
-##############################################################################
 class DbLite(object):
     """
     Class to wrap the SQL stuff about TestCases and TestActions ...
@@ -109,13 +106,11 @@ class DbLite(object):
 
     """
 
-    ##########################################################################
     def __init__(self, env):
         self.env= env
         self.dbg= self.env.log.debug
         self.dbg('DbLite.__init__()')
 
-    ##########################################################################
     def setup(self):
         """
         Sets up the two additional testman tables
@@ -123,7 +118,6 @@ class DbLite(object):
         self.dbg('DbLite.setup()')
 
 
-    ##########################################################################
     def insertTestCase(self, tcDict, actionDicts= None):
         """
         inserts one new TestCase into the table(s)
@@ -171,11 +165,9 @@ class DbLite(object):
                 c.executemany(stmt, actions)
         return dbs[0]
 
-    ##########################################################################
     def getTestCaseCollumns(self):
         return TC_KEYS
 
-    ##########################################################################
     def getTestCases(self, querystring= None, values= []):
         """
         selects all testcases of a given testrun with a given status.
@@ -198,11 +190,9 @@ class DbLite(object):
             self.dbg(dbs[0])
         return dbs[0]
 
-    ##########################################################################
     def getTestActionCollumns(self):
         return TA_KEYS
 
-    ##########################################################################
     def getTestActions(self, querystring= None, values= []):
         """
         Selects all testactions matching the given query string.
@@ -229,7 +219,6 @@ class DbLite(object):
 
         return dbs[0]
 
-    ##########################################################################
     def updateTestItem(self, table, id, value_stmt, values):
         """Updates a test action or test case of the given id.
 
@@ -257,7 +246,6 @@ class DbLite(object):
             self.dbg(values + [id])
             c.execute(stmt, values + [id])
 
-##############################################################################
 if __name__ == "__main__":
     logging.basicConfig(
             level= logging.DEBUG,

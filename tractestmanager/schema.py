@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# File: interfaces.py
+# File: schema.py
 #
 # Copyright (c) InQuant GmbH
 #

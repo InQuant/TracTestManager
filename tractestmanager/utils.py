@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# File: TestPlan.py
+# File: utils.py
 #
 # Copyright (c) Inquant GmbH
 #

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# File: TestPlan.py
+# File: __init__.py
 #
 # Copyright (c) Inquant GmbH
 #
@@ -24,6 +24,6 @@ __docformat__ = 'plaintext'
 from macros import *
 from TestManager import *
 from interfaces import *
-from json_operations import *
+from jsonapi import *
 import schema
 # vim: set ft=python ts=4 sw=4 expandtab :
