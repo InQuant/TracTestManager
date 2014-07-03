@@ -1,14 +1,20 @@
 Changelog
 =========
 
+?.?.? (201?-??-??)
+------------------
+
+- added tt elements css styles to be shown in testcase panel
+[ohockel]
+
 0.5.2 (2013-09-13)
 ------------------
 
 - writing comment to ticket if 'create ticket' option is selected in accordion
 - introducing configurable display states through trac.ini
-  [ohockel]
+[ohockel]
 - fixed #57 ticket priorities not hardcoded
-  [hplocher,ohockel]
+[hplocher,ohockel]
 
 0.5.1 (2013-09-09)
 ------------------
