@@ -1,10 +1,14 @@
 Changelog
 =========
 
-?.?.? (201?-??-??)
+0.5.3 (2014-07-04)
 ------------------
 
-- added tt elements css styles to be shown in testcase panel
+- reamed json_operations -> jsonapi
+- cleaned up commented lines
+- pep8 compatible formatting
+- added tt elements css styles to be shown in accordion
+- added css class underline for accordion
 [ohockel]
 
 0.5.2 (2013-09-13)
