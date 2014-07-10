@@ -93,7 +93,7 @@ var set_status = function($id, $value){
     else{
         values['status']  = $value;
     }
-    url               = '../../../json_testaction';
+    url = window.location.origin + '/trac/json_testaction';
     // do the post request
     $.ajax({
       type: 'POST',

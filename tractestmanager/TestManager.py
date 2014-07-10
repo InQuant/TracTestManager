@@ -117,6 +117,7 @@ class TestManagerPlugin(Component):
             cat_id    = req.args.get('cat_id') or panels[0][0]
             panel_id  = req.args.get('panel_id')
             path_info = req.args.get('path_info')
+            # TODO: what to do? REFACTOR!
             if not panel_id:
                 panel_id = filter(lambda panel: panel[0] == cat_id, panels)[0][2]
 
@@ -392,6 +393,7 @@ class TestCasePanel(Component):
                     display[models.SKIPPED] : models.SKIPPED}
             data["id"] = req.args.get("path_info", None)
             data["page"] = 'TestManager_accordion.html'
+            ############################################################################
             data["url"] = req.abs_href + req.path_info
             # get the testcase
 
