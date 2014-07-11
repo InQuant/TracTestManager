@@ -45,7 +45,7 @@ var set_status_success =  function(data){
     var toggle_container_id = parseInt(json.toggle_container_id);
 
     // change clolor of step according to json.status
-    $("#accordion" + toggle_container_id)[0].children[1].style['background'] = status_color[json.status];
+    $("#accordion" + toggle_container_id)[0].children[1].style['background'] = json.color;
     var duration = 100;
 
     // hide current container
@@ -71,10 +71,10 @@ var set_status_error =  function(data){
 };
 
 
-var set_status = function($id, $value){
-    var inputs = $("#accordion" + $id + ' :input');
+var set_status = function(id, value){
+    var inputs = $("#accordion" + id + ' :input');
     var values = {};
-    values["toggle_container_id"] = $id;
+    values["toggle_container_id"] = id;
 
     values["option"]= false;
     inputs.each(function(){
@@ -87,13 +87,17 @@ var set_status = function($id, $value){
         }
     });
 
-    if(values["comment"] && $value == "passed"){
+    if(values["comment"] && value == "passed"){
         values['status']  = "passed with comment";
     }
     else{
-        values['status']  = $value;
+        values['status']  = value;
     }
-    url = window.location.origin + '/trac/json_testaction';
+    url = window.location.protocol + "//" + window.location.hostname
+    if(window.location.port || false) {
+         url = url + ":" + window.location.port;
+    }
+    url = url + "/trac/json_testaction";
     // do the post request
     $.ajax({
       type: 'POST',

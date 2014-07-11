@@ -20,12 +20,20 @@
 
 from testmanconst import *
 
+COLOR = {
+    #"green": "#899639",
+    #"blue": "#0080BC",
+    #"red": "#A90050",
+    #"grey": "#4E4E4E",
+    #"yellow": "#FFB900"
+}
+
 def get_status_color(status):
     colors = {
-            PASSED : "#66FF00",
-            PASSED_COMMENT : "#FFFF00",
-            FAILED : "#FF0033",
-            SKIPPED : "#AAAAAA",
+            PASSED : COLOR.get("green", "#66FF00"),
+            PASSED_COMMENT : COLOR.get("yellow", "#FFFF00"),
+            FAILED : COLOR.get("red", "#FF0033"),
+            SKIPPED : COLOR.get("grey", "#AAAAAA"),
             "default" : "#FFFFFF",
             }
     if status in colors:

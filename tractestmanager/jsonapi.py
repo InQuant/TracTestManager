@@ -41,6 +41,7 @@ from trac.ticket.model import Ticket
 import models
 from config import get_display_states
 from testmanconst import *
+from utils import get_status_color
 
 COMMENT_TEMPLATE = """
 %(status)s "%(title)s" in %(tc_link)s for [wiki:%(wiki)s?revision=%(revision)s&ta_id=%(ta_id)s]
@@ -61,21 +62,21 @@ class TestCaseManipulator(Component):
         return re.match(r'/json_testaction', req.path_info) is not None
 
     def process_request(self, req):
-        self.dbg= self.env.log.debug
+        self.dbg = self.env.log.debug
 
         toggle_container_id = req.args.get("toggle_container_id", None)
 
-        id      = req.args.get("action", None)
-        status  = req.args.get("status", None)
+        id = req.args.get("action", None)
+        status = req.args.get("status", None)
         comment = req.args.get("comment", "")
-        option  = req.args.get("option", None)
-        runid   = req.args.get("testrun", None)
+        option = req.args.get("option", None)
+        runid = req.args.get("testrun", None)
 
-        json_response = {
-                'update' : 'success',
-                'status' : status,
-                'toggle_container_id' : toggle_container_id
-                }
+        json_response = {'update': 'success',
+                         'status': status,
+                         'toggle_container_id': toggle_container_id,
+                         'color': get_status_color(status)
+                         }
 
         try:
             testaction = models.TestActionQuery(self.env, id=id).execute()[0]
@@ -101,15 +102,16 @@ class TestCaseManipulator(Component):
                     tid= self._create_or_update_ticket( runid, testaction, comment, req )
                     comment= "%s\n\nSee ticket #%-d." % (comment, tid)
 
-                json_response['cnum'] = self._add_comment_to_testrun( runid, testaction, comment, req )
+                json_response['cnum'] = self._add_comment_to_testrun(runid, testaction, comment, req)
 
             else:
                 testaction.set_status(status=status, comment=None, tester=req.authname)
 
             # send ajax callback success
             req.send(json.dumps(json_response))
-        except (AttributeError, TracError) , e:
-            req.send(json.dumps({"update":"failed", "message":unicode(e)}), status=500)
+        except (AttributeError, TracError) as e:
+            req.send(json.dumps({"update": "failed", "message": unicode(e)}),
+                     status=500)
 
     def _create_or_update_ticket(self, runid, testaction, comment, req):
         """ creates or updates a ticket for an action (defect if failed, enhancement if
@@ -158,7 +160,7 @@ class TestCaseManipulator(Component):
             'type'         : ticket_type,
             'description'  : description,
             'priority'     : req.args.get('priority', 'major'),
-            'keywords'     : self._get_testplan_title( testrun ),
+            'keywords'     : self._get_testplan_title(testrun),
         }
         self.dbg('ticket data: %s' % data)
 

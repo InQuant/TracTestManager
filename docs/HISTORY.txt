@@ -9,6 +9,8 @@ Changelog
 - pep8 compatible formatting
 - added tt elements css styles to be shown in accordion
 - added css class underline for accordion
+- new colors but inactive
+- fixed the bug where some installations won't work with static json urls
 [ohockel]
 
 0.5.2 (2013-09-13)
