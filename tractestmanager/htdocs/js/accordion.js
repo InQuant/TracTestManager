@@ -29,10 +29,11 @@ var skip_remaining = function(data){
     // called if skip_remaining is clicked
     // get all containers
     var containers = $('div.toggle_container').toArray();
-    // remove previous steps
-    while(containers[0].id < data){
-        containers.shift();
-    }
+
+    // remove previous steps and sort inplace
+    containers = containers.filter(function(element){if(element.id>=this)return element}, data);
+    containers = containers.sort(function(a,b){return a.id-b.id});
+
     for(var i=0;i<containers.length;i++){
        // click skipped for each container 
        $('#' + containers[i].id + ' button[value=skipped]')[0].click();
@@ -93,11 +94,8 @@ var set_status = function(id, value){
     else{
         values['status']  = value;
     }
-    url = window.location.protocol + "//" + window.location.hostname
-    if(window.location.port || false) {
-         url = url + ":" + window.location.port;
-    }
-    url = url + "/trac/json_testaction";
+    var fullurl = window.location.href;
+    var url = fullurl.slice(0, fullurl.search(/TestManager/)) + "json_testaction";
     // do the post request
     $.ajax({
       type: 'POST',
