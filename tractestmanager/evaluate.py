@@ -15,7 +15,11 @@ from trac.core import TracError
 import db_models
 from db_models import TA_TABLE, TA_KEYS, TC_TABLE, TC_KEYS
 from db_models import SKIPPED, NOT_TESTED, PASSED, FAILED, PASSED_COMMENT
-from config import get_display_states
+from config import get_display_states, DISPLAY_STATES
+
+# hackyhackhack
+from utils import reverse_dict
+STATES_DISPLAY = reverse_dict(DISPLAY_STATES)
 
 import models
 from models import TestCase, TestCaseQuery
@@ -92,13 +96,13 @@ class TestCaseStatus(object):
             for s, cnt in status_cnt.iteritems():
                 if s in group['statuses']:
                     group_cnt += cnt
-                    query_args.setdefault('status', []).append(display[s])
+                    query_args.setdefault('status', []).append(display.get(STATES_DISPLAY[s]))
             for arg in [kv for kv in group.get('query_args', '').split(',')
                         if '=' in kv]:
                 k, v = [a.strip() for a in arg.split('=', 1)]
                 query_args.setdefault(k, []).append(v)
-            group['label'] = display[group['name']]
-            stat.add_interval(group.get('label', group['name']),
+            group['label'] = display.get(STATES_DISPLAY[group['name']])
+            stat.add_interval(group.get('label', display.get(STATES_DISPLAY[group['name']])),
                               group_cnt, query_args,
                               group.get('css_class', group['name']),
                               bool(group.get('overall_completion')))

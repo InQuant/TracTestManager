@@ -386,11 +386,6 @@ class TestCasePanel(Component):
             data["warning"] = req.args.get("warning", "")
             data["error"] = req.args.get("error", "")
             data["display_status"] = get_display_states(self)
-            data["status"] = {display[models.PASSED] : models.PASSED,
-                    display[models.FAILED] : models.FAILED,
-                    display[models.PASSED_COMMENT] : models.PASSED_COMMENT,
-                    display[models.NOT_TESTED] : models.NOT_TESTED,
-                    display[models.SKIPPED] : models.SKIPPED}
             data["id"] = req.args.get("path_info", None)
             data["page"] = 'TestManager_accordion.html'
             ############################################################################

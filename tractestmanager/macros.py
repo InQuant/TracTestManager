@@ -311,7 +311,7 @@ class TestRunMonitorMacro(WikiMacroBase):
                     "testcase" : "[%s/TestManager/general/testcase/%s #%s %s]" %
                     (req.abs_href(), tc.id, tc.id, tc.title.replace('=','').strip()),
                     "tester" : tc.tester,
-                    "status" : display[tc.status],
+                    "status" : tc.status,
                     "color" : tc.color
                     }
             text += """{{{#!td style="background: %(color)s"

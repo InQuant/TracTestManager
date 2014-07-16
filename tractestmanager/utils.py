@@ -28,6 +28,8 @@ COLOR = {
     #"yellow": "#FFB900"
 }
 
+reverse_dict = lambda x: dict(zip(x.values(), x.keys()))
+
 def get_status_color(status):
     colors = {
             PASSED : COLOR.get("green", "#66FF00"),

@@ -39,9 +39,12 @@ from trac.util.datefmt import utc
 import json
 from trac.ticket.model import Ticket
 import models
-from config import get_display_states
+from config import DISPLAY_STATES, get_display_states
 from testmanconst import *
-from utils import get_status_color
+from utils import get_status_color, reverse_dict
+
+# hackyhackhack
+STATES_DISPLAY = reverse_dict(DISPLAY_STATES)
 
 COMMENT_TEMPLATE = """
 %(status)s "%(title)s" in %(tc_link)s for [wiki:%(wiki)s?revision=%(revision)s&ta_id=%(ta_id)s]
@@ -73,7 +76,7 @@ class TestCaseManipulator(Component):
         runid = req.args.get("testrun", None)
 
         json_response = {'update': 'success',
-                         'status': status,
+                         'status': STATES_DISPLAY[status],
                          'toggle_container_id': toggle_container_id,
                          'color': get_status_color(status)
                          }
@@ -204,7 +207,7 @@ class TestCaseManipulator(Component):
         tc_link = self._build_tc_link( testaction, req)
         comment_data = {"title": testaction.title,
                 "ta_id" : id,
-                "status" : display[testaction.status],
+                "status" : testaction.status,
                 "wiki": testcase.wiki,
                 "revision": testcase.revision,
                 "tc_link": tc_link,

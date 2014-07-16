@@ -27,11 +27,11 @@ MANAGER_PERMISSION = 'TM_TESTMANAGER'
 TESTER_PERMISSION = 'TM_TESTER'
 
 DISPLAY_STATES = {
-        PASSED : u'passed',
-        PASSED_COMMENT : u'passed with comment',
-        FAILED : u'failed',
-        SKIPPED : u'skipped',
-        NOT_TESTED : u'not tested',
+        "passed" : u'passed',
+        "passed_comment" : u'passed with comment',
+        "failed" : u'failed',
+        "skipped" : u'skipped',
+        "not_tested" : u'not tested',
     }
 
 def get_display_states(component):
