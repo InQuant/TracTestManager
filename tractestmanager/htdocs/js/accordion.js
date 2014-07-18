@@ -7,23 +7,28 @@ jQuery(document).ready(function($) {
     $('.trigger').click( function() {
         var trig = $(this);
         var duration = 100;
-        if ( trig.hasClass('trigger_active') ) {
+        if (trig.hasClass('trigger_active')) {
             trig.next('.toggle_container').slideToggle(duration);
         } else {
             $('.trigger_active').next('.toggle_container').slideToggle(duration);
             trig.next('.toggle_container').slideToggle(duration);
         };
+        // TODO: do we need this false?
         return false;
     });
 
     // handle the button clicks (skipped / passed /failed)
     $('button:button').click(function(){
         var actionid = parseInt(this.parentNode.id);
-        if(this.name=='skip_remaining') skip_remaining(this.parentNode.id);
+        if(this.name==='skip_remaining') skip_remaining(this.parentNode.id);
         else set_status(actionid, this.value);
         return false;
     });
 });
+
+var clickButton = function(element){
+    $('#' + element.id + ' button[value=' + this + ']')[0].click()
+}
 
 var skip_remaining = function(data){
     // called if skip_remaining is clicked
@@ -31,13 +36,10 @@ var skip_remaining = function(data){
     var containers = $('div.toggle_container').toArray();
 
     // remove previous steps and sort inplace
-    containers = containers.filter(function(element){if(element.id>=this)return element}, data);
+    containers = containers.filter(function(element){if(element.id>=this)return true}, data);
     containers = containers.sort(function(a,b){return a.id-b.id});
-
-    for(var i=0;i<containers.length;i++){
-       // click skipped for each container 
-       $('#' + containers[i].id + ' button[value=skipped]')[0].click();
-    };
+    // now click skipped :)
+    containers.forEach(clickButton,"skipped");
 };
 
 var set_status_success =  function(data){

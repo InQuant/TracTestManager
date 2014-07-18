@@ -205,12 +205,13 @@ class TestPlanPanel(Component):
         if not MANAGER_PERMISSION in req.perm:
             return
 
-        data = dict() #template data
+        #template data
+        data = dict()
         data["info"] = req.args.get("info", "")
         data["warning"] = req.args.get("warning", "")
         data["error"] = req.args.get("error", "")
         # The template to be rendered
-        data["page"] = 'TestManager_base.html'
+        template = 'TestManager_base.html'
         data["testplanlink"] = req.base_url + req.path_info
 
         if 'start_plan' in req.args:
@@ -221,12 +222,13 @@ class TestPlanPanel(Component):
             try:
                 testrun.setup(pagename, req.authname)
                 testrun.start()
-            except TracError, e:
+            except TracError as e:
                 data["error"] = safe_unicode(e.message)
 
         elif 'testplan_to_restart' in req.args:
             # we have a defect testrun to be restarted
             runids = req.args['testplan_to_restart']
+
             def ensure_list(var):
                 if type(var) == list:
                     return var
@@ -237,7 +239,7 @@ class TestPlanPanel(Component):
                     self.log.debug("trying to restart testplan " + runid)
                     testrun = models.TestRun(self.env, runid)
                     testrun.start()
-                except TracError, e:
+                except TracError as e:
                     data["error"] = safe_unicode(e.message)
 
         # query and render accepted testruns
@@ -266,7 +268,7 @@ class TestPlanPanel(Component):
             defect_run['ref'] = tag.a('#', defect_run.id, ' ',
                     defect_run.summary, href=req.href.ticket(defect_run.id))
         data["title"] = 'TestPlans'
-        return data['page'] , data
+        return template, data
 
 def build_testcase_link(tm_href, tc):
     # build link with genshi
@@ -381,13 +383,14 @@ class TestCasePanel(Component):
         """
         display = get_display_states(self)
         if TESTER_PERMISSION in req.perm:
-            data = dict() #template data
+            #template data
+            data = dict()
             data["info"] = req.args.get("info", "")
             data["warning"] = req.args.get("warning", "")
             data["error"] = req.args.get("error", "")
             data["display_status"] = get_display_states(self)
             data["id"] = req.args.get("path_info", None)
-            data["page"] = 'TestManager_accordion.html'
+            template = 'TestManager_accordion.html'
             ############################################################################
             data["url"] = req.abs_href + req.path_info
             # get the testcase
@@ -396,8 +399,10 @@ class TestCasePanel(Component):
             data['default_priority'] = self.get_default_priority()
             if data["id"]:
                 try:
-                    testcase = models.TestCaseQuery(self.env,
-                            tcid=data['id']).execute()[0]
+                    testcase = models.TestCaseQuery(
+                        self.env,
+                        tcid=data['id']
+                    ).execute()[0]
                     for action in testcase.actions:
                         action.color = {"style" : ("background:%s" % get_status_color(action.status))}
                     data["TestCaseTitle"] = testcase.title.strip('=')
@@ -414,10 +419,10 @@ class TestCasePanel(Component):
                     if req.authname != testcase.tester:
                         # assigned to someone else - but can be done by mr urlaubsvertretung
                         data["warning"] = 'this testcase has been assigned to %s' % testcase.tester
-                except:
+                except TracError:
                     # not found
                     data["error"] = 'the requested testcase could not be found or has been erased'
-            return data["page"] , data
+            return template, data
 
 class TestManagerPermissions(Component):
     """ This class covers the permissions
