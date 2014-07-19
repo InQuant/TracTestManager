@@ -1,6 +1,13 @@
 Changelog
 =========
 
+0.5.5 (2014-07-**)
+------------------
+
+- removed unused search criteria 
+- fixed display states on multiple macros and templates
+[ohockel]
+
 0.5.4 (2014-07-16)
 ------------------
 
