@@ -28,18 +28,20 @@ from trac.wiki.formatter import system_message
 from trac.wiki.macros import WikiMacroBase
 from trac.wiki import Formatter
 
-from trac.ticket.roadmap import ITicketGroupStatsProvider, \
-                                apply_ticket_permissions, get_ticket_stats
 from trac.core import *
-from trac.web.chrome import Chrome, ITemplateProvider, add_stylesheet, add_script
-from trac.wiki.api import IWikiMacroProvider, parse_args
+from trac.web.chrome import (
+    Chrome, ITemplateProvider, add_stylesheet, add_script
+)
+from trac.wiki.api import parse_args
 
 import StringIO
 
 from tractestmanager.utils import safe_unicode, get_status_color
 from tractestmanager.parsers import TestcaseParser, TestPlanMacroParser
+from models import TestCaseQuery, STATUSES
 
-from tractestmanager.config import get_display_states
+from tractestmanager.config import get_display_states, STATES_DISPLAY
+
 
 class TestPlanMacro(WikiMacroBase):
     """Testplan macro.
@@ -231,7 +233,6 @@ class TestEvalMacro(WikiMacroBase):
             merge = False
 
         # Create & execute the query string
-        from models import TestCaseQuery, STATUSES
         tcs= TestCaseQuery( self.env, **kwargs ).execute()
         if not merge:
             tcs= TestCaseQuery( self.env, **kwargs ).execute()
@@ -299,8 +300,8 @@ class TestRunMonitorMacro(WikiMacroBase):
         self.components = self.compmgr.components
         display = get_display_states(self)
         # get testrun
-        from models import TestCaseQuery
-        # TODO: get the config - we have to make the config persistent in some way
+        # TODO: get the config - we have to make the config
+        #       persistent in some way
         # now we take more than one testrun to monitor
         # TODO: should we really split this here?
         tcs = TestCaseQuery(self.env, testrun=kwargs['testrun']).execute()
@@ -308,12 +309,16 @@ class TestRunMonitorMacro(WikiMacroBase):
         for tc in tcs:
             tc.color = get_status_color(tc.status)
             tc_data = {
-                    "testcase" : "[%s/TestManager/general/testcase/%s #%s %s]" %
-                    (req.abs_href(), tc.id, tc.id, tc.title.replace('=','').strip()),
-                    "tester" : tc.tester,
-                    "status" : tc.status,
-                    "color" : tc.color
-                    }
+                "testcase": "[%s/TestManager/general/testcase/%s #%s %s]" % (
+                    req.abs_href(),
+                    tc.id,
+                    tc.id,
+                    tc.title.replace('=', '').strip()
+                ),
+                "tester": tc.tester,
+                "status": display.get(STATES_DISPLAY.get(tc.status)),
+                "color": tc.color
+            }
             text += """{{{#!td style="background: %(color)s"
               %(testcase)s
             }}}
@@ -326,7 +331,7 @@ class TestRunMonitorMacro(WikiMacroBase):
             |----------------
             """ % tc_data
         # ... and finally display them
-        Formatter(self.env, formatter.context).format(text,out)
+        Formatter(self.env, formatter.context).format(text, out)
         return Markup(out.getvalue())
 
 

@@ -39,18 +39,16 @@ from trac.util.datefmt import utc
 import json
 from trac.ticket.model import Ticket
 import models
-from config import DISPLAY_STATES, get_display_states
+from config import STATES_DISPLAY, get_display_states
 from testmanconst import *
-from utils import get_status_color, reverse_dict
-
-# hackyhackhack
-STATES_DISPLAY = reverse_dict(DISPLAY_STATES)
+from utils import get_status_color
 
 COMMENT_TEMPLATE = """
 %(status)s "%(title)s" in %(tc_link)s for [wiki:%(wiki)s?revision=%(revision)s&ta_id=%(ta_id)s]
 
 %(comment)s
 """
+
 
 class TestCaseManipulator(Component):
     """ Component that supports the Testcase Execution
@@ -75,11 +73,12 @@ class TestCaseManipulator(Component):
         option = req.args.get("option", None)
         runid = req.args.get("testrun", None)
 
-        json_response = {'update': 'success',
-                         'status': STATES_DISPLAY[status],
-                         'toggle_container_id': toggle_container_id,
-                         'color': get_status_color(status)
-                         }
+        json_response = {
+            'update': 'success',
+            'status': STATES_DISPLAY[status],
+            'toggle_container_id': toggle_container_id,
+            'color': get_status_color(status)
+        }
 
         try:
             testaction = models.TestActionQuery(self.env, id=id).execute()[0]
@@ -136,12 +135,17 @@ class TestCaseManipulator(Component):
         # build ticket summary: <todo>: <action> of <testcase>, e.g.:
         # 'Creator checks in the model of TcCaddocCreate failed.'
         testcase = models.TestCaseQuery(self.env, tcid=testaction.tcid).execute()[0]
-        summary= "%s of %s %s." % (testaction.title, testcase.wiki, display[todo])
+        summary = "%s of %s %s." % (testaction.title, testcase.wiki, display[todo])
 
         # build description
-        description= "Related test case: %s.\n\n%s" % (self._build_tc_link(testaction, req), comment)
+        description = "Related test case: %s.\n\n%s" % (
+            self._build_tc_link(testaction, req),
+            comment
+        )
         # check if a similar ticket already exists...
-        existing_tickets= Query.from_string(self.env, "summary=%s" % summary).execute()
+        existing_tickets = Query.from_string(
+            self.env, "summary=%s" % summary
+        ).execute()
         if existing_tickets:
             # if yes return the ticket id
             t = Ticket(self.env, existing_tickets[0]['id'])
@@ -152,18 +156,18 @@ class TestCaseManipulator(Component):
                     t['keywords'] += ',%s' % tp_title
             else:
                 t['keywords'] = tp_title
-            t.save_changes(author=req.authname,comment=description)
+            t.save_changes(author=req.authname, comment=description)
             return t.id
 
         # build the ticket
         ticket = Ticket(self.env)
         data = {
-            'reporter'     : req.authname,
-            'summary'      : summary,
-            'type'         : ticket_type,
-            'description'  : description,
-            'priority'     : req.args.get('priority', 'major'),
-            'keywords'     : self._get_testplan_title(testrun),
+            'reporter': req.authname,
+            'summary': summary,
+            'type': ticket_type,
+            'description': description,
+            'priority': req.args.get('priority', 'major'),
+            'keywords': self._get_testplan_title(testrun),
         }
         self.dbg('ticket data: %s' % data)
 
@@ -172,10 +176,13 @@ class TestCaseManipulator(Component):
             tid = ticket.insert()
             ticket.save_changes()
 
-        except TracError, e:
+        except TracError as e:
             self.env.log.error(e)
-            raise TracError( safe_unicode("ticket could not be created: %s" %
-                    e.message ))
+            raise TracError(
+                safe_unicode(
+                    "ticket could not be created: %s" % e.message
+                )
+            )
 
         return tid
 
@@ -185,33 +192,39 @@ class TestCaseManipulator(Component):
             e.g.
             = [wiki:TestplanDemo] =
         """
-        pat= re.compile( "\[wiki:(.*?)\]" )
-        m= pat.search( testrun['description'] )
+        pat = re.compile("\[wiki:(.*?)\]")
+        m = pat.search(testrun['description'])
         if m:
             return m.group(1)
         else:
             return ""
 
     def _build_tc_link(self, testaction, req):
-        return "[%s/TestManager/general/testcase/%s TestCase #%s]" % (req.abs_href(),
-                testaction.tcid, testaction.tcid)
+        return "[%s/TestManager/general/testcase/%s TestCase #%s]" % (
+            req.abs_href(),
+            testaction.tcid,
+            testaction.tcid
+        )
 
     def _add_comment_to_testrun(self, runid, testaction, comment, req):
-        id= testaction.id
+        id = testaction.id
         testrun = Ticket(self.env, tkt_id=runid)
-        display = get_display_states(self.env)
 
         # add comment to ticket with ta_id, comment and tcid
-        testcase = models.TestCaseQuery(self.env, tcid=testaction.tcid).execute()[0]
+        testcase = models.TestCaseQuery(
+            self.env, tcid=testaction.tcid
+        ).execute()[0]
         # TODO: check if testcase can be opened from a ticket
-        tc_link = self._build_tc_link( testaction, req)
-        comment_data = {"title": testaction.title,
-                "ta_id" : id,
-                "status" : testaction.status,
-                "wiki": testcase.wiki,
-                "revision": testcase.revision,
-                "tc_link": tc_link,
-                "comment": comment}
+        tc_link = self._build_tc_link(testaction, req)
+        comment_data = {
+            "title": testaction.title,
+            "ta_id": id,
+            "status": testaction.status,
+            "wiki": testcase.wiki,
+            "revision": testcase.revision,
+            "tc_link": tc_link,
+            "comment": comment
+        }
         comment = COMMENT_TEMPLATE % comment_data
         # TODO: decode base64
         return testrun.save_changes(author= req.authname, comment=comment)

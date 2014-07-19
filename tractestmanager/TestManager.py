@@ -54,7 +54,7 @@ from trac.ticket import Priority
 
 # testman specific imports
 from interfaces import ITestManagerPanelProvider
-from config import MANAGER_PERMISSION, TESTER_PERMISSION, get_display_states
+from config import MANAGER_PERMISSION, TESTER_PERMISSION, get_display_states, STATES_DISPLAY
 from tractestmanager.utils import safe_unicode, get_status_color
 import tractestmanager.models as models
 
@@ -212,6 +212,7 @@ class TestPlanPanel(Component):
         data["error"] = req.args.get("error", "")
         # The template to be rendered
         template = 'TestManager_base.html'
+        data['page'] = page
         data["testplanlink"] = req.base_url + req.path_info
 
         if 'start_plan' in req.args:
@@ -248,8 +249,13 @@ class TestPlanPanel(Component):
         # TODO: populate with TestRun model
         for run in runs:
             # from genshi.builder import tag
-            #run['ref'] = tag.a('#', run['id'], ' ', run['summary'], href=req.href.ticket(run['id']))
-            run['ref'] = tag.a('#', run.id, ' ', run.summary, href=req.href.ticket(run.id))
+            #run['ref'] = tag.a('#', run['id'],
+            #' ', run['summary'], href=req.href.ticket(run['id']))
+            run['ref'] = tag.a(
+                '#', run.id,
+                ' ', run.summary,
+                href=req.href.ticket(run.id)
+            )
 
         testplans = list()
         for testplan in WikiSystem(self.env).get_pages('Testplan'):
@@ -302,19 +308,22 @@ class TestQueryPanel(Component):
         data["error"] = req.args.get("error", "")
         display = get_display_states(self)
         tm_href = self.env.abs_href("TestManager/general")
+
         # get the testcase filter args
         filters= dict()
         for arg in req.args:
             if arg in models.TC_KEYS:
                 filters[arg]= req.args.get(arg, "")
 
+        # as a filter we get that form value like "passed_comment"
+        # in that case we have to use the STATES_DISPLAY const where the real
+        # values are stored. As this is bad to understand - this is a real
+        # FIXME
         if filters.get('status'):
-            for k,v in display.items():
+            for k,v in STATES_DISPLAY.items():
                 if v == filters.get('status'):
                     filters['status'] = k
-        runs= list()
-        if filters.get('tester') == 'all':
-            filters.pop('tester')
+        runs = list()
         if filters.get('testrun', None) is None:
             runs = models.TestRunQuery(self.env, status='accepted').execute()
         else:
@@ -330,37 +339,43 @@ class TestQueryPanel(Component):
                 filters.pop('testrun')
 
         for run in runs:
-            run.testcases = models.TestCaseQuery(self.env, testrun=run.id, **filters).execute()
+            run.testcases = models.TestCaseQuery(
+                self.env, testrun=run.id, **filters
+            ).execute()
 
             # build link with genshi
-            for tc in run.testcases: tc.ref= build_testcase_link(tm_href, tc)
+            for tc in run.testcases:
+                tc.ref = build_testcase_link(tm_href, tc)
 
         # The template to be rendered
         display[req.authname] = req.authname
         display['all'] = 'all'
-        data["filter"]= {}
-        data["testcases"]= runs
+        data["filter"] = {}
+        data["testcases"] = runs
         data["page"] = 'TestManager_base.html'
         data["title"] = 'TestCases'
 
         data["url"] = req.abs_href + req.path_info + "?" + req.query_string
-        data["filter_caption"] = {
-        'tester': "Tester: ",
-            'status' : "Testcase Status: "
-        }
-        data["filter"] = {
-                'tester' : [req.authname, 'all'],
-            'status' : [models.FAILED, models.NOT_TESTED, models.SKIPPED, models.PASSED, models.PASSED_COMMENT],
-        }
-        data['display_filter'] = display
-        return 'TestManager_base.html' , data
+        data["filter_caption"] = "Testcase Status: "
+        data["filter"] = [
+            models.FAILED, models.NOT_TESTED, models.SKIPPED,
+            models.PASSED, models.PASSED_COMMENT
+        ]
+        html_disp = STATES_DISPLAY.copy()
+        for k,v in html_disp.items():
+            html_disp[k] = display.get(v)
+        data['display_filter'] = html_disp
+        return 'TestManager_base.html', data
+
 
 class TestCasePanel(Component):
     """ a panel to fit requests for executing testcases
     """
     implements(ITestManagerPanelProvider)
+
     def __init__(self):
         Component.__init__(self)
+
     def get_admin_panels(self, req):
         """ returns the Section and the Name for the Navigation
         """
@@ -381,7 +396,6 @@ class TestCasePanel(Component):
     def render_admin_panel(self, req, cat, page, path_info):
         """ main request handler
         """
-        display = get_display_states(self)
         if TESTER_PERMISSION in req.perm:
             #template data
             data = dict()
@@ -390,8 +404,8 @@ class TestCasePanel(Component):
             data["error"] = req.args.get("error", "")
             data["display_status"] = get_display_states(self)
             data["id"] = req.args.get("path_info", None)
-            template = 'TestManager_accordion.html'
-            ############################################################################
+            data["page"] = 'TestManager_accordion.html'
+
             data["url"] = req.abs_href + req.path_info
             # get the testcase
 
@@ -404,37 +418,53 @@ class TestCasePanel(Component):
                         tcid=data['id']
                     ).execute()[0]
                     for action in testcase.actions:
-                        action.color = {"style" : ("background:%s" % get_status_color(action.status))}
+                        action.color = {
+                            "style": ("background:%s"
+                                      % get_status_color(action.status))
+                        }
                     data["TestCaseTitle"] = testcase.title.strip('=')
                     data["TestCaseDescription"] = testcase.description
                     data["TestCaseActions"] = testcase.actions
                     data["revision"] = testcase.revision
                     data["title"] = '(%s) ' % testcase.tcid + testcase.wiki
-                    # XXX: we have to fix this in 1.0 because wiki_to_html is deprecated
+                    # XXX: we have to fix this in 1.0 because
+                    #      wiki_to_html is deprecated
                     for action in testcase.actions:
-                        action.description= wiki_to_html(action.description, self.env, req)
-                        action.expected_result= wiki_to_html("''Result:''[[BR]]" + action.expected_result, self.env, req)
+                        action.description = wiki_to_html(
+                            action.description, self.env, req)
+                        action.expected_result = wiki_to_html(
+                            "''Result:''[[BR]]" + action.expected_result,
+                            self.env, req)
                         for comment in action.comments:
-                            comment["text"] = wiki_to_html(comment["text"], self.env, req)
+                            comment["text"] = wiki_to_html(
+                                comment["text"], self.env, req)
                     if req.authname != testcase.tester:
-                        # assigned to someone else - but can be done by mr urlaubsvertretung
-                        data["warning"] = 'this testcase has been assigned to %s' % testcase.tester
+                        # assigned to someone else
+                        # but can be done by mr urlaubsvertretung
+                        data["warning"] = 'this testcase %s %s' % (
+                            'has been assigned to',
+                            testcase.tester)
                 except TracError:
                     # not found
-                    data["error"] = 'the requested testcase could not be found or has been erased'
-            return template, data
+                    data["error"] = '%s %s %s' % ('the requested testcase ',
+                                                  'could not be found or has',
+                                                  'been erased')
+            return data["page"], data
+
 
 class TestManagerPermissions(Component):
     """ This class covers the permissions
         @see: config.py
     """
     implements(IPermissionRequestor)
+
     def get_permission_actions(self):
         return (MANAGER_PERMISSION, TESTER_PERMISSION)
 
 
 class TestManagerAttachmentScript(Component):
-    """ This class adds a javascript to prefill the description of an attachment
+    """ This class adds a javascript to prefill
+    the description of an attachment
     """
     implements(IRequestFilter)
 

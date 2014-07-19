@@ -8,21 +8,11 @@
 __author__ = 'Lutz Mende <lutz.mende@inquant.de>'
 __docformat__ = 'plaintext'
 
-import string
-
-from trac.core import TracError
-
-import db_models
-from db_models import TA_TABLE, TA_KEYS, TC_TABLE, TC_KEYS
 from db_models import SKIPPED, NOT_TESTED, PASSED, FAILED, PASSED_COMMENT
-from config import get_display_states, DISPLAY_STATES
-
-# hackyhackhack
-from utils import reverse_dict
-STATES_DISPLAY = reverse_dict(DISPLAY_STATES)
+from config import get_display_states, STATES_DISPLAY
 
 import models
-from models import TestCase, TestCaseQuery
+
 
 def default_teststatus_groups():
     return [
@@ -60,15 +50,16 @@ def default_teststatus_groups():
         },
     ]
 
+
 class TestCaseStatus(object):
 
     def __init__(self, env):
-        self.env= env
+        self.env = env
 
-    def get_testcase_stats( self, testcases ):
+    def get_testcase_stats(self, testcases):
         return self.get_testcase_group_stats([tc.tcid for tc in testcases])
 
-    def get_testcase_group_stats( self, tc_ids ):
+    def get_testcase_group_stats(self, tc_ids):
         total_cnt = len(tc_ids)
         all_statuses = set(models.test_status())
         status_cnt = {}
@@ -87,7 +78,7 @@ class TestCaseStatus(object):
 
         stat = TestItemGroupStats('testcase status', 'testcases')
 
-        groups =  default_teststatus_groups()
+        groups = default_teststatus_groups()
 
         display = get_display_states(self.env)
         for group in groups:
@@ -96,18 +87,21 @@ class TestCaseStatus(object):
             for s, cnt in status_cnt.iteritems():
                 if s in group['statuses']:
                     group_cnt += cnt
-                    query_args.setdefault('status', []).append(display.get(STATES_DISPLAY[s]))
+                    query_args.setdefault('status', []).append(s)
             for arg in [kv for kv in group.get('query_args', '').split(',')
                         if '=' in kv]:
                 k, v = [a.strip() for a in arg.split('=', 1)]
                 query_args.setdefault(k, []).append(v)
             group['label'] = display.get(STATES_DISPLAY[group['name']])
-            stat.add_interval(group.get('label', display.get(STATES_DISPLAY[group['name']])),
-                              group_cnt, query_args,
-                              group.get('css_class', group['name']),
-                              bool(group.get('overall_completion')))
+            stat.add_interval(
+                group.get('label', display.get(STATES_DISPLAY[group['name']])),
+                group_cnt, query_args,
+                group.get('css_class', group['name']),
+                bool(group.get('overall_completion'))
+            )
         stat.refresh_calcs()
         return stat
+
 
 class TestItemGroupStats(object):
     """ Encapsulates statistics on a group of test items (actions or cases).
