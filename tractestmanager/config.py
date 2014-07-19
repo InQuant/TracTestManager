@@ -21,29 +21,34 @@
 __author__ = 'Rainer Hihn <rainer.hihn@inquant.de>'
 __docformat__ = 'plaintext'
 
-from testmanconst import *
+from testmanconst import PASSED, PASSED_COMMENT, FAILED, SKIPPED, NOT_TESTED
+from utils import reverse_dict
 
 MANAGER_PERMISSION = 'TM_TESTMANAGER'
 TESTER_PERMISSION = 'TM_TESTER'
 
-DISPLAY_STATES = {
-        "passed" : u'passed',
-        "passed_comment" : u'passed with comment',
-        "failed" : u'failed',
-        "skipped" : u'skipped',
-        "not_tested" : u'not tested',
-    }
+STATES_DISPLAY = {
+    PASSED: u'passed',
+    PASSED_COMMENT: u"passed_comment",
+    FAILED: u'failed',
+    SKIPPED: u'skipped',
+    NOT_TESTED: u'not_tested'
+}
+
 
 def get_display_states(component):
     """ get configured display states from trac.ini if configured
     [testmanager]
     passed = foo
-    passed with comment = bar
+    passed_comment = bar
     failed = doh
     skipped = n
-    not tested = -
+    not_tested = -
     """
-    states = dict([option for option in component.config.options('testmanager')])
-    if not states or not len(states) == len(DISPLAY_STATES):
-        return DISPLAY_STATES
+    states = dict(
+        [option for option in component.config.options('testmanager')]
+    )
+    if not states or not len(states) == len(STATES_DISPLAY):
+        return reverse_dict(STATES_DISPLAY)
     return states
+

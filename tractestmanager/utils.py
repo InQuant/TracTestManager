@@ -18,7 +18,7 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-from testmanconst import *
+from testmanconst import PASSED, PASSED_COMMENT, FAILED, SKIPPED
 
 COLOR = {
     #"green": "#899639",
@@ -30,18 +30,20 @@ COLOR = {
 
 reverse_dict = lambda x: dict(zip(x.values(), x.keys()))
 
+
 def get_status_color(status):
     colors = {
-            PASSED : COLOR.get("green", "#66FF00"),
-            PASSED_COMMENT : COLOR.get("yellow", "#FFFF00"),
-            FAILED : COLOR.get("red", "#FF0033"),
-            SKIPPED : COLOR.get("grey", "#AAAAAA"),
-            "default" : "#FFFFFF",
-            }
+        PASSED: COLOR.get("green", "#66FF00"),
+        PASSED_COMMENT: COLOR.get("yellow", "#FFFF00"),
+        FAILED: COLOR.get("red", "#FF0033"),
+        SKIPPED: COLOR.get("grey", "#AAAAAA"),
+        "default": "#FFFFFF",
+    }
     if status in colors:
         return colors[status]
     else:
         return colors["default"]
+
 
 def safe_unicode(value, encoding='utf-8'):
     """Converts a value to unicode, even it is already a unicode string.
