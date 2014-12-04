@@ -264,6 +264,7 @@ class TestPlanPanel(Component):
             data["info"] = 'There are no testplans'
         if len(runs) < 1:
             data["info"] = 'There are no running testplans'
+        testplans.sort()
 
         # get active and valid testruns
         data["testruns"] = runs
