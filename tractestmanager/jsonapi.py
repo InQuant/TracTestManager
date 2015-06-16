@@ -116,26 +116,22 @@ class TestCaseManipulator(Component):
                      status=500)
 
     def _create_or_update_ticket(self, runid, testaction, comment, req):
-        """ creates or updates a ticket for an action (defect if failed, enhancement if
-        passed)
-        update means add a comment to the already created ticket and add keyword
-        if neccesary
+        """ creates or updates a ticket for an action (default ticket
+        type if failed, enhancement if otherwise (e.g. passed with comment))
+        update means add a comment to the already created ticket
+        and add keyword if neccesary
         """
         self.dbg('accordion.request._create_or_update_ticket(%s)' % req.args)
         testrun = Ticket(self.env, tkt_id=runid)
         display = get_display_states(self.env)
 
-        # determine type of ticket
-        ticket_type= 'defect'
-        todo = FAILED
-        if testaction.status != FAILED:
-            ticket_type= 'enhancement'
-            todo= 'is unreasonable'
-
         # build ticket summary: <todo>: <action> of <testcase>, e.g.:
         # 'Creator checks in the model of TcCaddocCreate failed.'
-        testcase = models.TestCaseQuery(self.env, tcid=testaction.tcid).execute()[0]
-        summary = "%s of %s %s." % (testaction.title, testcase.wiki, display[todo])
+        todo = STATES_DISPLAY[testaction.status]
+        testcase = models.TestCaseQuery(self.env,
+                                        tcid=testaction.tcid).execute()[0]
+        summary = "%s of %s %s." % (
+            testaction.title, testcase.wiki, display[todo])
 
         # build description
         description = "Related test case: %s.\n\n%s" % (
@@ -161,12 +157,19 @@ class TestCaseManipulator(Component):
 
         # build the ticket
         ticket = Ticket(self.env)
+
+        # determine type of ticket
+        ticket_type = ticket.get_default('type')
+        if testaction.status != FAILED:
+            ticket_type = 'enhancement'
+
         data = {
             'reporter': req.authname,
             'summary': summary,
             'type': ticket_type,
             'description': description,
             'priority': req.args.get('priority', 'major'),
+            'status': 'new',
             'keywords': self._get_testplan_title(testrun),
         }
         self.dbg('ticket data: %s' % data)
