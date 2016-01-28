@@ -259,7 +259,7 @@ class TestEvalMacro(WikiMacroBase):
         # ... and finally display them
         add_stylesheet(req, 'common/css/roadmap.css')
         add_stylesheet(req, 'TestManager/css/testmanager.css')
-        chrome = Chrome(self)
+        chrome = Chrome(self.env)
         return chrome.render_template(req, 'progressmeter.html', stats_data,
                                       fragment=True)
 
